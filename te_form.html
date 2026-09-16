@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Тренажёр て-формы</title>
+  <style>
+    :root {
+      --bg-page: #f4f1ea;
+      --card-bg: #ffffff;
+      --text-main: #2c2c2a;
+      --text-sub: #6b6a63;
+      --text-muted: #9a988f;
+      --border: #d3d1c7;
+      --border-light: #e5e2d8;
+      --accent: #d97757;
+      --accent-hover: #c46849;
+      
+      --sel-bg: #eeecf0;
+      --sel-border: #7f77dd;
+      --sel-text: #3c3489;
+      
+      --success-bg: #eaf3de;
+      --success-border: #97c459;
+      --success-text: #3b6b19;
+      
+      --error-bg: #fbeae8;
+      --error-border: #a32d2d;
+      --error-text: #a32d2d;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 14px 12px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Кнопка возврата в главное меню */
+    .back-to-menu {
+      display: inline-flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: 6px;
+      text-decoration: none;
+      color: #6b6a63;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 14px;
+      background: #fff;
+      border: 1px solid #d3d1c7;
+      border-radius: 20px;
+      margin-bottom: 2px;
+      transition: all 0.2s ease;
+    }
+    .back-to-menu:hover, .back-to-menu:active {
+      background: #2c2c2a;
+      color: #fff;
+      border-color: #2c2c2a;
+    }
+
+    /* Шапка */
+    .header {
+      text-align: center;
+      padding: 2px 0 4px;
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
+
+    /* Меню блоков: ровно 3 ряда по 2 кнопки */
+    .block-selector {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+      width: 100% !important;
+    }
+
+    .pill-btn {
+      display: block !important;
+      width: 100% !important;
+      padding: 10px 6px !important;
+      border-radius: 10px !important;
+      border: 1px solid var(--border) !important;
+      background-color: var(--card-bg) !important;
+      color: var(--text-main) !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      outline: none !important;
+      text-align: center !important;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn:hover {
+      border-color: var(--text-muted) !important;
+    }
+
+    .pill-btn.active {
+      background-color: var(--text-main) !important;
+      color: var(--bg-page) !important;
+      border-color: var(--text-main) !important;
+    }
+
+    .pill-btn.pill-errors {
+      border-color: var(--error-border) !important;
+      color: var(--error-text) !important;
+    }
+
+    .pill-btn.pill-errors.active {
+      background-color: var(--error-border) !important;
+      color: #ffffff !important;
+    }
+
+    /* Прогресс-бар */
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--success-border);
+      border-radius: 3px;
+      transition: width 0.25s ease;
+    }
+
+    /* Карточка вопроса */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    .audio-btn {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-sub);
+      outline: none;
+      transition: transform 0.1s;
+    }
+    .audio-btn:hover { background: #eae6dc; }
+    .audio-btn:active { transform: scale(0.92); }
+
+    .kanji {
+      font-size: 34px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+
+    .kana {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .meaning {
+      font-size: 15px;
+      color: var(--sel-text);
+      margin-top: 8px;
+      font-weight: 500;
+    }
+
+    .stem-display {
+      font-size: 26px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-top: 16px;
+      letter-spacing: 2px;
+      background: var(--bg-page);
+      padding: 6px 20px;
+      border-radius: 8px;
+      border: 1px dashed var(--border);
+    }
+
+    /* 6 кнопок ответов */
+    .buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .choice-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 0;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-main);
+      cursor: pointer;
+      outline: none;
+      transition: background 0.1s, transform 0.1s, border-color 0.1s;
+    }
+
+    .choice-btn:hover {
+      background: var(--sel-bg);
+      border-color: var(--sel-border);
+    }
+
+    .choice-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Блок пояснения */
+    .feedback-box {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid transparent;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .feedback-box.correct {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: var(--success-text);
+    }
+
+    .feedback-box.wrong {
+      background: var(--error-bg);
+      border-color: var(--error-border);
+      color: var(--error-text);
+    }
+
+    .fb-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .fb-form {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--text-main);
+    }
+
+    .fb-rule {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--text-sub);
+    }
+
+    .btn-action {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      outline: none;
+      margin-top: 6px;
+      transition: background 0.15s ease;
+    }
+    .btn-action:hover { background: var(--accent-hover); }
+
+    /* Окончание блока */
+    .dialog-view {
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 36px 20px;
+      text-align: center;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .dialog-view h2 { font-size: 22px; color: var(--text-main); }
+    .dialog-view p { font-size: 14px; color: var(--text-sub); line-height: 1.5; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <a href="index.html" class="back-to-menu">← Меню</a>
+
+  <!-- Шапка -->
+  <div class="header">
+    <h1>Тренажёр て-формы</h1>
+    <p>Японские глаголы N5</p>
+  </div>
+
+  <!-- Меню выбора блоков: 3 ряда по 2 кнопки -->
+  <div class="block-selector">
+    <button type="button" class="pill-btn active" id="btnBlock0" onclick="switchBlock(0)">Блок 1</button>
+    <button type="button" class="pill-btn" id="btnBlock1" onclick="switchBlock(1)">Блок 2</button>
+    <button type="button" class="pill-btn" id="btnBlock2" onclick="switchBlock(2)">Блок 3</button>
+    <button type="button" class="pill-btn" id="btnBlock3" onclick="switchBlock(3)">Блок 4</button>
+    <button type="button" class="pill-btn" id="btnBlock4" onclick="switchBlock(4)">Блок 5</button>
+    <button type="button" class="pill-btn pill-errors" id="btnBlock5" onclick="switchBlock(5)">Ошибки (0)</button>
+  </div>
+
+  <!-- Прогресс -->
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Игровая панель -->
+  <div id="gamePanel" style="display: flex; flex-direction: column; gap: 12px;">
+    <div class="card">
+      <button type="button" class="audio-btn" id="btnReplayAudio" title="Прослушать">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+      </button>
+      <div class="kanji" id="qKanji">飲む</div>
+      <div class="kana" id="qKana">のむ</div>
+      <div class="meaning" id="qMeaning">пить</div>
+      <div class="stem-display" id="qStem">飲＿＿</div>
+    </div>
+
+    <!-- 6 кнопок вариантов -->
+    <div class="buttons-grid" id="choicesGrid">
+      <button type="button" class="choice-btn" data-end="て">て</button>
+      <button type="button" class="choice-btn" data-end="って">って</button>
+      <button type="button" class="choice-btn" data-end="んで">んで</button>
+      <button type="button" class="choice-btn" data-end="いて">いて</button>
+      <button type="button" class="choice-btn" data-end="いで">いで</button>
+      <button type="button" class="choice-btn" data-end="して">して</button>
+    </div>
+
+    <!-- Пояснение ответа -->
+    <div class="feedback-box" id="feedbackBox">
+      <div class="fb-title">
+        <span id="fbVerdict">Верно!</span>
+        <span id="fbGroup" style="font-size:12px; font-weight:normal; opacity:0.85;"></span>
+      </div>
+      <div class="fb-form" id="fbFullForm">飲んで</div>
+      <div class="fb-rule" id="fbRule">1 спр.: む, ぶ, ぬ → んで</div>
+      <button type="button" class="btn-action" id="btnNextWord">Продолжить</button>
+    </div>
+  </div>
+
+  <!-- Экран окончания блока -->
+  <div class="dialog-view" id="emptyScreen">
+    <h2 id="emptyTitle">Блок завершён!</h2>
+    <p id="emptyDesc">Все слова блока пройдены.</p>
+    <button type="button" class="btn-action" id="btnRestartBlock">Пройти ещё раз</button>
+  </div>
+</div>
+
+
+<script>
+var verbsData = [
+  { id:1, kanji:"会う", kana:"あう", mean:"встречаться", gr:1, stem:"会", end:"って", te:"会って", teKana:"あって", rule:"1 спр.: う, つ, る → って" },
+  { id:2, kanji:"開く", kana:"あく", mean:"открываться", gr:1, stem:"開", end:"いて", te:"開いて", teKana:"あいて", rule:"1 спр.: く → いて" },
+  { id:3, kanji:"開ける", kana:"あける", mean:"открывать", gr:2, stem:"開け", end:"て", te:"開けて", teKana:"あけて", rule:"2 спр.: る → て" },
+  { id:4, kanji:"あげる", kana:"あげる", mean:"давать, дарить", gr:2, stem:"あげ", end:"て", te:"あげて", teKana:"あげて", rule:"2 спр.: る → て" },
+  { id:5, kanji:"遊ぶ", kana:"あそぶ", mean:"играть, развлекаться", gr:1, stem:"遊", end:"んで", te:"遊んで", teKana:"あそんで", rule:"1 спр.: ぶ, む, ぬ → んで" },
+  { id:6, kanji:"浴びる", kana:"あびる", mean:"обливаться, принимать душ", gr:2, stem:"浴び", end:"て", te:"浴びて", teKana:"あびて", rule:"2 спр.: る → て" },
+  { id:7, kanji:"洗う", kana:"あらう", mean:"мыть, умывать", gr:1, stem:"洗", end:"って", te:"洗って", teKana:"あらって", rule:"1 спр.: う, つ, る → って" },
+  { id:8, kanji:"ある", kana:"ある", mean:"быть (о неодушевленном)", gr:1, stem:"あ", end:"って", te:"あって", teKana:"あって", rule:"1 спр.: う, つ, る → って" },
+  { id:9, kanji:"歩く", kana:"あるく", mean:"идти пешком", gr:1, stem:"歩", end:"いて", te:"歩いて", teKana:"あるいて", rule:"1 спр.: く → いて" },
+  { id:10, kanji:"言う", kana:"いう", mean:"говорить, сказать", gr:1, stem:"言", end:"って", te:"言って", teKana:"いって", rule:"1 спр.: う, つ, る → って" },
+  { id:11, kanji:"行く", kana:"いく", mean:"идти, ехать", gr:1, stem:"行", end:"って", te:"行って", teKana:"いって", rule:"Исключение: 行く → 行って" },
+  { id:12, kanji:"いる", kana:"いる", mean:"быть (об одушевленном)", gr:2, stem:"い", end:"て", te:"いて", teKana:"いて", rule:"2 спр.: る → て" },
+  { id:13, kanji:"要る", kana:"いる", mean:"быть нужным, требоваться", gr:1, stem:"要", end:"って", te:"要って", teKana:"いって", rule:"Исключение (1 спр.): 要る → 要って" },
+  { id:14, kanji:"入れる", kana:"いれる", mean:"вставлять, вкладывать", gr:2, stem:"入れ", end:"て", te:"入れて", teKana:"いれて", rule:"2 спр.: る → て" },
+  { id:15, kanji:"歌う", kana:"うたう", mean:"петь", gr:1, stem:"歌", end:"って", te:"歌って", teKana:"うたって", rule:"1 спр.: う, つ, る → って" },
+  { id:16, kanji:"生まれる", kana:"うまれる", mean:"рождаться", gr:2, stem:"生まれ", end:"て", te:"生まれて", teKana:"うまれて", rule:"2 спр.: る → て" },
+  { id:17, kanji:"売る", kana:"うる", mean:"продавать", gr:1, stem:"売", end:"って", te:"売って", teKana:"うって", rule:"1 спр.: う, つ, る → って" },
+  { id:18, kanji:"起きる", kana:"おきる", mean:"просыпаться, вставать", gr:2, stem:"起き", end:"て", te:"起きて", teKana:"おきて", rule:"2 спр.: る → て" },
+  { id:19, kanji:"置く", kana:"おく", mean:"ставить, класть", gr:1, stem:"置", end:"いて", te:"置いて", teKana:"おいて", rule:"1 спр.: く → いて" },
+  { id:20, kanji:"送る", kana:"おくる", mean:"отправлять, провожать", gr:1, stem:"送", end:"って", te:"送って", teKana:"おくって", rule:"1 спр.: う, つ, る → って" },
+  { id:21, kanji:"押す", kana:"おす", mean:"нажимать, толкать", gr:1, stem:"押", end:"して", te:"押して", teKana:"おして", rule:"1 спр.: す → して" },
+  { id:22, kanji:"覚える", kana:"おぼえる", mean:"запоминать, помнить", gr:2, stem:"覚え", end:"て", te:"覚えて", teKana:"おぼえて", rule:"2 спр.: る → て" },
+  { id:23, kanji:"泳ぐ", kana:"およぐ", mean:"плавать", gr:1, stem:"泳", end:"いで", te:"泳いで", teKana:"およいで", rule:"1 спр.: ぐ → いで" },
+  { id:24, kanji:"降りる", kana:"おりる", mean:"спускаться, выходить из транспорта", gr:2, stem:"降り", end:"て", te:"降りて", teKana:"おりて", rule:"2 спр.: る → て" },
+  { id:25, kanji:"終わる", kana:"おわる", mean:"заканчиваться", gr:1, stem:"終わ", end:"って", te:"終わって", teKana:"おわって", rule:"1 спр.: う, つ, る → って" },
+  { id:26, kanji:"買い物する", kana:"かいものする", mean:"делать покупки", gr:3, stem:"買い物", end:"して", te:"買い物して", teKana:"かいものして", rule:"3 спр.: する → して" },
+  { id:27, kanji:"買う", kana:"かう", mean:"покупать", gr:1, stem:"買", end:"って", te:"買って", teKana:"かって", rule:"1 спр.: う, つ, る → って" },
+  { id:28, kanji:"返す", kana:"かえす", mean:"возвращать (вещь)", gr:1, stem:"返", end:"して", te:"返して", teKana:"かえして", rule:"1 спр.: す → して" },
+  { id:29, kanji:"帰る", kana:"かえる", mean:"возвращаться домой", gr:1, stem:"帰", end:"って", te:"帰って", teKana:"かえって", rule:"Исключение (1 спр.): 帰る → 帰って" },
+  { id:30, kanji:"かかる", kana:"かかる", mean:"требоваться (время/деньги)", gr:1, stem:"かか", end:"って", te:"かかって", teKana:"かかって", rule:"1 спр.: う, つ, る → って" },
+  { id:31, kanji:"書く", kana:"かく", mean:"писать", gr:1, stem:"書", end:"いて", te:"書いて", teKana:"かいて", rule:"1 спр.: く → いて" },
+  { id:32, kanji:"かける", kana:"かける", mean:"звонить, надевать очки", gr:2, stem:"かけ", end:"て", te:"かけて", teKana:"かけて", rule:"2 спр.: る → て" },
+  { id:33, kanji:"貸す", kana:"かす", mean:"одалживать", gr:1, stem:"貸", end:"して", te:"貸して", teKana:"かして", rule:"1 спр.: す → して" },
+  { id:34, kanji:"かぶる", kana:"かぶる", mean:"надевать на голову", gr:1, stem:"かぶ", end:"って", te:"かぶって", teKana:"かぶって", rule:"1 спр.: う, つ, る → って" },
+  { id:35, kanji:"借りる", kana:"かりる", mean:"брать взаймы", gr:2, stem:"借り", end:"て", te:"借りて", teKana:"かりて", rule:"2 спр.: る → て" },
+  { id:36, kanji:"消える", kana:"きえる", mean:"гаснуть, исчезать", gr:2, stem:"消え", end:"て", te:"消えて", teKana:"きえて", rule:"2 спр.: る → て" },
+  { id:37, kanji:"聞く", kana:"きく", mean:"слушать, спрашивать", gr:1, stem:"聞", end:"いて", te:"聞いて", teKana:"きいて", rule:"1 спр.: く → いて" },
+  { id:38, kanji:"切る", kana:"きる", mean:"резать", gr:1, stem:"切", end:"って", te:"切って", teKana:"きって", rule:"Исключение (1 спр.): 切る → 切って" },
+  { id:39, kanji:"着る", kana:"きる", mean:"надевать (выше пояса)", gr:2, stem:"着", end:"て", te:"着て", teKana:"きて", rule:"2 спр.: る → て" },
+  { id:40, kanji:"来る", kana:"くる", mean:"приходить", gr:3, stem:"来", end:"て", te:"来て（きて）", teKana:"きて", rule:"3 спр.: 来る (くる) → 来て (きて)" },
+  { id:41, kanji:"結婚する", kana:"けっこんする", mean:"жениться, выходить замуж", gr:3, stem:"結婚", end:"して", te:"結婚して", teKana:"けっこんして", rule:"3 спр.: する → して" },
+  { id:42, kanji:"消す", kana:"けす", mean:"выключать, гасить", gr:1, stem:"消", end:"して", te:"消して", teKana:"けして", rule:"1 спр.: す → して" },
+  { id:43, kanji:"答える", kana:"こたえる", mean:"отвечать", gr:2, stem:"答え", end:"て", te:"答えて", teKana:"こたえて", rule:"2 спр.: る → て" },
+  { id:44, kanji:"コピーする", kana:"コピーする", mean:"ксерокопировать", gr:3, stem:"コピー", end:"して", te:"コピーして", teKana:"コピーして", rule:"3 спр.: する → して" },
+  { id:45, kanji:"困る", kana:"こまる", mean:"испытывать затруднения", gr:1, stem:"困", end:"って", te:"困って", teKana:"こまって", rule:"1 спр.: う, つ, る → って" },
+  { id:46, kanji:"咲く", kana:"さく", mean:"цвести, расцветать", gr:1, stem:"咲", end:"いて", te:"咲いて", teKana:"さいて", rule:"1 спр.: く → いて" },
+  { id:47, kanji:"差す", kana:"さす", mean:"раскрывать зонт", gr:1, stem:"差", end:"して", te:"差して", teKana:"さして", rule:"1 спр.: す → して" },
+  { id:48, kanji:"散歩する", kana:"さんぽする", mean:"прогуливаться", gr:3, stem:"散歩", end:"して", te:"散歩して", teKana:"さんぽして", rule:"3 спр.: する → して" },
+  { id:49, kanji:"死ぬ", kana:"しぬ", mean:"умирать", gr:1, stem:"死", end:"んで", te:"死んで", teKana:"しんで", rule:"1 спр.: ぬ, ぶ, む → んで" },
+  { id:50, kanji:"閉まる", kana:"しまる", mean:"закрываться", gr:1, stem:"閉ま", end:"って", te:"閉まって", teKana:"しまって", rule:"1 спр.: う, つ, る → って" },
+  { id:51, kanji:"閉める", kana:"しめる", mean:"закрывать", gr:2, stem:"閉め", end:"て", te:"閉めて", teKana:"しめて", rule:"2 спр.: る → て" },
+  { id:52, kanji:"締める", kana:"しめる", mean:"завязывать ремень/галстук", gr:2, stem:"締め", end:"て", te:"締めて", teKana:"しめて", rule:"2 спр.: る → て" },
+  { id:53, kanji:"写真をとる", kana:"しゃしんをとる", mean:"фотографировать", gr:1, stem:"写真をと", end:"って", te:"写真をとって", teKana:"しゃしんをとって", rule:"1 спр.: う, つ, る → って" },
+  { id:54, kanji:"質問する", kana:"しつもんする", mean:"задавать вопрос", gr:3, stem:"質問", end:"して", te:"質問して", teKana:"しつもんして", rule:"3 спр.: する → して" },
+  { id:55, kanji:"知る", kana:"しる", mean:"знать, узнавать", gr:1, stem:"知", end:"って", te:"知って", teKana:"しって", rule:"Исключение (1 спр.): 知る → 知って" },
+  { id:56, kanji:"吸う", kana:"すう", mean:"вдыхать, курить", gr:1, stem:"吸", end:"って", te:"吸って", teKana:"すって", rule:"1 спр.: う, つ, る → って" },
+  { id:57, kanji:"住む", kana:"すむ", mean:"жить, проживать", gr:1, stem:"住", end:"んで", te:"住んで", teKana:"すんで", rule:"1 спр.: む, ぶ, ぬ → んで" },
+  { id:58, kanji:"する", kana:"する", mean:"делать", gr:3, stem:"", end:"して", te:"して", teKana:"して", rule:"3 спр.: する → して" },
+  { id:59, kanji:"座る", kana:"すわる", mean:"садиться", gr:1, stem:"座", end:"って", te:"座って", teKana:"すわって", rule:"1 спр.: う, つ, る → って" },
+  { id:60, kanji:"洗濯する", kana:"せんたくする", mean:"стирать вещи", gr:3, stem:"洗濯", end:"して", te:"洗濯して", teKana:"せんたくして", rule:"3 спр.: する → して" },
+  { id:61, kanji:"掃除する", kana:"そうじする", mean:"убираться", gr:3, stem:"掃除", end:"して", te:"掃除して", teKana:"そうじして", rule:"3 спр.: する → して" },
+  { id:62, kanji:"出す", kana:"だす", mean:"доставать, сдавать", gr:1, stem:"出", end:"して", te:"出して", teKana:"だして", rule:"1 спр.: す → して" },
+  { id:63, kanji:"立つ", kana:"たつ", mean:"стоять, вставать", gr:1, stem:"立", end:"って", te:"立って", teKana:"たって", rule:"1 спр.: う, つ, る → って" },
+  { id:64, kanji:"頼む", kana:"たのむ", mean:"просить, заказывать", gr:1, stem:"頼", end:"んで", te:"頼んで", teKana:"たのんで", rule:"1 спр.: む, ぶ, ぬ → んで" },
+  { id:65, kanji:"食べる", kana:"たべる", mean:"есть, кушать", gr:2, stem:"食べ", end:"て", te:"食べて", teKana:"たべて", rule:"2 спр.: る → て" },
+  { id:66, kanji:"違う", kana:"ちがう", mean:"отличаться, быть не тем", gr:1, stem:"違", end:"って", te:"違って", teKana:"ちがって", rule:"1 спр.: う, つ, る → って" },
+  { id:67, kanji:"使う", kana:"つかう", mean:"использовать", gr:1, stem:"使", end:"って", te:"使って", teKana:"つかって", rule:"1 спр.: う, つ, る → って" },
+  { id:68, kanji:"疲れる", kana:"つかれる", mean:"уставать", gr:2, stem:"疲れ", end:"て", te:"疲れて", teKana:"つかれて", rule:"2 спр.: る → て" },
+  { id:69, kanji:"着く", kana:"つく", mean:"прибывать", gr:1, stem:"着", end:"いて", te:"着いて", teKana:"ついて", rule:"1 спр.: く → いて" },
+  { id:70, kanji:"作る", kana:"つくる", mean:"делать, готовить", gr:1, stem:"作", end:"って", te:"作って", teKana:"つくって", rule:"1 спр.: う, つ, る → って" },
+  { id:71, kanji:"点ける", kana:"つける", mean:"включать, зажигать", gr:2, stem:"点け", end:"て", te:"点けて", teKana:"つけて", rule:"2 спр.: る → て" },
+  { id:72, kanji:"勤める", kana:"つとめる", mean:"служить, работать", gr:2, stem:"勤め", end:"て", te:"勤めて", teKana:"つとめて", rule:"2 спр.: る → て" },
+  { id:73, kanji:"出かける", kana:"でかける", mean:"выходить из дома", gr:2, stem:"出かけ", end:"て", te:"出かけて", teKana:"でかけて", rule:"2 спр.: る → て" },
+  { id:74, kanji:"できる", kana:"できる", mean:"мочь, быть в состоянии", gr:2, stem:"でき", end:"て", te:"できて", teKana:"できて", rule:"2 спр.: る → て" },
+  { id:75, kanji:"出る", kana:"でる", mean:"выходить, появляться", gr:2, stem:"出", end:"て", te:"出て", teKana:"でて", rule:"2 спр.: る → て" },
+  { id:76, kanji:"電話する", kana:"でんわする", mean:"звонить по телефону", gr:3, stem:"電話", end:"して", te:"電話して", teKana:"でんわして", rule:"3 спр.: する → して" },
+  { id:77, kanji:"飛ぶ", kana:"とぶ", mean:"летать, прыгать", gr:1, stem:"飛", end:"んで", te:"飛んで", teKana:"とんで", rule:"1 спр.: ぶ, む, ぬ → んで" },
+  { id:78, kanji:"止まる", kana:"とまる", mean:"останавливаться", gr:1, stem:"止ま", end:"って", te:"止まって", teKana:"とまって", rule:"1 спр.: う, つ, る → って" },
+  { id:79, kanji:"取る", kana:"とる", mean:"брать, доставать", gr:1, stem:"取", end:"って", te:"取って", teKana:"とって", rule:"1 спр.: う, つ, る → って" },
+  { id:80, kanji:"撮る", kana:"とる", mean:"снимать (фото/видео)", gr:1, stem:"撮", end:"って", te:"撮って", teKana:"とって", rule:"1 спр.: う, つ, る → って" },
+  { id:81, kanji:"鳴く", kana:"なく", mean:"петь, лаять, щебетать", gr:1, stem:"鳴", end:"いて", te:"鳴いて", teKana:"ないて", rule:"1 спр.: く → いて" },
+  { id:82, kanji:"並ぶ", kana:"ならぶ", mean:"стоять в очереди", gr:1, stem:"並", end:"んで", te:"並んで", teKana:"ならんで", rule:"1 спр.: ぶ, む, ぬ → んで" },
+  { id:83, kanji:"並べる", kana:"ならべる", mean:"расставлять по порядку", gr:2, stem:"並べ", end:"て", te:"並べて", teKana:"ならべて", rule:"2 спр.: る → て" },
+  { id:84, kanji:"なる", kana:"なる", mean:"становиться", gr:1, stem:"な", end:"って", te:"なって", teKana:"なって", rule:"1 спр.: う, つ, る → って" },
+  { id:85, kanji:"脱ぐ", kana:"ぬぐ", mean:"снимать одежду/обувь", gr:1, stem:"脱", end:"いで", te:"脱いで", teKana:"ぬいで", rule:"1 спр.: ぐ → いで" },
+  { id:86, kanji:"寝る", kana:"ねる", mean:"ложиться спать", gr:2, stem:"寝", end:"て", te:"寝て", teKana:"ねて", rule:"2 спр.: る → て" },
+  { id:87, kanji:"登る", kana:"のぼる", mean:"взбираться на гору", gr:1, stem:"登", end:"って", te:"登って", teKana:"のぼって", rule:"1 спр.: う, つ, る → って" },
+  { id:88, kanji:"飲む", kana:"のむ", mean:"пить", gr:1, stem:"飲", end:"んで", te:"飲んで", teKana:"のんで", rule:"1 спр.: む, ぶ, ぬ → んで" },
+  { id:89, kanji:"乗る", kana:"のる", mean:"садиться в транспорт", gr:1, stem:"乗", end:"って", te:"乗って", teKana:"のって", rule:"1 спр.: う, つ, る → って" },
+  { id:90, kanji:"入る", kana:"はいる", mean:"входить, заходить", gr:1, stem:"入", end:"って", te:"入って", teKana:"はいって", rule:"Исключение (1 спр.): 入る → 入って" },
+  { id:91, kanji:"履く", kana:"はく", mean:"надевать обувь/брюки", gr:1, stem:"履", end:"いて", te:"履いて", teKana:"はいて", rule:"1 спр.: く → いて" },
+  { id:92, kanji:"走る", kana:"はしる", mean:"бежать", gr:1, stem:"走", end:"って", te:"走って", teKana:"はしって", rule:"Исключение (1 спр.): 走る → 走って" },
+  { id:93, kanji:"働く", kana:"はたらく", mean:"работать", gr:1, stem:"働", end:"いて", te:"働いて", teKana:"はたらいて", rule:"1 спр.: く → いて" },
+  { id:94, kanji:"話す", kana:"はなす", mean:"говорить, рассказывать", gr:1, stem:"話", end:"して", te:"話して", teKana:"はなして", rule:"1 спр.: す → して" },
+  { id:95, kanji:"張る / 貼る", kana:"はる", mean:"наклеивать", gr:1, stem:"貼", end:"って", te:"貼って", teKana:"はって", rule:"1 спр.: う, つ, る → って" },
+  { id:96, kanji:"晴れる", kana:"はれる", mean:"проясняться (о погоде)", gr:2, stem:"晴れ", end:"て", te:"晴れて", teKana:"はれて", rule:"2 спр.: る → て" },
+  { id:97, kanji:"引く", kana:"ひく", mean:"тянуть; простужаться", gr:1, stem:"引", end:"いて", te:"引いて", teKana:"ひいて", rule:"1 спр.: く → いて" },
+  { id:98, kanji:"弾く", kana:"ひく", mean:"играть на муз. инстр.", gr:1, stem:"弾", end:"いて", te:"弾いて", teKana:"ひいて", rule:"1 спр.: く → いて" },
+  { id:99, kanji:"吹く", kana:"ふく", mean:"дуть (о ветре)", gr:1, stem:"吹", end:"いて", te:"吹いて", teKana:"ふいて", rule:"1 спр.: く → いて" },
+  { id:100, kanji:"降る", kana:"ふる", mean:"выпадать (осадки)", gr:1, stem:"降", end:"って", te:"降って", teKana:"ふって", rule:"1 спр.: う, つ, る → って" },
+  { id:101, kanji:"勉強する", kana:"べんきょうする", mean:"учиться, заниматься", gr:3, stem:"勉強", end:"して", te:"勉強して", teKana:"べんきょうして", rule:"3 спр.: する → して" },
+  { id:102, kanji:"曲がる", kana:"まがる", mean:"поворачивать, сгибаться", gr:1, stem:"曲が", end:"って", te:"曲がって", teKana:"まがって", rule:"1 спр.: う, つ, る → って" },
+  { id:103, kanji:"待つ", kana:"まつ", mean:"ждать", gr:1, stem:"待", end:"って", te:"待って", teKana:"まって", rule:"1 спр.: う, つ, る → って" },
+  { id:104, kanji:"磨く", kana:"みがく", mean:"чистить зубы, полировать", gr:1, stem:"磨", end:"いて", te:"磨いて", teKana:"みがいて", rule:"1 спр.: く → いて" },
+  { id:105, kanji:"見せる", kana:"みせる", mean:"показывать", gr:2, stem:"見せ", end:"て", te:"見せて", teKana:"みせて", rule:"2 спр.: る → て" },
+  { id:106, kanji:"見る", kana:"みる", mean:"видеть, смотреть", gr:2, stem:"見", end:"て", te:"見て", teKana:"みて", rule:"2 спр.: る → て" },
+  { id:107, kanji:"持つ", kana:"もつ", mean:"держать, иметь при себе", gr:1, stem:"持", end:"って", te:"持って", teKana:"もって", rule:"1 спр.: う, つ, る → って" },
+  { id:108, kanji:"呼ぶ", kana:"よぶ", mean:"звать, вызывать", gr:1, stem:"呼", end:"んで", te:"呼んで", teKana:"よんで", rule:"1 спр.: ぶ, む, ぬ → んで" },
+  { id:109, kanji:"読む", kana:"よむ", mean:"читать", gr:1, stem:"読", end:"んで", te:"読んで", teKana:"よんで", rule:"1 спр.: む, ぶ, ぬ → んで" },
+  { id:110, kanji:"旅行する", kana:"りょこうする", mean:"путешествовать", gr:3, stem:"旅行", end:"して", te:"旅行して", teKana:"りょこうして", rule:"3 спр.: する → して" },
+  { id:111, kanji:"練習する", kana:"れんしゅうする", mean:"тренироваться", gr:3, stem:"練習", end:"して", te:"練習して", teKana:"れんしゅうして", rule:"3 спр.: する → して" },
+  { id:112, kanji:"分かる", kana:"わかる", mean:"понимать", gr:1, stem:"分か", end:"って", te:"分かって", teKana:"わかって", rule:"1 спр.: う, つ, る → って" },
+  { id:113, kanji:"忘れる", kana:"わすれる", mean:"забывать", gr:2, stem:"忘れ", end:"て", te:"忘れて", teKana:"わすれて", rule:"2 спр.: る → て" },
+  { id:114, kanji:"渡す", kana:"わたす", mean:"передавать, вручать", gr:1, stem:"渡", end:"して", te:"渡して", teKana:"わたして", rule:"1 спр.: す → して" },
+  { id:115, kanji:"渡る", kana:"わたる", mean:"переходить улицу/мост", gr:1, stem:"渡", end:"って", te:"渡って", teKana:"わたって", rule:"1 спр.: う, つ, る → って" },
+  { id:116, kanji:"教える", kana:"おしえる", mean:"обучать, объяснять", gr:2, stem:"教え", end:"て", te:"教えて", teKana:"おしえて", rule:"2 спр.: る → て" },
+  { id:117, kanji:"始まる", kana:"はじまる", mean:"начинаться", gr:1, stem:"始ま", end:"って", te:"始まって", teKana:"はじまって", rule:"1 спр.: う, つ, る → って" },
+  { id:118, kanji:"始める", kana:"はじめる", mean:"начинать", gr:2, stem:"始め", end:"て", te:"始めて", teKana:"はじめて", rule:"2 спр.: る → て" },
+  { id:119, kanji:"もらう", kana:"もらう", mean:"получать", gr:1, stem:"もら", end:"って", te:"もらって", teKana:"もらって", rule:"1 спр.: う, つ, る → って" },
+  { id:120, kanji:"くれる", kana:"くれる", mean:"давать (мне/нам)", gr:2, stem:"くれ", end:"て", te:"くれて", teKana:"くれて", rule:"2 спр.: る → て" },
+  { id:121, kanji:"泣く", kana:"なく", mean:"плакать", gr:1, stem:"泣", end:"いて", te:"泣いて", teKana:"ないて", rule:"1 спр.: く → いて" },
+  { id:122, kanji:"泊まる", kana:"とまる", mean:"ночевать, останавливаться", gr:1, stem:"泊ま", end:"って", te:"泊まって", teKana:"とまって", rule:"1 спр.: う, つ, る → って" },
+  { id:123, kanji:"見せる", kana:"みせる", mean:"показывать", gr:2, stem:"見せ", end:"て", te:"見せて", teKana:"みせて", rule:"2 спр.: る → て" },
+  { id:124, kanji:"テストする", kana:"テストする", mean:"тестировать", gr:3, stem:"テスト", end:"して", te:"テストして", teKana:"テストして", rule:"3 спр.: する → して" },
+  { id:125, kanji:"パーティーをする", kana:"パーティーをする", mean:"устраивать вечеринку", gr:3, stem:"パーティーを", end:"して", te:"パーティーをして", teKana:"パーティーをして", rule:"3 спр.: する → して" }
+];
+
+var currentBlock = 0;
+var currentIndex = 0;
+var currentList = [];
+var errorList = [];
+var isAnswered = false;
+
+// Озвучивание
+function speak(text) {
+  try {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      var msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'ja-JP';
+      msg.rate = 0.9;
+
+      var voices = window.speechSynthesis.getVoices();
+      if (voices && voices.length > 0) {
+        var kyoko = voices.find(function(v) { return v.name.toLowerCase().indexOf('kyoko') !== -1; }) || 
+                    voices.find(function(v) { return v.lang && v.lang.indexOf('ja') === 0; });
+        if (kyoko) msg.voice = kyoko;
+      }
+
+      window.speechSynthesis.speak(msg);
+    }
+  } catch (err) {
+    console.warn("Audio unavailable:", err);
+  }
+}
+
+// Обновление стилей кнопок меню
+function updateNav() {
+  for (var i = 0; i < 6; i++) {
+    var btn = document.getElementById('btnBlock' + i);
+    if (!btn) continue;
+    if (currentBlock === i) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  }
+  var errBtn = document.getElementById('btnBlock5');
+  if (errBtn) {
+    errBtn.textContent = 'Ошибки (' + errorList.length + ')';
+  }
+}
+
+function switchBlock(idx) {
+  currentBlock = idx;
+  currentIndex = 0;
+
+  if (idx < 5) {
+    currentList = verbsData.slice(idx * 25, (idx + 1) * 25);
+  } else {
+    currentList = errorList.slice();
+  }
+
+  updateNav();
+  renderCard();
+}
+
+function renderCard() {
+  isAnswered = false;
+  document.getElementById('feedbackBox').style.display = 'none';
+  document.getElementById('choicesGrid').style.display = 'grid';
+
+  if (currentList.length === 0 || currentIndex >= currentList.length) {
+    showEmpty();
+    return;
+  }
+
+  document.getElementById('emptyScreen').style.display = 'none';
+  document.getElementById('gamePanel').style.display = 'flex';
+
+  var item = currentList[currentIndex];
+  document.getElementById('qKanji').textContent = item.kanji;
+  document.getElementById('qKana').textContent = item.kana;
+  document.getElementById('qMeaning').textContent = item.mean;
+  document.getElementById('qStem').textContent = item.stem + '＿＿';
+
+  var progress = (currentIndex / currentList.length) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  speak(item.kana);
+}
+
+function handleAnswer(chosenEnd) {
+  if (isAnswered) return;
+  isAnswered = true;
+
+  var item = currentList[currentIndex];
+  var isCorrect = (chosenEnd === item.end);
+  var fbBox = document.getElementById('feedbackBox');
+  var fbVerdict = document.getElementById('fbVerdict');
+
+  document.getElementById('choicesGrid').style.display = 'none';
+  fbBox.style.display = 'flex';
+
+  if (isCorrect) {
+    fbBox.className = 'feedback-box correct';
+    fbVerdict.textContent = 'Правильно! ✨';
+    if (currentBlock === 5) {
+      errorList = errorList.filter(function(e) { return e.id !== item.id; });
+    }
+  } else {
+    fbBox.className = 'feedback-box wrong';
+    fbVerdict.textContent = 'Ошибка ✕';
+    var exists = errorList.some(function(e) { return e.id === item.id; });
+    if (!exists) {
+      errorList.push(item);
+    }
+  }
+
+  document.getElementById('fbGroup').textContent = item.gr + '-е спряжение';
+  document.getElementById('fbFullForm').textContent = item.te;
+  document.getElementById('fbRule').textContent = item.rule;
+
+  speak(item.teKana);
+  updateNav();
+}
+
+function showEmpty() {
+  document.getElementById('gamePanel').style.display = 'none';
+  document.getElementById('emptyScreen').style.display = 'flex';
+  document.getElementById('progressBar').style.width = '100%';
+
+  var title = document.getElementById('emptyTitle');
+  var desc = document.getElementById('emptyDesc');
+
+  if (currentBlock === 5) {
+    if (errorList.length === 0) {
+      title.textContent = 'Ошибок нет!';
+      desc.textContent = 'Вы исправили все неверные ответы.';
+    } else {
+      title.textContent = 'Круг ошибок пройден';
+      desc.textContent = 'Осталось исправить: ' + errorList.length;
+    }
+  } else {
+    title.textContent = 'Блок ' + (currentBlock + 1) + ' пройден!';
+    desc.textContent = 'Можете повторить этот блок или выбрать следующий в меню вверху.';
+  }
+}
+
+// Нажатия на 6 вариантов ответов
+var choiceButtons = document.querySelectorAll('.choice-btn');
+choiceButtons.forEach(function(btn) {
+  btn.onclick = function() {
+    handleAnswer(btn.getAttribute('data-end'));
+  };
+});
+
+document.getElementById('btnNextWord').onclick = function() {
+  currentIndex++;
+  renderCard();
+};
+
+document.getElementById('btnReplayAudio').onclick = function() {
+  if (currentList[currentIndex]) {
+    speak(currentList[currentIndex].kana);
+  }
+};
+
+document.getElementById('btnRestartBlock').onclick = function() {
+  switchBlock(currentBlock);
+};
+
+// Запуск
+switchBlock(0);
+</script>
+</body>
+</html>

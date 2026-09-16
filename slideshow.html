@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JLPT N5 — Слайд-шоу</title>
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --card-bg: #ffffff;
+      --text: #2c2c2a;
+      --sub-text: #6b6a63;
+      --kana: #858379;
+      --border: #d3d1c7;
+      --border-light: #e5e2d8;
+      --accent: #d97757;
+      --accent-hover: #c46445;
+      --ink: #3c3489;
+      --success-bg: #eaf3de;
+      --success-border: #97c459;
+      --star-color: #d97706;
+      --star-bg: #fef3c7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-x: hidden;
+    }
+
+    /* Верхнее меню */
+    header {
+      width: 100%;
+      padding: 12px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-light);
+      background: var(--bg);
+      z-index: 10;
+      gap: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Кнопка возврата в главное меню */
+    .back-to-menu {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: var(--sub-text);
+      font-size: 0.9rem;
+      font-weight: 600;
+      padding: 7px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .back-to-menu:hover, .back-to-menu:active {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .badge-n5 {
+      background: var(--accent);
+      color: white;
+      padding: 3px 12px;
+      border-radius: 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: transparent;
+      color: var(--sub-text);
+      border: 1px solid var(--border);
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .nav-btn:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .nav-btn.active {
+      background: var(--text);
+      color: #fff;
+      border-color: var(--text);
+    }
+
+    /* Главная область */
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 15px 25px;
+      position: relative;
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+      height: 100%;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Карточка с абсолютным центром */
+    .presentation-card {
+      width: 96vw;
+      max-width: 1440px;
+      min-height: 74vh;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 30px;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .card-top {
+      position: absolute;
+      top: 24px;
+      left: 36px;
+      right: 36px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .card-top * {
+      pointer-events: auto;
+    }
+
+    .deck-indicator {
+      font-size: 0.95rem;
+      color: var(--sub-text);
+      font-weight: 600;
+    }
+
+    .corner-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-circle-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      cursor: pointer;
+      color: var(--text);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .action-circle-btn:hover {
+      transform: scale(1.12);
+      border-color: var(--text);
+    }
+
+    .action-circle-btn.btn-voice:hover {
+      background: #eef2ff;
+      border-color: var(--ink);
+    }
+
+    .action-circle-btn.btn-star.starred {
+      background: var(--star-bg);
+      border-color: var(--star-color);
+      color: var(--star-color);
+    }
+
+    .action-circle-btn.btn-check:hover {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: #3b7c1e;
+    }
+
+    .action-circle-btn.btn-esc {
+      display: none;
+      font-weight: bold;
+      color: var(--sub-text);
+    }
+
+    .action-circle-btn.btn-esc:hover {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #b91c1c;
+    }
+
+    /* Блок текста по центру */
+    .card-center {
+      text-align: center;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0 20px;
+    }
+
+    /* Автомасштаб шрифтов */
+    .kanji-display {
+      font-size: clamp(6.5rem, 15vw, 13.5rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+      letter-spacing: 0 !important;
+      margin: 0 0 16px 0;
+      text-align: center;
+      white-space: nowrap;
+      max-width: 95vw;
+    }
+
+    .reading-display {
+      font-size: clamp(2.6rem, 5.5vw, 4.6rem);
+      color: var(--kana);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: 0 !important;
+      margin: 0 0 16px 0;
+      text-align: center;
+      white-space: nowrap;
+      max-width: 95vw;
+    }
+
+    .kanji-display.len-4 {
+      font-size: clamp(5rem, 11vw, 9.8rem);
+      margin-bottom: 12px;
+    }
+
+    .kanji-display.len-5 {
+      font-size: clamp(4rem, 8.8vw, 7.8rem);
+      margin-bottom: 10px;
+    }
+
+    .kanji-display.len-long {
+      font-size: clamp(3rem, 6.8vw, 6rem);
+      margin-bottom: 8px;
+    }
+
+    .reading-display.len-long {
+      font-size: clamp(1.8rem, 3.8vw, 3.2rem);
+      margin-bottom: 10px;
+    }
+
+    .meaning-display {
+      font-size: clamp(0.95rem, 1.8vw, 1.4rem);
+      color: var(--ink);
+      font-weight: 600;
+      display: inline-block;
+      border: none !important;
+      background: transparent !important;
+      padding: 4px 12px;
+      margin: 0;
+      text-align: center;
+      transition: filter 0.25s ease, opacity 0.25s ease;
+      max-width: 90vw;
+    }
+
+    .meaning-display.hidden-answer {
+      filter: blur(8px);
+      opacity: 0.15;
+    }
+
+    /* Нижняя панель */
+    .bottom-bar {
+      width: 100%;
+      background: var(--card-bg);
+      border-top: 1px solid var(--border-light);
+      padding: 14px 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .ctrl-btn {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 18px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .ctrl-btn:hover {
+      border-color: var(--text);
+      background: #eae6dc;
+    }
+
+    .ctrl-btn.primary {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .ctrl-btn.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .ctrl-btn.active-toggle {
+      background: #eef2ff;
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+
+    .select-custom {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .progress-line-container {
+      position: absolute;
+      top: -3px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--border-light);
+    }
+
+    .progress-line {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.05s linear;
+    }
+
+    /* Fullscreen ТВ режим */
+    :fullscreen header,
+    :fullscreen .bottom-bar,
+    :fullscreen .deck-indicator {
+      display: none !important;
+    }
+
+    :fullscreen body {
+      background: var(--bg);
+    }
+
+    :fullscreen main {
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    :fullscreen .presentation-card {
+      width: 100vw;
+      height: 100vh;
+      max-width: none;
+      min-height: 100vh;
+      border: none;
+      border-radius: 0;
+      background: var(--bg);
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    :fullscreen .card-top {
+      top: 36px;
+      left: 48px;
+      right: 48px;
+    }
+
+    :fullscreen .action-circle-btn.btn-esc {
+      display: flex;
+    }
+
+    :fullscreen .kanji-display {
+      font-size: clamp(12rem, 26vw, 24rem);
+      margin-bottom: 24px;
+    }
+    :fullscreen .kanji-display.len-4 {
+      font-size: clamp(8.5rem, 18vw, 16.5rem);
+      margin-bottom: 18px;
+    }
+    :fullscreen .kanji-display.len-5 {
+      font-size: clamp(7rem, 14vw, 13rem);
+      margin-bottom: 16px;
+    }
+    :fullscreen .kanji-display.len-long {
+      font-size: clamp(4.8rem, 10.5vw, 9.8rem);
+      margin-bottom: 14px;
+    }
+
+    :fullscreen .reading-display {
+      font-size: clamp(4.5rem, 10vw, 9rem);
+      margin-bottom: 24px;
+    }
+    :fullscreen .reading-display.len-long {
+      font-size: clamp(2.8rem, 6vw, 5.2rem);
+      margin-bottom: 16px;
+    }
+
+    :fullscreen .meaning-display {
+      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    }
+
+    /* Списки во вкладках */
+    .list-wrapper {
+      width: 96vw;
+      max-width: 1440px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 28px;
+      max-height: 78vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .search-input {
+      padding: 10px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      font-size: 1rem;
+      min-width: 280px;
+    }
+
+    .words-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 14px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    .word-item {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .word-item .main-info .w-kanji {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .word-item .main-info .w-reading {
+      font-size: 1rem;
+      color: var(--sub-text);
+      margin-left: 8px;
+    }
+
+    .word-item .main-info .w-meaning {
+      font-size: 0.95rem;
+      color: var(--ink);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mini-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 34px;
+      height: 34px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .mini-btn:hover {
+      transform: scale(1.1);
+      border-color: var(--text);
+    }
+
+    .mini-btn.starred {
+      background: var(--star-bg);
+      border-color: var(--star-color);
+      color: var(--star-color);
+    }
+
+    .mini-btn.learned {
+      background: var(--success-bg);
+      border-color: var(--success-border);
+      color: #2b6814;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--sub-text);
+      font-size: 1.15rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-content {
+      animation: fadeIn 0.2s ease forwards;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Меню -->
+  <header>
+    <div class="header-left">
+      <a href="index.html" class="back-to-menu">← Меню</a>
+      <div class="brand">
+        <span>日本語 JLPT N5</span>
+        <span class="badge-n5">710 Слов</span>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-btn active" onclick="switchTab('presentation')">📺 Презентация</button>
+      <button class="nav-btn" id="favTabBtn" onclick="switchTab('favorites')">⭐ Избранные (0)</button>
+      <button class="nav-btn" id="learnedTabBtn" onclick="switchTab('learned')">✔️ Изученные (0)</button>
+      <button class="nav-btn" onclick="switchTab('all')">📚 Все 710 слов</button>
+    </div>
+  </header>
+
+  <!-- Экран -->
+  <main>
+    <div id="tab-presentation" class="tab-content active">
+      <div class="presentation-card">
+        
+        <div class="card-top">
+          <div class="deck-indicator" id="deckIndicator">Слово 1 из 710</div>
+          
+          <div class="corner-actions">
+            <button class="action-circle-btn btn-star" id="starActionBtn" onclick="toggleCurrentFavorite()" title="В избранное / Доучить (S)">
+              ⭐
+            </button>
+            <button class="action-circle-btn btn-voice" onclick="speakCurrentWord(true)" title="Озвучить Kyoko (V)">
+              🔊
+            </button>
+            <button class="action-circle-btn btn-check" onclick="markCurrentAsLearned()" title="Знаю слово (Enter или K)">
+              ✔️
+            </button>
+            <button class="action-circle-btn btn-esc" onclick="toggleFullScreen()" title="Выйти из полного экрана (ESC / F)">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="card-center" onclick="toggleHideAnswer()">
+          <div class="kanji-display" id="dispKanji">ああ</div>
+          <div class="reading-display" id="dispReading">ああ</div>
+          <div>
+            <div class="meaning-display" id="dispMeaning">А! (восклицание)</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Вкладка: Избранные -->
+    <div id="tab-favorites" class="tab-content">
+      <div class="list-wrapper">
+        <div class="list-header">
+          <div>
+            <h2>⭐ Избранные слова</h2>
+            <p style="color:var(--sub-text); font-size:0.95rem;">Слова, добавленные для повторения</p>
+          </div>
+          <button class="ctrl-btn primary" onclick="startDeckMode('favorites')">▶ Запустить презентацию из избранных</button>
+        </div>
+        <div class="words-grid" id="favoritesGrid"></div>
+      </div>
+    </div>
+
+    <!-- Вкладка: Изученные -->
+    <div id="tab-learned" class="tab-content">
+      <div class="list-wrapper">
+        <div class="list-header">
+          <div>
+            <h2>✔️ Изученные слова</h2>
+            <p style="color:var(--sub-text); font-size:0.95rem;">Исключены из основного показа</p>
+          </div>
+          <button class="ctrl-btn" onclick="resetAllLearned()">Вернуть все в колоду</button>
+        </div>
+        <div class="words-grid" id="learnedGrid"></div>
+      </div>
+    </div>
+
+    <!-- Вкладка: Все слова -->
+    <div id="tab-all" class="tab-content">
+      <div class="list-wrapper">
+        <div class="list-header">
+          <div>
+            <h2>📚 Полный словарь (710 слов)</h2>
+            <p style="color:var(--sub-text); font-size:0.95rem;" id="allWordsCount">Всего: 710 слов</p>
+          </div>
+          <input type="text" class="search-input" id="searchAllInput" placeholder="Поиск по кандзи, чтению или смыслу..." oninput="filterAllWords()">
+        </div>
+        <div class="words-grid" id="allWordsGrid"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Панель управления -->
+  <div class="bottom-bar">
+    <div class="progress-line-container">
+      <div class="progress-line" id="progressLine"></div>
+    </div>
+
+    <button class="ctrl-btn" onclick="prevSlide()" title="Стрелка влево">◀ Назад</button>
+    <button class="ctrl-btn primary" id="playBtn" onclick="togglePlay()">⏸ Пауза</button>
+    <button class="ctrl-btn" onclick="nextSlide()" title="Стрелка вправо">Вперёд ▶</button>
+    
+    <select class="select-custom" id="timerSelect" onchange="changeInterval()">
+      <option value="3000">3 сек</option>
+      <option value="5000" selected>5 сек</option>
+      <option value="8000">8 сек</option>
+      <option value="10000">10 сек</option>
+      <option value="15000">15 сек</option>
+      <option value="30000">30 сек</option>
+      <option value="45000">45 сек</option>
+    </select>
+
+    <button class="ctrl-btn active-toggle" id="autoVoiceBtn" onclick="toggleAutoVoice()" title="Клавиша A">
+      🔊 Автоозвучка: ВКЛ
+    </button>
+
+    <button class="ctrl-btn" onclick="toggleHideAnswer()" title="Клавиша H">👁 Ответ</button>
+    <button class="ctrl-btn" onclick="shuffleCurrentDeck()">🔀 Перемешать</button>
+    <button class="ctrl-btn" onclick="toggleFullScreen()" title="Клавиша F">⛶ Экран (16:9)</button>
+  </div>
+
+  <script>
+    const RAW_VOCABULARY = [
+      { id:1, k:"ああ", r:"ああ", m:"А! (восклицание)" },
+      { id:2, k:"会う", r:"あう", m:"встречаться" },
+      { id:3, k:"青", r:"あお", m:"синий цвет" },
+      { id:4, k:"青い", r:"あおい", m:"синий" },
+      { id:5, k:"赤", r:"あか", m:"красный цвет" },
+      { id:6, k:"赤い", r:"あかい", m:"красный" },
+      { id:7, k:"明るい", r:"あかるい", m:"светлый, яркий" },
+      { id:8, k:"秋", r:"あき", m:"осень" },
+      { id:9, k:"開く", r:"あく", m:"открываться" },
+      { id:10, k:"開ける", r:"あける", m:"открывать" },
+      { id:11, k:"上げる", r:"あげる", m:"поднимать; дарить" },
+      { id:12, k:"朝", r:"あさ", m:"утро" },
+      { id:13, k:"朝ご飯", r:"あさごはん", m:"завтрак" },
+      { id:14, k:"明後日", r:"あさって", m:"послезавтра" },
+      { id:15, k:"足", r:"あし", m:"нога, ступня" },
+      { id:16, k:"明日", r:"あした", m:"завтра" },
+      { id:17, k:"あそこ", r:"あそこ", m:"там, вон там" },
+      { id:18, k:"遊ぶ", r:"あそぶ", m:"играть, веселиться" },
+      { id:19, k:"暖かい", r:"あたたかい", m:"тёплый (о погоде)" },
+      { id:20, k:"頭", r:"あたま", m:"голова" },
+      { id:21, k:"新しい", r:"あたらしい", m:"новый" },
+      { id:22, k:"あちら", r:"あちら", m:"туда (вежл.)" },
+      { id:23, k:"暑い", r:"あつい", m:"жарко (о погоде)" },
+      { id:24, k:"熱い", r:"あつい", m:"горячий (на ощупь)" },
+      { id:25, k:"厚い", r:"あつい", m:"толстый" },
+      { id:26, k:"あっち", r:"あっち", m:"вон там" },
+      { id:27, k:"後", r:"あと", m:"после, потом" },
+      { id:28, k:"あなた", r:"あなた", m:"ты, вы" },
+      { id:29, k:"兄", r:"あに", m:"старший брат" },
+      { id:30, k:"姉", r:"あね", m:"старшая сестра" },
+      { id:31, k:"アパート", r:"アパート", m:"квартира" },
+      { id:32, k:"あの", r:"あの", m:"тот (вон тот); эм... (пауза)" },
+      { id:33, k:"浴びる", r:"あびる", m:"принимать (душ)" },
+      { id:34, k:"危ない", r:"あぶない", m:"опасный" },
+      { id:35, k:"甘い", r:"あまい", m:"сладкий" },
+      { id:36, k:"あまり", r:"あまり", m:"не очень; остаток" },
+      { id:37, k:"雨", r:"あめ", m:"дождь" },
+      { id:38, k:"飴", r:"あめ", m:"леденец, конфета" },
+      { id:39, k:"洗う", r:"あらう", m:"мыть" },
+      { id:40, k:"ある", r:"ある", m:"быть, находиться (о неодуш.)" },
+      { id:41, k:"有る", r:"ある", m:"быть, иметься (о неодуш.)" },
+      { id:42, k:"歩く", r:"あるく", m:"идти пешком" },
+      { id:43, k:"あれ", r:"あれ", m:"то, вон то" },
+      { id:44, k:"いい / 良い", r:"よい", m:"хороший" },
+      { id:45, k:"いいえ", r:"いいえ", m:"нет" },
+      { id:46, k:"言う", r:"いう", m:"говорить, сказать" },
+      { id:47, k:"家", r:"いえ", m:"дом" },
+      { id:48, k:"いかが", r:"いかが", m:"как (вежл.)" },
+      { id:49, k:"行く", r:"いく", m:"идти, ехать" },
+      { id:50, k:"いくつ", r:"いくつ", m:"сколько (штук); сколько лет" },
+      { id:51, k:"いくら", r:"いくら", m:"сколько (стоит)" },
+      { id:52, k:"池", r:"いけ", m:"пруд" },
+      { id:53, k:"医者", r:"いしゃ", m:"врач" },
+      { id:54, k:"椅子", r:"いす", m:"стул" },
+      { id:55, k:"忙しい", r:"いそがしい", m:"занятой" },
+      { id:56, k:"痛い", r:"いたい", m:"больно" },
+      { id:57, k:"一", r:"いち", m:"один" },
+      { id:58, k:"一日", r:"いちにち", m:"один день" },
+      { id:59, k:"一番", r:"いちばん", m:"самый, номер один" },
+      { id:60, k:"いつ", r:"いつ", m:"когда" },
+      { id:61, k:"五日", r:"いつか", m:"пять дней; пятое число" },
+      { id:62, k:"一緒", r:"いっしょ", m:"вместе" },
+      { id:63, k:"五つ", r:"いつつ", m:"пять (штук)" },
+      { id:64, k:"いつも", r:"いつも", m:"всегда, обычно" },
+      { id:65, k:"犬", r:"いぬ", m:"собака" },
+      { id:66, k:"今", r:"いま", m:"сейчас" },
+      { id:67, k:"意味", r:"いみ", m:"значение, смысл" },
+      { id:68, k:"妹", r:"いもうと", m:"младшая сестра" },
+      { id:69, k:"嫌", r:"いや", m:"неприятный, не по душе" },
+      { id:70, k:"入口", r:"いりぐち", m:"вход" },
+      { id:71, k:"居る", r:"いる", m:"быть, находиться (об одуш.)" },
+      { id:72, k:"要る", r:"いる", m:"нуждаться" },
+      { id:73, k:"入れる", r:"いれる", m:"вставлять, вкладывать" },
+      { id:74, k:"色", r:"いろ", m:"цвет" },
+      { id:75, k:"色々", r:"いろいろ", m:"разный, различный" },
+      { id:76, k:"上", r:"うえ", m:"верх, наверху" },
+      { id:77, k:"後ろ", r:"うしろ", m:"сзади" },
+      { id:78, k:"薄い", r:"うすい", m:"тонкий; слабый (о цвете, вкусе)" },
+      { id:79, k:"歌", r:"うた", m:"песня" },
+      { id:80, k:"歌う", r:"うたう", m:"петь" },
+      { id:81, k:"うち", r:"うち", m:"дом, моё жилище" },
+      { id:82, k:"生まれる", r:"うまれる", m:"рождаться" },
+      { id:83, k:"海", r:"うみ", m:"море" },
+      { id:84, k:"売る", r:"うる", m:"продавать" },
+      { id:85, k:"うるさい", r:"うるさい", m:"шумный, надоедливый" },
+      { id:86, k:"上着", r:"うわぎ", m:"куртка, пиджак" },
+      { id:87, k:"絵", r:"え", m:"картина, рисунок" },
+      { id:88, k:"映画", r:"えいが", m:"фильм, кино" },
+      { id:89, k:"映画館", r:"えいがかん", m:"кинотеатр" },
+      { id:90, k:"英語", r:"えいご", m:"английский язык" },
+      { id:91, k:"ええ", r:"ええ", m:"да" },
+      { id:92, k:"駅", r:"えき", m:"станция" },
+      { id:93, k:"エレベーター", r:"エレベーター", m:"лифт" },
+      { id:94, k:"円", r:"えん", m:"иена (счётный суффикс)" },
+      { id:95, k:"鉛筆", r:"えんぴつ", m:"карандаш" },
+      { id:96, k:"お〜", r:"お〜", m:"вежливая приставка" },
+      { id:97, k:"美味しい", r:"おいしい", m:"вкусный" },
+      { id:98, k:"多い", r:"おおい", m:"много" },
+      { id:99, k:"大きい", r:"おおきい", m:"большой" },
+      { id:100, k:"大きな", r:"おおきな", m:"большой" },
+      { id:101, k:"大勢", r:"おおぜい", m:"много людей" },
+      { id:102, k:"お母さん", r:"おかあさん", m:"мать (вежливо)" },
+      { id:103, k:"お菓子", r:"おかし", m:"сладости" },
+      { id:104, k:"お金", r:"おかね", m:"деньги" },
+      { id:105, k:"起きる", r:"おきる", m:"просыпаться, вставать" },
+      { id:106, k:"置く", r:"おく", m:"ставить, класть" },
+      { id:107, k:"奥さん", r:"おくさん", m:"жена (чужая, вежл.)" },
+      { id:108, k:"お酒", r:"おさけ", m:"алкоголь, сакэ" },
+      { id:109, k:"お皿", r:"おさら", m:"тарелка" },
+      { id:110, k:"伯父さん / 叔父さん", r:"おじさん", m:"дядя; мужчина" },
+      { id:111, k:"おじいさん", r:"おじいさん", m:"дедушка (вежливо)" },
+      { id:112, k:"教える", r:"おしえる", m:"учить, объяснять" },
+      { id:113, k:"押す", r:"おす", m:"толкать, нажимать" },
+      { id:114, k:"遅い", r:"おそい", m:"медленный; поздний" },
+      { id:115, k:"お茶", r:"おちゃ", m:"чай" },
+      { id:116, k:"お手洗い", r:"おてあらい", m:"туалет" },
+      { id:117, k:"お父さん", r:"おとうさん", m:"отец (вежливо)" },
+      { id:118, k:"弟", r:"おとうと", m:"младший брат" },
+      { id:119, k:"男", r:"おとこ", m:"мужчина" },
+      { id:120, k:"男の子", r:"おとこのこ", m:"мальчик" },
+      { id:121, k:"一昨日", r:"おととい", m:"позавчера" },
+      { id:122, k:"一昨年", r:"おととし", m:"позапрошлый год" },
+      { id:123, k:"大人", r:"おとな", m:"взрослый" },
+      { id:124, k:"お腹", r:"おなか", m:"живот" },
+      { id:125, k:"同じ", r:"おなじ", m:"одинаковый, тот же" },
+      { id:126, k:"お兄さん", r:"おにいさん", m:"старший брат (вежливо)" },
+      { id:127, k:"お姉さん", r:"おねえさん", m:"старшая сестра (вежливо)" },
+      { id:128, k:"伯母さん / 叔母さん", r:"おばさん", m:"тётя" },
+      { id:129, k:"おばあさん", r:"おばあさん", m:"бабушка (вежливо)" },
+      { id:130, k:"お風呂", r:"おふろ", m:"ванна" },
+      { id:131, k:"お弁当", r:"おべんとう", m:"бэнто, коробочка с обедом" },
+      { id:132, k:"覚える", r:"おぼえる", m:"запоминать" },
+      { id:133, k:"お巡りさん", r:"おまわりさん", m:"полицейский" },
+      { id:134, k:"重い", r:"おもい", m:"тяжёлый" },
+      { id:135, k:"面白い", r:"おもしろい", m:"интересный, смешной" },
+      { id:136, k:"泳ぐ", r:"およぐ", m:"плавать" },
+      { id:137, k:"降りる", r:"おりる", m:"выходить (из транспорта)" },
+      { id:138, k:"終わる", r:"おわる", m:"заканчиваться" },
+      { id:139, k:"音楽", r:"おんがく", m:"музыка" },
+      { id:140, k:"女", r:"おんな", m:"женщина" },
+      { id:141, k:"女の子", r:"おんなのこ", m:"девочка" },
+      { id:142, k:"〜回", r:"〜かい", m:"счётчик раз" },
+      { id:143, k:"〜階", r:"〜かい", m:"счётчик этажей" },
+      { id:144, k:"外国", r:"がいこく", m:"иностранное государство" },
+      { id:145, k:"外国人", r:"がいこくじん", m:"иностранец" },
+      { id:146, k:"会社", r:"かいしゃ", m:"компания, фирма" },
+      { id:147, k:"階段", r:"かいだん", m:"лестница" },
+      { id:148, k:"買い物", r:"かいもの", m:"покупки, шопинг" },
+      { id:149, k:"買う", r:"かう", m:"покупать" },
+      { id:150, k:"返す", r:"かえす", m:"возвращать (предмет)" },
+      { id:151, k:"帰る", r:"かえる", m:"возвращаться домой" },
+      { id:152, k:"顔", r:"かお", m:"лицо" },
+      { id:153, k:"かかる", r:"かかる", m:"занимать (время, деньги)" },
+      { id:154, k:"鍵", r:"かぎ", m:"ключ" },
+      { id:155, k:"書く", r:"かく", m:"писать" },
+      { id:156, k:"学生", r:"がくせい", m:"студент" },
+      { id:157, k:"〜か月", r:"〜かげつ", m:"счётчик месяцев" },
+      { id:158, k:"掛ける", r:"かける", m:"надевать (очки)" },
+      { id:159, k:"かける", r:"かける", m:"звонить; садиться" },
+      { id:160, k:"傘", r:"かさ", m:"зонт" },
+      { id:161, k:"貸す", r:"かす", m:"давать взаймы" },
+      { id:162, k:"風", r:"かぜ", m:"ветер" },
+      { id:163, k:"風邪", r:"かぜ", m:"простуда" },
+      { id:164, k:"方", r:"ほう", m:"сторона, направление" },
+      { id:165, k:"家族", r:"かぞく", m:"семья" },
+      { id:166, k:"カタカナ", r:"カタカナ", m:"катакана" },
+      { id:167, k:"〜月", r:"〜がつ", m:"месяц (в дате)" },
+      { id:168, k:"学校", r:"がっこう", m:"школа" },
+      { id:169, k:"カップ", r:"カップ", m:"чашка" },
+      { id:170, k:"家庭", r:"かてい", m:"семья, дом" },
+      { id:171, k:"角", r:"かど", m:"угол" },
+      { id:172, k:"鞄", r:"かばん", m:"сумка" },
+      { id:173, k:"花瓶", r:"かびん", m:"ваза (для цветов)" },
+      { id:174, k:"被る", r:"かぶる", m:"надевать (на голову)" },
+      { id:175, k:"紙", r:"かみ", m:"бумага" },
+      { id:176, k:"カメラ", r:"カメラ", m:"фотоаппарат" },
+      { id:177, k:"火曜日", r:"かようび", m:"вторник" },
+      { id:178, k:"辛い", r:"からい", m:"острый, пряный" },
+      { id:179, k:"体", r:"からだ", m:"тело" },
+      { id:180, k:"借りる", r:"かりる", m:"брать взаймы" },
+      { id:181, k:"〜がる", r:"〜がる", m:"суффикс проявления чувства" },
+      { id:182, k:"軽い", r:"かるい", m:"лёгкий (по весу)" },
+      { id:183, k:"カレー", r:"カレー", m:"карри" },
+      { id:184, k:"カレンダー", r:"カレンダー", m:"календарь" },
+      { id:185, k:"川", r:"かわ", m:"река" },
+      { id:186, k:"〜側", r:"〜がわ", m:"сторона" },
+      { id:187, k:"可愛い", r:"かわいい", m:"милый, симпатичный" },
+      { id:188, k:"漢字", r:"かんじ", m:"кандзи" },
+      { id:189, k:"木", r:"き", m:"дерево" },
+      { id:190, k:"黄色", r:"きいろ", m:"жёлтый цвет" },
+      { id:191, k:"黄色い", r:"きいろい", m:"жёлтый" },
+      { id:192, k:"消える", r:"きえる", m:"гаснуть, исчезать" },
+      { id:193, k:"聞く", r:"きく", m:"слушать; спрашивать" },
+      { id:194, k:"北", r:"きた", m:"север" },
+      { id:195, k:"ギター", r:"ギター", m:"гитара" },
+      { id:196, k:"汚い", r:"きたない", m:"грязный" },
+      { id:197, k:"喫茶店", r:"きっさてん", m:"кафе" },
+      { id:198, k:"切手", r:"きって", m:"марка" },
+      { id:199, k:"切符", r:"きっぷ", m:"билет" },
+      { id:200, k:"昨日", r:"きのう", m:"вчера" },
+      { id:201, k:"九", r:"きゅう", m:"девять" },
+      { id:202, k:"牛肉", r:"ぎゅうにく", m:"говядина" },
+      { id:203, k:"牛乳", r:"ぎゅうにゅう", m:"молоко" },
+      { id:204, k:"今日", r:"きょう", m:"сегодня" },
+      { id:205, k:"教室", r:"きょうしつ", m:"класс" },
+      { id:206, k:"兄弟", r:"きょうだい", m:"братья и сёстры" },
+      { id:207, k:"去年", r:"きょねん", m:"в прошлом году" },
+      { id:208, k:"嫌い", r:"きらい", m:"нелюбимый, ненавистный" },
+      { id:209, k:"切る", r:"きる", m:"резать; вешать трубку" },
+      { id:210, k:"着る", r:"きる", m:"носить (одежду)" },
+      { id:211, k:"綺麗", r:"きれい", m:"красивый, чистый" },
+      { id:212, k:"キログラム", r:"キログラム", m:"килограмм" },
+      { id:213, k:"キロメートル", r:"キロメートル", m:"километр" },
+      { id:214, k:"銀行", r:"ぎんこう", m:"банк" },
+      { id:215, k:"金曜日", r:"きんようび", m:"пятница" },
+      { id:216, k:"薬", r:"くすり", m:"лекарство" },
+      { id:217, k:"ください", r:"ください", m:"пожалуйста, дайте" },
+      { id:218, k:"果物", r:"くだもの", m:"фрукты" },
+      { id:219, k:"口", r:"くち", m:"рот" },
+      { id:220, k:"靴", r:"くつ", m:"обувь" },
+      { id:221, k:"靴下", r:"くつした", m:"носки" },
+      { id:222, k:"国", r:"くに", m:"страна" },
+      { id:223, k:"曇り", r:"くもり", m:"облачная погода" },
+      { id:224, k:"曇る", r:"くもる", m:"становиться облачно" },
+      { id:225, k:"暗い", r:"くらい", m:"тёмный" },
+      { id:226, k:"〜くらい / 〜ぐらい", r:"くらい", m:"примерно" },
+      { id:227, k:"クラス", r:"クラス", m:"класс (группа)" },
+      { id:228, k:"グラム", r:"グラム", m:"грамм" },
+      { id:229, k:"来る", r:"くる", m:"приходить" },
+      { id:230, k:"車", r:"くるま", m:"машина" },
+      { id:231, k:"黒", r:"くろ", m:"чёрный цвет" },
+      { id:232, k:"黒い", r:"くろい", m:"чёрный" },
+      { id:233, k:"警官", r:"けいかん", m:"полицейский" },
+      { id:234, k:"今朝", r:"けさ", m:"сегодня утром" },
+      { id:235, k:"消す", r:"けす", m:"гасить, выключать" },
+      { id:236, k:"結構", r:"けっこう", m:"достаточно; неплохо" },
+      { id:237, k:"結婚", r:"けっこん", m:"брак" },
+      { id:238, k:"月曜日", r:"げつようび", m:"понедельник" },
+      { id:239, k:"玄関", r:"げんかん", m:"прихожая, вход" },
+      { id:240, k:"元気", r:"げんき", m:"здоровый, энергичный" },
+      { id:241, k:"〜個", r:"〜こ", m:"счётчик мелких предметов" },
+      { id:242, k:"五", r:"ご", m:"пять" },
+      { id:243, k:"〜語", r:"〜ご", m:"язык (суффикс)" },
+      { id:244, k:"公園", r:"こうえん", m:"парк" },
+      { id:245, k:"交差点", r:"こうさてん", m:"перекрёсток" },
+      { id:246, k:"紅茶", r:"こうちゃ", m:"чёрный чай" },
+      { id:247, k:"交番", r:"こうばん", m:"полицейский пост" },
+      { id:248, k:"声", r:"こえ", m:"голос" },
+      { id:249, k:"コート", r:"コート", m:"пальто" },
+      { id:250, k:"コーヒー", r:"コーヒー", m:"кофе" },
+      { id:251, k:"ここ", r:"ここ", m:"здесь" },
+      { id:252, k:"午後", r:"ごご", m:"после полудня (PM)" },
+      { id:253, k:"九日", r:"ここのか", m:"девять дней; девятое число" },
+      { id:254, k:"九つ", r:"ここのつ", m:"девять (штук)" },
+      { id:255, k:"午前", r:"ごぜん", m:"до полудня (AM)" },
+      { id:256, k:"答える", r:"こたえる", m:"отвечать" },
+      { id:257, k:"こちら", r:"こちら", m:"сюда (вежл.)" },
+      { id:258, k:"こっち", r:"こっち", m:"сюда" },
+      { id:259, k:"コップ", r:"コップ", m:"стакан" },
+      { id:260, k:"今年", r:"ことし", m:"в этом году" },
+      { id:261, k:"言葉", r:"ことば", m:"слово, язык" },
+      { id:262, k:"子供", r:"こども", m:"ребёнок" },
+      { id:263, k:"この", r:"この", m:"этот" },
+      { id:264, k:"ご飯", r:"ごはん", m:"рис (варёный); еда" },
+      { id:265, k:"コピーする", r:"コピーする", m:"копировать" },
+      { id:266, k:"困る", r:"こまる", m:"быть в затруднении" },
+      { id:267, k:"これ", r:"これ", m:"это" },
+      { id:268, k:"〜ごろ", r:"ごろ", m:"примерно (о времени)" },
+      { id:269, k:"今月", r:"こんげつ", m:"в этом месяце" },
+      { id:270, k:"今週", r:"こんしゅう", m:"на этой неделе" },
+      { id:271, k:"こんな", r:"こんな", m:"такой" },
+      { id:272, k:"今晩", r:"こんばん", m:"сегодня вечером" },
+      { id:273, k:"さあ", r:"さあ", m:"ну что ж" },
+      { id:274, k:"〜歳", r:"〜さい", m:"счётчик лет (возраст)" },
+      { id:275, k:"財布", r:"さいふ", m:"кошелёк" },
+      { id:276, k:"魚", r:"さかな", m:"рыба" },
+      { id:277, k:"先", r:"さき", m:"впереди; раньше" },
+      { id:278, k:"咲く", r:"さく", m:"цвести" },
+      { id:279, k:"作文", r:"さくぶん", m:"сочинение" },
+      { id:280, k:"差す", r:"さす", m:"открывать (зонт)" },
+      { id:281, k:"〜冊", r:"〜さつ", m:"счётчик книг" },
+      { id:282, k:"雑誌", r:"ざっし", m:"журнал" },
+      { id:283, k:"砂糖", r:"さとう", m:"сахар" },
+      { id:284, k:"寒い", r:"さむい", m:"холодно (о погоде)" },
+      { id:285, k:"再来年", r:"さらいねん", m:"через год" },
+      { id:286, k:"〜さん", r:"〜さん", m:"суффикс вежливости" },
+      { id:287, k:"三", r:"さん", m:"три" },
+      { id:288, k:"散歩", r:"さんぽ", m:"прогулка" },
+      { id:289, k:"四", r:"し", m:"четыре" },
+      { id:290, k:"〜時", r:"〜じ", m:"час (время)" },
+      { id:291, k:"塩", r:"しお", m:"соль" },
+      { id:292, k:"しかし", r:"しかし", m:"однако, но" },
+      { id:293, k:"時間", r:"じかん", m:"время, час" },
+      { id:294, k:"〜時間", r:"〜じかん", m:"счётчик часов" },
+      { id:295, k:"仕事", r:"しごと", m:"работа" },
+      { id:296, k:"辞書", r:"じしょ", m:"словарь" },
+      { id:297, k:"静か", r:"しずか", m:"тихий, спокойный" },
+      { id:298, k:"下", r:"した", m:"низ, внизу" },
+      { id:299, k:"七", r:"しち", m:"семь" },
+      { id:300, k:"質問", r:"しつもん", m:"вопрос" },
+      { id:301, k:"自転車", r:"じてんしゃ", m:"велосипед" },
+      { id:302, k:"自動車", r:"じどうしゃ", m:"автомобиль" },
+      { id:303, k:"死ぬ", r:"しぬ", m:"умирать" },
+      { id:304, k:"字引", r:"じびき", m:"словарь" },
+      { id:305, k:"自分", r:"じぶん", m:"сам, себя" },
+      { id:306, k:"閉まる", r:"しまる", m:"закрываться" },
+      { id:307, k:"閉める", r:"しめる", m:"закрывать" },
+      { id:308, k:"締める", r:"しめる", m:"завязывать, затягивать" },
+      { id:309, k:"じゃ / じゃあ", r:"じゃあ", m:"ну, тогда" },
+      { id:310, k:"写真", r:"しゃしん", m:"фотография" },
+      { id:311, k:"シャツ", r:"シャツ", m:"рубашка" },
+      { id:312, k:"シャワー", r:"シャワー", m:"душ" },
+      { id:313, k:"十", r:"じゅう", m:"десять" },
+      { id:314, k:"〜中", r:"〜じゅう", m:"в течение, весь" },
+      { id:315, k:"〜週間", r:"〜しゅうかん", m:"счётчик недель" },
+      { id:316, k:"授業", r:"じゅぎょう", m:"урок, занятие" },
+      { id:317, k:"宿題", r:"しゅくだい", m:"домашнее задание" },
+      { id:318, k:"上手", r:"じょうず", m:"умелый, искусный" },
+      { id:319, k:"丈夫", r:"じょうぶ", m:"крепкий, здоровый" },
+      { id:320, k:"醤油", r:"しょうゆ", m:"соевый соус" },
+      { id:321, k:"食堂", r:"しょくどう", m:"столовая" },
+      { id:322, k:"知る", r:"しる", m:"знать" },
+      { id:323, k:"白", r:"しろ", m:"белый цвет" },
+      { id:324, k:"白い", r:"しろい", m:"белый" },
+      { id:325, k:"〜人", r:"〜じん", m:"суффикс жителя" },
+      { id:326, k:"新聞", r:"しんぶん", m:"газета" },
+      { id:327, k:"水曜日", r:"すいようび", m:"среда" },
+      { id:328, k:"吸う", r:"すう", m:"вдыхать, курить" },
+      { id:329, k:"スカート", r:"スカート", m:"юбка" },
+      { id:330, k:"好き", r:"すき", m:"любимый, нравящийся" },
+      { id:331, k:"〜すぎ", r:"〜すぎ", m:"слишком; после" },
+      { id:332, k:"少ない", r:"すくない", m:"мало" },
+      { id:333, k:"すぐに", r:"すぐに", m:"сразу" },
+      { id:334, k:"少し", r:"すこし", m:"немного" },
+      { id:335, k:"涼しい", r:"すずしい", m:"прохладный" },
+      { id:336, k:"〜ずつ", r:"〜ずつ", m:"по (столько-то)" },
+      { id:337, k:"ストーブ", r:"ストーブ", m:"обогреватель" },
+      { id:338, k:"スプーン", r:"スプーン", m:"ложка" },
+      { id:339, k:"スポーツ", r:"スポーツ", m:"спорт" },
+      { id:340, k:"ズボン", r:"ズボン", m:"брюки" },
+      { id:341, k:"住む", r:"すむ", m:"жить (где-то)" },
+      { id:342, k:"する", r:"する", m:"делать" },
+      { id:343, k:"座る", r:"すわる", m:"сидеть" },
+      { id:344, k:"背", r:"せ", m:"спина, рост" },
+      { id:345, k:"生徒", r:"せいと", m:"ученик" },
+      { id:346, k:"セーター", r:"セーター", m:"свитер" },
+      { id:347, k:"石鹸", r:"せっけん", m:"мыло" },
+      { id:348, k:"背広", r:"せびろ", m:"мужской костюм" },
+      { id:349, k:"狭い", r:"せまい", m:"узкий, тесный" },
+      { id:350, k:"ゼロ", r:"ゼロ", m:"ноль" },
+      { id:351, k:"千", r:"せん", m:"тысяча" },
+      { id:352, k:"先月", r:"せんげつ", m:"в прошлом месяце" },
+      { id:353, k:"先週", r:"せんしゅう", m:"на прошлой неделе" },
+      { id:354, k:"先生", r:"せんせい", m:"учитель, врач" },
+      { id:355, k:"洗濯", r:"せんたく", m:"стирка" },
+      { id:356, k:"全部", r:"ぜんぶ", m:"всё, целиком" },
+      { id:357, k:"そう / そうです", r:"そう", m:"да, так" },
+      { id:358, k:"掃除", r:"そうじ", m:"уборка" },
+      { id:359, k:"そうして / そして", r:"そして", m:"и затем" },
+      { id:360, k:"そこ", r:"そこ", m:"там" },
+      { id:361, k:"そちら", r:"そちら", m:"туда (вежл.)" },
+      { id:362, k:"そっち", r:"そっち", m:"туда" },
+      { id:363, k:"外", r:"そと", m:"снаружи, вне" },
+      { id:364, k:"その", r:"その", m:"тот" },
+      { id:365, k:"そば", r:"そば", m:"гречневая лапша" },
+      { id:366, k:"空", r:"そら", m:"небо" },
+      { id:367, k:"それ", r:"それ", m:"то" },
+      { id:368, k:"それから", r:"それから", m:"а потом, затем" },
+      { id:369, k:"それでは", r:"それでは", m:"ну тогда, что ж" },
+      { id:370, k:"〜台", r:"〜だい", m:"счётчик техники" },
+      { id:371, k:"大学", r:"だいがく", m:"университет" },
+      { id:372, k:"大使館", r:"たいしかん", m:"посольство" },
+      { id:373, k:"大丈夫", r:"だいじょうぶ", m:"безопасный; нормально" },
+      { id:374, k:"大好き", r:"だいすき", m:"очень нравится" },
+      { id:375, k:"大切", r:"たいせつ", m:"важный, ценный" },
+      { id:376, k:"台所", r:"だいどころ", m:"кухня" },
+      { id:377, k:"大変", r:"たいへん", m:"трудный, тяжёлый" },
+      { id:378, k:"高い", r:"たかい", m:"высокий; дорогой" },
+      { id:379, k:"〜だけ", r:"だけ", m:"только" },
+      { id:380, k:"沢山", r:"たくさん", m:"много" },
+      { id:381, k:"タクシー", r:"タクシー", m:"такси" },
+      { id:382, k:"出す", r:"だす", m:"доставать, сдавать" },
+      { id:383, k:"〜たち", r:"たち", m:"суффикс мн. числа" },
+      { id:384, k:"立つ", r:"たつ", m:"стоять" },
+      { id:385, k:"たて", r:"たて", m:"высота, длина" },
+      { id:386, k:"建物", r:"たてもの", m:"здание" },
+      { id:387, k:"楽しい", r:"たのしい", m:"весёлый, приятный" },
+      { id:388, k:"頼む", r:"たのむ", m:"просить" },
+      { id:389, k:"たばこ", r:"たばこ", m:"табак, сигареты" },
+      { id:390, k:"多分", r:"たぶん", m:"наверное, возможно" },
+      { id:391, k:"食べ物", r:"たべもの", m:"еда" },
+      { id:392, k:"食べる", r:"たべる", m:"есть" },
+      { id:393, k:"卵", r:"たまご", m:"яйцо" },
+      { id:394, k:"誰", r:"だれ", m:"кто" },
+      { id:395, k:"誰か", r:"だれか", m:"кто-то" },
+      { id:396, k:"誕生日", r:"たんじょうび", m:"день рождения" },
+      { id:397, k:"だんだん", r:"だんだん", m:"постепенно" },
+      { id:398, k:"小さい", r:"ちいさい", m:"маленький" },
+      { id:399, k:"小さな", r:"ちいさな", m:"маленький" },
+      { id:400, k:"近い", r:"ちかい", m:"близкий" },
+      { id:401, k:"違う", r:"ちがう", m:"отличаться; быть неверным" },
+      { id:402, k:"近く", r:"ちかく", m:"рядом, поблизости" },
+      { id:403, k:"地下鉄", r:"ちкатеつ", m:"метро" },
+      { id:404, k:"地図", r:"ちず", m:"карта" },
+      { id:405, k:"父", r:"ちち", m:"отец" },
+      { id:406, k:"茶色", r:"ちゃいろ", m:"коричневый цвет" },
+      { id:407, k:"茶碗", r:"ちゃわん", m:"пиала для риса" },
+      { id:408, k:"ちょうど", r:"ちょうど", m:"точно, ровно" },
+      { id:409, k:"ちょっと", r:"ちょっと", m:"немного, чуть-чуть" },
+      { id:410, k:"使う", r:"つかう", m:"использовать" },
+      { id:411, k:"疲れる", r:"つかれる", m:"уставать" },
+      { id:412, k:"次", r:"つぎ", m:"следующий" },
+      { id:413, k:"着く", r:"つく", m:"прибывать, достигать" },
+      { id:414, k:"机", r:"つくえ", m:"стол" },
+      { id:415, k:"作る", r:"つくる", m:"делать, создавать" },
+      { id:416, k:"つける", r:"つける", m:"включать (свет)" },
+      { id:417, k:"勤める", r:"つとめる", m:"работать (в компании)" },
+      { id:418, k:"つまらない", r:"つまらない", m:"скучный, неинтересный" },
+      { id:419, k:"冷たい", r:"つめたい", m:"холодный (на ощупь)" },
+      { id:420, k:"強い", r:"つよい", m:"сильный" },
+      { id:421, k:"手", r:"て", m:"рука" },
+      { id:422, k:"テープ", r:"テープ", m:"плёнка, лента" },
+      { id:423, k:"テープレコーダー", r:"テープレコーダー", m:"магнитофон" },
+      { id:424, k:"テーブル", r:"テーブル", m:"стол" },
+      { id:425, k:"出かける", r:"でかける", m:"выходить, отправляться" },
+      { id:426, k:"手紙", r:"てがみ", m:"письмо" },
+      { id:427, k:"できる", r:"できる", m:"мочь, уметь" },
+      { id:428, k:"出口", r:"でぐち", m:"выход" },
+      { id:429, k:"テスト", r:"テスト", m:"тест" },
+      { id:430, k:"では", r:"では", m:"итак, тогда" },
+      { id:431, k:"デパート", r:"デパート", m:"универмаг" },
+      { id:432, k:"でも", r:"でも", m:"но, однако" },
+      { id:433, k:"出る", r:"でる", m:"выходить, покидать" },
+      { id:434, k:"テレビ", r:"テレビ", m:"телевизор" },
+      { id:435, k:"天気", r:"てんき", m:"погода" },
+      { id:436, k:"電気", r:"でんき", m:"электричество, свет" },
+      { id:437, k:"電車", r:"でんしゃ", m:"электричка" },
+      { id:438, k:"電話", r:"でんわ", m:"телефон" },
+      { id:439, k:"戸", r:"と", m:"дверь (раздвижная)" },
+      { id:440, k:"〜度", r:"〜ど", m:"счётчик раз, градус" },
+      { id:441, k:"ドア", r:"ドア", m:"дверь" },
+      { id:442, k:"トイレ", r:"トイレ", m:"туалет" },
+      { id:443, k:"どう", r:"どう", m:"как" },
+      { id:444, k:"どうして", r:"どうして", m:"почему" },
+      { id:445, k:"どうぞ", r:"どうぞ", m:"пожалуйста" },
+      { id:446, k:"動物", r:"どうぶつ", m:"животное" },
+      { id:447, k:"どうも", r:"どうも", m:"спасибо; весьма" },
+      { id:448, k:"遠い", r:"とおい", m:"далёкий" },
+      { id:449, k:"十日", r:"とおか", m:"десять дней; десятое число" },
+      { id:450, k:"時々", r:"ときどき", m:"иногда" },
+      { id:451, k:"時計", r:"とけい", m:"часы" },
+      { id:452, k:"どこ", r:"どこ", m:"где" },
+      { id:453, k:"所", r:"ところ", m:"место" },
+      { id:454, k:"年", r:"とし", m:"год" },
+      { id:455, k:"図書館", r:"としょかん", m:"библиотека" },
+      { id:456, k:"どちら", r:"どちら", m:"который, куда (вежл.)" },
+      { id:457, k:"どっち", r:"どっち", m:"который (из двух)" },
+      { id:458, k:"とても", r:"とても", m:"очень" },
+      { id:459, k:"どなた", r:"どなた", m:"кто (вежл.)" },
+      { id:460, k:"隣", r:"となり", m:"соседний, рядом" },
+      { id:461, k:"どの", r:"どの", m:"который" },
+      { id:462, k:"飛ぶ", r:"とぶ", m:"летать" },
+      { id:463, k:"止まる", r:"とまる", m:"останавливаться" },
+      { id:464, k:"友達", r:"ともだち", m:"друг" },
+      { id:465, k:"土曜日", r:"どようび", m:"суббота" },
+      { id:466, k:"鳥", r:"とり", m:"птица" },
+      { id:467, k:"鶏肉", r:"とりにく", m:"курица" },
+      { id:468, k:"取る", r:"とる", m:"брать" },
+      { id:469, k:"撮る", r:"とる", m:"снимать (фото)" },
+      { id:470, k:"どれ", r:"どれ", m:"который (из многих)" },
+      { id:471, k:"どんな", r:"どんな", m:"какой" },
+      { id:472, k:"ない", r:"ない", m:"нет, не имеется" },
+      { id:473, k:"ナイフ", r:"ナイフ", m:"нож" },
+      { id:474, k:"中", r:"なか", m:"внутри" },
+      { id:475, k:"長い", r:"ながい", m:"длинный" },
+      { id:476, k:"鳴く", r:"なく", m:"издавать звук (о животном)" },
+      { id:477, k:"無くす", r:"なくす", m:"терять" },
+      { id:478, k:"なぜ", r:"なぜ", m:"почему" },
+      { id:479, k:"夏", r:"なつ", m:"лето" },
+      { id:480, k:"夏休み", r:"なつやすみ", m:"летние каникулы" },
+      { id:481, k:"〜など", r:"など", m:"и так далее" },
+      { id:482, k:"七つ", r:"ななつ", m:"семь (штук)" },
+      { id:483, k:"何", r:"なに", m:"что" },
+      { id:484, k:"七日", r:"なのか", m:"семь дней; седьмое число" },
+      { id:485, k:"名前", r:"なまえ", m:"имя" },
+      { id:486, k:"習う", r:"ならう", m:"учиться, изучать" },
+      { id:487, k:"並ぶ", r:"ならぶ", m:"выстраиваться в ряд" },
+      { id:488, k:"並べる", r:"ならべる", m:"расставлять по порядку" },
+      { id:489, k:"なる", r:"なる", m:"становиться" },
+      { id:490, k:"何〜", r:"なん〜", m:"какой (суффикс)" },
+      { id:491, k:"二", r:"に", m:"два" },
+      { id:492, k:"にぎやか", r:"にぎやか", m:"шумный, оживлённый" },
+      { id:493, k:"肉", r:"にく", m:"мясо" },
+      { id:494, k:"西", r:"にし", m:"запад" },
+      { id:495, k:"〜日", r:"〜にち", m:"число (в дате)" },
+      { id:496, k:"日曜日", r:"にちようび", m:"воскресенье" },
+      { id:497, k:"荷物", r:"にもつ", m:"багаж" },
+      { id:498, k:"ニュース", r:"ニュース", m:"новости" },
+      { id:499, k:"庭", r:"にわ", m:"сад" },
+      { id:500, k:"脱ぐ", r:"ぬぐ", m:"снимать (одежду)" },
+      { id:501, k:"温い", r:"ぬるい", m:"чуть тёплый (о жидкости)" },
+      { id:502, k:"ネクタイ", r:"ネクタイ", m:"галстук" },
+      { id:503, k:"猫", r:"ねこ", m:"кошка" },
+      { id:504, k:"寝る", r:"ねる", m:"спать" },
+      { id:505, k:"〜年", r:"〜ねん", m:"год (счётчик)" },
+      { id:506, k:"ノート", r:"ノート", m:"тетрадь" },
+      { id:507, k:"登る", r:"のぼる", m:"подниматься, взбираться" },
+      { id:508, k:"飲み物", r:"のみもの", m:"напиток" },
+      { id:509, k:"飲む", r:"のむ", m:"пить" },
+      { id:510, k:"乗る", r:"のる", m:"садиться (в транспорт)" },
+      { id:511, k:"歯", r:"は", m:"зубы" },
+      { id:512, k:"パーティー", r:"パーティー", m:"вечеринка" },
+      { id:513, k:"はい", r:"はい", m:"да" },
+      { id:514, k:"〜杯", r:"〜はい", m:"счётчик чашек, бокалов" },
+      { id:515, k:"灰皿", r:"はいざら", m:"пепельница" },
+      { id:516, k:"入る", r:"はいる", m:"входить" },
+      { id:517, k:"葉書", r:"はがき", m:"открытка" },
+      { id:518, k:"履く", r:"はく", m:"надевать (штаны, обувь)" },
+      { id:519, k:"箱", r:"はこ", m:"коробка" },
+      { id:520, k:"橋", r:"はし", m:"мост" },
+      { id:521, k:"箸", r:"はし", m:"палочки для еды" },
+      { id:522, k:"始まる", r:"はじまる", m:"начинаться" },
+      { id:523, k:"初め / 始め", r:"はじめ", m:"начало" },
+      { id:524, k:"初めて", r:"はじめて", m:"впервые" },
+      { id:525, k:"走る", r:"はしる", m:"бежать" },
+      { id:526, k:"バス", r:"バス", m:"автобус" },
+      { id:527, k:"バター", r:"バター", m:"масло" },
+      { id:528, k:"二十歳", r:"はたち", m:"20 лет" },
+      { id:529, k:"働く", r:"はたらく", m:"работать" },
+      { id:530, k:"八", r:"はち", m:"восемь" },
+      { id:531, k:"二十日", r:"はつか", m:"двадцать дней; 20-е число" },
+      { id:532, k:"花", r:"はな", m:"цветок" },
+      { id:533, k:"鼻", r:"はな", m:"нос" },
+      { id:534, k:"話", r:"はなし", m:"рассказ, разговор" },
+      { id:535, k:"話す", r:"はなす", m:"говорить" },
+      { id:536, k:"母", r:"はは", m:"мать" },
+      { id:537, k:"早い", r:"はやい", m:"ранний" },
+      { id:538, k:"速い", r:"はやい", m:"быстрый" },
+      { id:539, k:"春", r:"はる", m:"весна" },
+      { id:540, k:"貼る", r:"はる", m:"приклеивать" },
+      { id:541, k:"晴れ", r:"はれ", m:"ясная погода" },
+      { id:542, k:"晴れる", r:"はれる", m:"проясняться" },
+      { id:543, k:"半", r:"はん", m:"половина" },
+      { id:544, k:"晩", r:"ばん", m:"вечер" },
+      { id:545, k:"〜番", r:"〜ばん", m:"номер, счётчик" },
+      { id:546, k:"パン", r:"パン", m:"хлеб" },
+      { id:547, k:"ハンカチ", r:"ハンカチ", m:"носовой платок" },
+      { id:548, k:"番号", r:"ばんごう", m:"номер" },
+      { id:549, k:"晩ご飯", r:"ばんごはん", m:"ужин" },
+      { id:550, k:"半分", r:"はんぶん", m:"половина" },
+      { id:551, k:"東", r:"ひがし", m:"восток" },
+      { id:552, k:"〜匹", r:"〜ひき", m:"счётчик животных" },
+      { id:553, k:"引く", r:"ひく", m:"тянуть; вычитать" },
+      { id:554, k:"弾く", r:"ひく", m:"играть (на струнных)" },
+      { id:555, k:"低い", r:"ひくい", m:"низкий" },
+      { id:556, k:"飛行機", r:"ひこうき", m:"самолёт" },
+      { id:557, k:"左", r:"ひだり", m:"лево" },
+      { id:558, k:"人", r:"ひと", m:"человек" },
+      { id:559, k:"一つ", r:"ひとつ", m:"одна (штука)" },
+      { id:560, k:"一月", r:"ひとつき", m:"один месяц" },
+      { id:561, k:"一人", r:"ひとり", m:"один человек" },
+      { id:562, k:"暇", r:"ひま", m:"свободный (о времени)" },
+      { id:563, k:"百", r:"ひゃく", m:"сто" },
+      { id:564, k:"病院", r:"びょういん", m:"больница" },
+      { id:565, k:"病気", r:"びょうき", m:"болезнь" },
+      { id:566, k:"平仮名", r:"ひらがな", m:"хирагана" },
+      { id:567, k:"昼", r:"ひる", m:"день" },
+      { id:568, k:"昼ご飯", r:"ひるごはん", m:"обед" },
+      { id:569, k:"広い", r:"ひろい", m:"широкий, просторный" },
+      { id:570, k:"フィルム", r:"フィルム", m:"плёнка (фото)" },
+      { id:571, k:"封筒", r:"ふうとう", m:"конверт" },
+      { id:572, k:"プール", r:"プール", m:"бассейн" },
+      { id:573, k:"フォーク", r:"フォーク", m:"вилка" },
+      { id:574, k:"吹く", r:"ふく", m:"дуть (о ветре)" },
+      { id:575, k:"服", r:"ふく", m:"одежда" },
+      { id:576, k:"二つ", r:"ふたつ", m:"две (штуки)" },
+      { id:577, k:"豚肉", r:"ぶたにく", m:"свинина" },
+      { id:578, k:"二人", r:"ふたり", m:"два человека" },
+      { id:579, k:"二日", r:"ふつか", m:"два дня; 2-е число" },
+      { id:580, k:"太い", r:"ふとい", m:"толстый (в диаметре); жирный" },
+      { id:581, k:"冬", r:"ふゆ", m:"зима" },
+      { id:582, k:"降る", r:"ふる", m:"идти (о дожде, снеге)" },
+      { id:583, k:"古い", r:"ふるい", m:"старый (неодуш.)" },
+      { id:584, k:"〜分", r:"〜ふん", m:"минута" },
+      { id:585, k:"文章", r:"ぶんしょう", m:"текст, предложение" },
+      { id:586, k:"ページ", r:"ページ", m:"страница" },
+      { id:587, k:"下手", r:"へた", m:"неумелый" },
+      { id:588, k:"ベッド", r:"ベッド", m:"кровать" },
+      { id:589, k:"ペット", r:"ペット", m:"питомец" },
+      { id:590, k:"部屋", r:"へや", m:"комната" },
+      { id:591, k:"辺", r:"へん", m:"окрестность" },
+      { id:592, k:"ペン", r:"ペン", m:"ручка" },
+      { id:593, k:"勉強", r:"べんきょう", m:"учёба" },
+      { id:594, k:"便利", r:"べんり", m:"удобный" },
+      { id:595, k:"帽子", r:"ぼうし", m:"шляпа" },
+      { id:596, k:"ボールペン", r:"ボールペン", m:"шариковая ручка" },
+      { id:597, k:"ポケット", r:"ポケット", m:"карман" },
+      { id:598, k:"欲しい", r:"ほしい", m:"хотеть (вещь)" },
+      { id:599, k:"ポスト", r:"ポスト", m:"почтовый ящик" },
+      { id:600, k:"細い", r:"ほそい", m:"тонкий; стройный" },
+      { id:601, k:"ボタン", r:"ボタン", m:"кнопка" },
+      { id:602, k:"ホテル", r:"ホテル", m:"отель" },
+      { id:603, k:"本", r:"ほん", m:"книга" },
+      { id:604, k:"〜本", r:"〜ほん", m:"счётчик длинных предметов" },
+      { id:605, k:"本棚", r:"ほんだな", m:"книжная полка" },
+      { id:606, k:"本当", r:"ほんとう", m:"правда, действительно" },
+      { id:607, k:"〜枚", r:"〜まい", m:"счётчик плоских предметов" },
+      { id:608, k:"毎朝", r:"まいあさ", m:"каждое утро" },
+      { id:609, k:"毎月", r:"まいつき", m:"каждый месяц" },
+      { id:610, k:"毎週", r:"まいしゅう", m:"каждую неделю" },
+      { id:611, k:"毎日", r:"まいにち", m:"каждый день" },
+      { id:612, k:"毎年", r:"まいとし / まいねん", m:"каждый год" },
+      { id:613, k:"毎晩", r:"まいばん", m:"каждый вечер" },
+      { id:614, k:"前", r:"まえ", m:"перед, спереди" },
+      { id:615, k:"〜前", r:"〜まえ", m:"перед, до" },
+      { id:616, k:"曲がる", r:"まがる", m:"поворачивать" },
+      { id:617, k:"まずい", r:"まずい", m:"невкусный" },
+      { id:618, k:"また", r:"また", m:"снова, ещё" },
+      { id:619, k:"まだ", r:"まだ", m:"ещё, пока" },
+      { id:620, k:"町", r:"まち", m:"город, район" },
+      { id:621, k:"待つ", r:"まつ", m:"ждать" },
+      { id:622, k:"まっすぐ", r:"まっすぐ", m:"прямо" },
+      { id:623, k:"マッチ", r:"マッチ", m:"спички" },
+      { id:624, k:"窓", r:"まど", m:"окно" },
+      { id:625, k:"丸い / 円い", r:"まるい", m:"круглый" },
+      { id:626, k:"万", r:"まん", m:"десять тысяч" },
+      { id:627, k:"万年筆", r:"まんねんひつ", m:"перьевая ручка" },
+      { id:628, k:"磨く", r:"みがく", m:"чистить (зубы)" },
+      { id:629, k:"右", r:"みぎ", m:"право" },
+      { id:630, k:"短い", r:"みじかい", m:"короткий" },
+      { id:631, k:"水", r:"みず", m:"вода" },
+      { id:632, k:"店", r:"みせ", m:"магазин" },
+      { id:633, k:"見せる", r:"みせる", m:"показывать" },
+      { id:634, k:"道", r:"みち", m:"дорога" },
+      { id:635, k:"三日", r:"みっか", m:"три дня; третье число" },
+      { id:636, k:"三つ", r:"みっつ", m:"три (штук)" },
+      { id:637, k:"緑", r:"みどり", m:"зелёный цвет" },
+      { id:638, k:"皆さん", r:"みなさん", m:"все (вежл.)" },
+      { id:639, k:"南", r:"みなみ", m:"юг" },
+      { id:640, k:"耳", r:"みみ", m:"уши" },
+      { id:641, k:"見る", r:"みる", m:"смотреть, видеть" },
+      { id:642, k:"みんな", r:"みんな", m:"все" },
+      { id:643, k:"六日", r:"むいか", m:"шесть дней; 6-е число" },
+      { id:644, k:"向こう", r:"むこう", m:"та сторона, дальше" },
+      { id:645, k:"難しい", r:"むずかしい", m:"сложный" },
+      { id:646, k:"六つ", r:"むっつ", m:"шесть (штук)" },
+      { id:647, k:"村", r:"むら", m:"деревня" },
+      { id:648, k:"目", r:"め", m:"глаза" },
+      { id:649, k:"メートル", r:"メートル", m:"метр" },
+      { id:650, k:"眼鏡", r:"めがね", m:"очки" },
+      { id:651, k:"もう", r:"もう", m:"уже; ещё" },
+      { id:652, k:"木曜日", r:"もくようび", m:"четверг" },
+      { id:653, k:"もしもし", r:"もしもし", m:"алло" },
+      { id:654, k:"持つ", r:"もつ", m:"держать, иметь" },
+      { id:655, k:"もっと", r:"もっと", m:"больше" },
+      { id:656, k:"物", r:"もの", m:"вещь" },
+      { id:657, k:"門", r:"もん", m:"ворота" },
+      { id:658, k:"問題", r:"もんだい", m:"проблема, вопрос, задача" },
+      { id:659, k:"〜屋", r:"〜や", m:"суффикс «магазин»" },
+      { id:660, k:"八百屋", r:"やおや", m:"овощной магазин" },
+      { id:661, k:"野菜", r:"やさい", m:"овощи" },
+      { id:662, k:"易しい", r:"やさしい", m:"лёгкий, простой" },
+      { id:663, k:"安い", r:"やすい", m:"дешёвый" },
+      { id:664, k:"休み", r:"やすみ", m:"выходной, отдых" },
+      { id:665, k:"休む", r:"やすむ", m:"отдыхать; отсутствовать" },
+      { id:666, k:"八つ", r:"やっつ", m:"восемь (штук)" },
+      { id:667, k:"山", r:"やま", m:"гора" },
+      { id:668, k:"やる", r:"やる", m:"делать; давать" },
+      { id:669, k:"夕方", r:"ゆうがた", m:"вечер (перед ужином)" },
+      { id:670, k:"夕飯", r:"ゆうはん", m:"ужин" },
+      { id:671, k:"郵便局", r:"ゆうびんきょく", m:"почта" },
+      { id:672, k:"昨夜", r:"ゆうべ", m:"вчера вечером" },
+      { id:673, k:"有名", r:"ゆうめい", m:"известный, знаменитый" },
+      { id:674, k:"雪", r:"ゆき", m:"снег" },
+      { id:675, k:"ゆっくりと", r:"ゆっくりと", m:"медленно" },
+      { id:676, k:"八日", r:"ようか", m:"восемь дней; 8-е число" },
+      { id:677, k:"洋服", r:"ようふく", m:"европейская одежда" },
+      { id:678, k:"よく", r:"よく", m:"часто; хорошо" },
+      { id:679, k:"横", r:"よこ", m:"сбоку" },
+      { id:680, k:"四日", r:"よっか", m:"четыре дня; 4-е число" },
+      { id:681, k:"四つ", r:"よっつ", m:"четыре (штук)" },
+      { id:682, k:"呼ぶ", r:"よぶ", m:"звать" },
+      { id:683, k:"読む", r:"よむ", m:"читать" },
+      { id:684, k:"夜", r:"よる", m:"ночь" },
+      { id:685, k:"弱い", r:"よわい", m:"слабый" },
+      { id:686, k:"来月", r:"らいげつ", m:"в следующем месяце" },
+      { id:687, k:"来週", r:"らいしゅう", m:"на следующей неделе" },
+      { id:688, k:"来年", r:"らいねん", m:"в следующем году" },
+      { id:689, k:"ラジオ", r:"ラジオ", m:"радио" },
+      { id:690, k:"ラジカセ", r:"ラジカセ", m:"радиокассетник" },
+      { id:691, k:"立派", r:"りっぱ", m:"великолепный" },
+      { id:692, k:"留学生", r:"りゅうがくせい", m:"иностранный студент" },
+      { id:693, k:"両親", r:"りょうしん", m:"родители" },
+      { id:694, k:"料理", r:"りょうり", m:"кухня, готовка" },
+      { id:695, k:"旅行", r:"りょこう", m:"путешествие" },
+      { id:696, k:"零", r:"れい", m:"ноль" },
+      { id:697, k:"冷蔵庫", r:"れいぞうこ", m:"холодильник" },
+      { id:698, k:"レコード", r:"レコード", m:"пластинка" },
+      { id:699, k:"レストラン", r:"レストラン", m:"ресторан" },
+      { id:700, k:"練習", r:"れんしゅう", m:"тренировка, практика" },
+      { id:701, k:"廊下", r:"ろうか", m:"коридор" },
+      { id:702, k:"六", r:"ろく", m:"шесть" },
+      { id:703, k:"ワイシャツ", r:"ワイシャツ", m:"рубашка (деловая)" },
+      { id:704, k:"若い", r:"わかい", m:"молодой" },
+      { id:705, k:"分かる", r:"わかる", m:"понимать" },
+      { id:706, k:"忘れる", r:"わすれる", m:"забывать" },
+      { id:707, k:"私", r:"わたし", m:"я" },
+      { id:708, k:"渡す", r:"わたす", m:"передавать, давать" },
+      { id:709, k:"渡る", r:"わたる", m:"переходить (дорогу, мост)" },
+      { id:710, k:"悪い", r:"わるい", m:"плохой" }
+    ];
+
+    let starredSet = new Set(JSON.parse(localStorage.getItem('kanji_starred_710') || '[]'));
+    let learnedSet = new Set(JSON.parse(localStorage.getItem('kanji_learned_710') || '[]'));
+
+    let isAutoVoice = true;
+    let currentDeckMode = 'normal'; 
+    let activeDeck = [];
+    let currentIndex = 0;
+    let isPlaying = true;
+    let slideInterval = 5000;
+    let timer = null;
+    let progressTimer = null;
+    let isAnswerHidden = false;
+
+    const dispKanji = document.getElementById('dispKanji');
+    const dispReading = document.getElementById('dispReading');
+    const dispMeaning = document.getElementById('dispMeaning');
+    const deckIndicator = document.getElementById('deckIndicator');
+    const starActionBtn = document.getElementById('starActionBtn');
+    const playBtn = document.getElementById('playBtn');
+    const autoVoiceBtn = document.getElementById('autoVoiceBtn');
+    const progressLine = document.getElementById('progressLine');
+    const favTabBtn = document.getElementById('favTabBtn');
+    const learnedTabBtn = document.getElementById('learnedTabBtn');
+
+    function saveStorage() {
+      localStorage.setItem('kanji_starred_710', JSON.stringify([...starredSet]));
+      localStorage.setItem('kanji_learned_710', JSON.stringify([...learnedSet]));
+      updateTabCounters();
+    }
+
+    function updateTabCounters() {
+      favTabBtn.textContent = `⭐ Избранные (${starredSet.size})`;
+      learnedTabBtn.textContent = `✔️ Изученные (${learnedSet.size})`;
+    }
+
+    // Алгоритм Фишера-Йетса для честного перемешивания
+    function shuffleArray(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function rebuildDeck() {
+      if (currentDeckMode === 'favorites') {
+        activeDeck = RAW_VOCABULARY.filter(item => starredSet.has(item.id));
+      } else {
+        activeDeck = RAW_VOCABULARY.filter(item => !learnedSet.has(item.id));
+      }
+
+      if (activeDeck.length === 0) {
+        dispKanji.textContent = "Пусто 🎉";
+        dispReading.textContent = "";
+        dispMeaning.textContent = "Все слова пройдены";
+        deckIndicator.textContent = "0 / 0";
+        stopTimer();
+        return;
+      }
+
+      if (currentIndex >= activeDeck.length) currentIndex = 0;
+      updateCard();
+    }
+
+    function updateCard() {
+      if (activeDeck.length === 0) return;
+      const item = activeDeck[currentIndex];
+      
+      dispKanji.classList.remove('fade-content');
+      void dispKanji.offsetWidth;
+      dispKanji.classList.add('fade-content');
+
+      dispKanji.textContent = item.k;
+      dispReading.textContent = item.r;
+      dispMeaning.textContent = item.m;
+
+      // Автомасштаб под длину слова
+      const kLen = item.k.length;
+      const rLen = item.r.length;
+
+      dispKanji.classList.remove('len-4', 'len-5', 'len-long');
+      dispReading.classList.remove('len-long');
+
+      if (kLen === 4) {
+        dispKanji.classList.add('len-4');
+      } else if (kLen === 5) {
+        dispKanji.classList.add('len-5');
+      } else if (kLen >= 6) {
+        dispKanji.classList.add('len-long');
+      }
+
+      if (rLen >= 8) {
+        dispReading.classList.add('len-long');
+      }
+
+      deckIndicator.textContent = `Слово ${currentIndex + 1} из ${activeDeck.length}`;
+
+      if (starredSet.has(item.id)) {
+        starActionBtn.classList.add('starred');
+      } else {
+        starActionBtn.classList.remove('starred');
+      }
+
+      if (isAutoVoice) {
+        speakCurrentWord(false);
+      }
+
+      resetProgress();
+    }
+
+    function getKyokoVoice() {
+      if (!('speechSynthesis' in window)) return null;
+      const voices = window.speechSynthesis.getVoices();
+      
+      let voice = voices.find(v => 
+        v.name.toLowerCase().includes('kyoko') || 
+        v.name.includes('キョウコ') ||
+        v.name.includes('Kyoko')
+      );
+      
+      if (!voice) {
+        voice = voices.find(v => v.lang.startsWith('ja') || v.lang === 'ja_JP');
+      }
+      return voice;
+    }
+
+    function speakCurrentWord(userTriggered = false) {
+      if (activeDeck.length === 0 || !('speechSynthesis' in window)) return;
+      const item = activeDeck[currentIndex];
+
+      window.speechSynthesis.cancel();
+      const ut = new SpeechSynthesisUtterance(item.r || item.k);
+      ut.lang = 'ja-JP';
+
+      const voice = getKyokoVoice();
+      if (voice) ut.voice = voice;
+      ut.rate = 0.9;
+
+      window.speechSynthesis.speak(ut);
+    }
+
+    function toggleAutoVoice() {
+      isAutoVoice = !isAutoVoice;
+      if (isAutoVoice) {
+        autoVoiceBtn.textContent = '🔊 Автоозвучка: ВКЛ';
+        autoVoiceBtn.classList.add('active-toggle');
+        speakCurrentWord(true);
+      } else {
+        autoVoiceBtn.textContent = '🔇 Автоозвучка: ВЫКЛ';
+        autoVoiceBtn.classList.remove('active-toggle');
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function toggleCurrentFavorite() {
+      if (activeDeck.length === 0) return;
+      const item = activeDeck[currentIndex];
+      toggleFavById(item.id);
+    }
+
+    // Интерактивная звезда для любого слова
+    function toggleFavById(id) {
+      if (starredSet.has(id)) {
+        starredSet.delete(id);
+      } else {
+        starredSet.add(id);
+      }
+      saveStorage();
+      
+      if (activeDeck[currentIndex] && activeDeck[currentIndex].id === id) {
+        if (starredSet.has(id)) {
+          starActionBtn.classList.add('starred');
+        } else {
+          starActionBtn.classList.remove('starred');
+        }
+      }
+
+      renderFavoritesList();
+      renderAllWordsList(document.getElementById('searchAllInput').value);
+
+      if (currentDeckMode === 'favorites') {
+        rebuildDeck();
+      }
+    }
+
+    // Интерактивная галочка (изучено)
+    function toggleLearnedById(id) {
+      if (learnedSet.has(id)) {
+        learnedSet.delete(id);
+      } else {
+        learnedSet.add(id);
+      }
+      saveStorage();
+      renderLearnedList();
+      renderAllWordsList(document.getElementById('searchAllInput').value);
+
+      if (currentDeckMode === 'normal') {
+        rebuildDeck();
+      }
+    }
+
+    function markCurrentAsLearned() {
+      if (activeDeck.length === 0) return;
+      const item = activeDeck[currentIndex];
+      
+      learnedSet.add(item.id);
+      saveStorage();
+      renderLearnedList();
+      
+      activeDeck.splice(currentIndex, 1);
+
+      if (activeDeck.length === 0) {
+        dispKanji.textContent = "Пусто 🎉";
+        dispReading.textContent = "";
+        dispMeaning.textContent = "Все слова пройдены";
+        deckIndicator.textContent = "0 / 0";
+        stopTimer();
+        return;
+      }
+
+      if (currentIndex >= activeDeck.length) {
+        currentIndex = 0;
+      }
+      updateCard();
+    }
+
+    function nextSlide() {
+      if (activeDeck.length === 0) return;
+      currentIndex = (currentIndex + 1) % activeDeck.length;
+      updateCard();
+    }
+
+    function prevSlide() {
+      if (activeDeck.length === 0) return;
+      currentIndex = (currentIndex - 1 + activeDeck.length) % activeDeck.length;
+      updateCard();
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        playBtn.textContent = '⏸ Пауза';
+        playBtn.classList.add('primary');
+        startTimer();
+      } else {
+        playBtn.textContent = '▶ Старт';
+        playBtn.classList.remove('primary');
+        stopTimer();
+      }
+    }
+
+    function startTimer() {
+      stopTimer();
+      if (!isPlaying || activeDeck.length === 0) return;
+
+      let start = performance.now();
+      progressTimer = setInterval(() => {
+        let elapsed = performance.now() - start;
+        let p = Math.min((elapsed / slideInterval) * 100, 100);
+        progressLine.style.width = p + '%';
+      }, 50);
+
+      timer = setTimeout(() => {
+        nextSlide();
+        startTimer();
+      }, slideInterval);
+    }
+
+    function stopTimer() {
+      clearTimeout(timer);
+      clearInterval(progressTimer);
+      progressLine.style.width = '0%';
+    }
+
+    function resetProgress() {
+      if (isPlaying) startTimer();
+    }
+
+    function changeInterval() {
+      slideInterval = parseInt(document.getElementById('timerSelect').value);
+      if (isPlaying) startTimer();
+    }
+
+    function toggleHideAnswer() {
+      isAnswerHidden = !isAnswerHidden;
+      dispMeaning.classList.toggle('hidden-answer', isAnswerHidden);
+    }
+
+    function shuffleCurrentDeck() {
+      if (activeDeck.length <= 1) return;
+      shuffleArray(activeDeck);
+      currentIndex = 0;
+      updateCard();
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+      const target = document.getElementById('tab-' + tabId);
+      if (target) target.classList.add('active');
+
+      const btnMap = {
+        'presentation': 0,
+        'favorites': 1,
+        'learned': 2,
+        'all': 3
+      };
+      document.querySelectorAll('.nav-btn')[btnMap[tabId]]?.classList.add('active');
+
+      if (tabId === 'favorites') renderFavoritesList();
+      if (tabId === 'learned') renderLearnedList();
+      if (tabId === 'all') renderAllWordsList(document.getElementById('searchAllInput').value);
+    }
+
+    function startDeckMode(mode) {
+      currentDeckMode = mode;
+      currentIndex = 0;
+      switchTab('presentation');
+      rebuildDeck();
+    }
+
+    function renderFavoritesList() {
+      const grid = document.getElementById('favoritesGrid');
+      grid.innerHTML = '';
+      const favWords = RAW_VOCABULARY.filter(w => starredSet.has(w.id));
+
+      if (favWords.length === 0) {
+        grid.innerHTML = '<div class="empty-state">В избранном пока нет слов. Нажмите ⭐ на карточке.</div>';
+        return;
+      }
+
+      favWords.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'word-item';
+        div.innerHTML = `
+          <div class="main-info">
+            <div><span class="w-kanji">${w.k}</span><span class="w-reading">${w.r}</span></div>
+            <div class="w-meaning">${w.m}</div>
+          </div>
+          <div class="item-actions">
+            <button class="mini-btn" onclick="speakWordText('${w.r}')">🔊</button>
+            <button class="mini-btn starred" onclick="toggleFavById(${w.id})" title="Убрать из избранного">⭐</button>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function renderLearnedList() {
+      const grid = document.getElementById('learnedGrid');
+      grid.innerHTML = '';
+      const learnedWords = RAW_VOCABULARY.filter(w => learnedSet.has(w.id));
+
+      if (learnedWords.length === 0) {
+        grid.innerHTML = '<div class="empty-state">Нет изученных слов.</div>';
+        return;
+      }
+
+      learnedWords.forEach(w => {
+        const div = document.createElement('div');
+        div.className = 'word-item';
+        div.innerHTML = `
+          <div class="main-info">
+            <div><span class="w-kanji">${w.k}</span><span class="w-reading">${w.r}</span></div>
+            <div class="w-meaning">${w.m}</div>
+          </div>
+          <div class="item-actions">
+            <button class="mini-btn learned" onclick="toggleLearnedById(${w.id})" title="Вернуть в колоду">✔️</button>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function resetAllLearned() {
+      if (confirm('Вернуть все изученные слова обратно в колоду?')) {
+        learnedSet.clear();
+        saveStorage();
+        renderLearnedList();
+        rebuildDeck();
+      }
+    }
+
+    function renderAllWordsList(query = '') {
+      const grid = document.getElementById('allWordsGrid');
+      grid.innerHTML = '';
+      document.getElementById('allWordsCount').textContent = `Всего: ${RAW_VOCABULARY.length} слов`;
+
+      const filtered = RAW_VOCABULARY.filter(w => {
+        const q = query.toLowerCase();
+        return w.k.toLowerCase().includes(q) || w.r.toLowerCase().includes(q) || w.m.toLowerCase().includes(q);
+      });
+
+      filtered.forEach(w => {
+        const isFav = starredSet.has(w.id);
+        const isLrn = learnedSet.has(w.id);
+
+        const div = document.createElement('div');
+        div.className = 'word-item';
+        div.innerHTML = `
+          <div class="main-info">
+            <div>
+              <span class="w-kanji">${w.k}</span>
+              <span class="w-reading">${w.r}</span>
+            </div>
+            <div class="w-meaning">${w.m}</div>
+          </div>
+          <div class="item-actions">
+            <button class="mini-btn ${isFav ? 'starred' : ''}" onclick="toggleFavById(${w.id})" title="${isFav ? 'В избранном' : 'Добавить в избранное'}">⭐</button>
+            <button class="mini-btn" onclick="speakWordText('${w.r}')" title="Озвучить Kyoko">🔊</button>
+            <button class="mini-btn ${isLrn ? 'learned' : ''}" onclick="toggleLearnedById(${w.id})" title="${isLrn ? 'Изучено (нажмите чтобы вернуть)' : 'Пометить как изученное'}">✔️</button>
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    function filterAllWords() {
+      renderAllWordsList(document.getElementById('searchAllInput').value);
+    }
+
+    function speakWordText(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const ut = new SpeechSynthesisUtterance(text);
+      ut.lang = 'ja-JP';
+      const voice = getKyokoVoice();
+      if (voice) ut.voice = voice;
+      window.speechSynthesis.speak(ut);
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === 'ArrowRight') {
+        nextSlide();
+      } else if (e.code === 'ArrowLeft') {
+        prevSlide();
+      } else if (e.code === 'KeyS') {
+        toggleCurrentFavorite();
+      } else if (e.code === 'KeyV') {
+        speakCurrentWord(true);
+      } else if (e.code === 'KeyA') {
+        toggleAutoVoice();
+      } else if (e.code === 'Enter' || e.code === 'KeyK') {
+        markCurrentAsLearned();
+      } else if (e.code === 'KeyH') {
+        toggleHideAnswer();
+      } else if (e.code === 'KeyF') {
+        toggleFullScreen();
+      }
+    });
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    saveStorage();
+    rebuildDeck();
+    startTimer();
+  </script>
+</body>
+</html>

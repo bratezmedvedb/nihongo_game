@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Японский тренажёр — 1 Уровень</title>
+  <style>
+    /* ==========================================================================
+       1. ЦВЕТОВАЯ ПАЛИТРА И СТИЛЬ (WARM PAPER MINIMALIST)
+       ========================================================================== */
+    :root {
+      --bg-page: #f4f1ea;
+      --bg-card: #ffffff;
+      --text-main: #2c2c2a;
+      --text-muted: #6b6a63;
+      --text-sub: #9a988f;
+      --border-color: #d3d1c7;
+      --border-light: #e5e2d8;
+      
+      --accent: #d97757;
+      --accent-hover: #c46445;
+
+      --selected-bg: #eeecf0;
+      --selected-border: #7f77dd;
+      --selected-text: #3c3489;
+
+      --success-bg: #eaf3de;
+      --success-border: #97c459;
+      --success-text: #386014;
+
+      --error-bg: #fdf0ee;
+      --error-border: #a32d2d;
+      --error-text: #a32d2d;
+
+      --radius-card: 14px;
+      --radius-pill: 20px;
+      --radius-btn: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px 12px 32px 12px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       2. ВЕРХНЯЯ НАВИГАЦИЯ
+       ========================================================================== */
+    .nav-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+      align-items: center;
+    }
+    .nav-bar::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      min-width: 38px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+
+    .nav-pill.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
+    .nav-pill.errors-pill {
+      margin-left: auto;
+      min-width: auto;
+      padding: 0 14px;
+      border-color: var(--border-color);
+    }
+    .nav-pill.errors-pill.has-errors {
+      color: var(--error-border);
+      border-color: var(--error-border);
+      background: #fff6f5;
+    }
+    .nav-pill.errors-pill.active {
+      background: var(--error-border);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       3. ПАНЕЛЬ ТЕОРИИ И ПРОГРЕСС-БАР
+       ========================================================================== */
+    .theory-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ==========================================================================
+       4. КАРТОЧКА ТРЕНАЖЁРА
+       ========================================================================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .target-ref-box {
+      background: var(--bg-page);
+      border-radius: var(--radius-btn);
+      padding: 16px 20px;
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ref-line {
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ref-kanji {
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .ref-kana {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+    .ref-trans {
+      color: var(--selected-text);
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .form-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .form-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-light);
+    }
+    .form-dot.done { background: var(--success-border); }
+    .form-dot.active { background: var(--accent); }
+
+    .prompt-box {
+      text-align: center;
+      padding: 4px 0;
+    }
+    .prompt-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .prompt-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: #faf9f6;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 0 14px;
+      font-size: 16px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      background: #ffffff;
+    }
+    .input-field[readonly] {
+      background: #f0eee6;
+      color: var(--text-muted);
+    }
+
+    .btn-main {
+      height: 46px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-main:active { background: var(--accent-hover); }
+
+    .feedback-box {
+      display: none;
+      border-radius: var(--radius-btn);
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feedback-box.correct {
+      display: flex !important;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+    .feedback-box.incorrect {
+      display: flex !important;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+    }
+
+    .feedback-status {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .feedback-box.correct .feedback-status { color: var(--success-text); }
+    .feedback-box.incorrect .feedback-status { color: var(--error-text); }
+
+    .feedback-sentence-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .feedback-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .feedback-text-kanji {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+    .feedback-text-kana {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .btn-audio-right {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.1s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-audio-right:active { transform: scale(0.90); }
+
+    .placeholder-view {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 40px 20px;
+      text-align: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .placeholder-view.active { display: flex; }
+
+    .reset-link {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-sub);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 8px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 44, 42, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-color);
+      max-width: 440px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-body { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+    .modal-body strong { color: var(--text-main); }
+    .modal-close-btn {
+      align-self: flex-end;
+      padding: 8px 16px;
+      background: var(--text-main);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      font-size: 13px;
+      touch-action: manipulation;
+    }
+  
+  /* Кнопка возврата в главное меню */
+  .back-to-menu {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+    text-decoration: none;
+    color: #6b6a63;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    background: #fff;
+    border: 1px solid #d3d1c7;
+    border-radius: 20px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+  }
+  .back-to-menu:hover, .back-to-menu:active {
+    background: #2c2c2a;
+    color: #fff;
+    border-color: #2c2c2a;
+  }
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <a href="index.html" class="back-to-menu">← Меню</a>
+    <div class="nav-bar">
+      <button type="button" class="nav-pill active" onclick="switchLevel(1)">1</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(2)">2</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(3)">3</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(4)">4</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(5)">5</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(6)">6</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(7)">7</button>
+      <button type="button" class="nav-pill errors-pill" id="errorsNavBtn" onclick="openErrorsTab()">Ошибки (0)</button>
+    </div>
+
+    <div class="theory-banner" id="theoryBanner" onclick="openTheoryModal()">
+      <span id="theoryBannerText">📖 Теория 1 уровня (ます-стиль)</span>
+      <span>➔</span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-labels">
+        <span id="progressWordLabel">Слово 1 из 124</span>
+        <span id="progressPercentLabel">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="card" id="gameCard">
+      <div class="target-ref-box">
+        <div class="ref-line">
+          <span class="ref-kanji" id="refNounKanji">友達</span>
+          <span class="ref-kana" id="refNounKana">- ともだち</span>
+          <span class="ref-trans" id="refNounTrans">- друг</span>
+        </div>
+        <div class="ref-line">
+          <span class="ref-kanji" id="refVerbKanji">会う</span>
+          <span class="ref-kana" id="refVerbKana">- あう</span>
+          <span class="ref-trans" id="refVerbTrans">- встречаться</span>
+        </div>
+      </div>
+
+      <div class="form-dots">
+        <div class="form-dot" id="dot0"></div>
+        <div class="form-dot" id="dot1"></div>
+        <div class="form-dot" id="dot2"></div>
+        <div class="form-dot" id="dot3"></div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label" id="modeLabel">Переведите фразу</div>
+        <div class="prompt-text" id="promptRu">Встречаюсь с другом.</div>
+      </div>
+
+      <div class="input-wrap">
+        <input 
+          type="text" 
+          id="userInput" 
+          class="input-field" 
+          placeholder="Введите кандзи или хираганой..." 
+          autocomplete="off" 
+          autocorrect="off" 
+          autocapitalize="off" 
+          spellcheck="false"
+        />
+        <button type="button" class="btn-main" id="actionBtn" onclick="handleAction()">Проверить</button>
+      </div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-status" id="feedbackStatus">✓ Правильно!</div>
+        <div class="feedback-sentence-row">
+          <div class="feedback-texts">
+            <div class="feedback-text-kanji" id="feedbackKanji">友達に会います</div>
+            <div class="feedback-text-kana" id="feedbackKana">ともだちにあいます</div>
+          </div>
+          <button type="button" class="btn-audio-right" title="Послушать ещё раз" onclick="replayAudio()">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="placeholder-view" id="placeholderView">
+      <h3 id="placeholderTitle" style="font-size: 18px; color: var(--text-main);">Уровень 2</h3>
+      <p style="font-size: 14px; color: var(--text-muted);">Этот уровень находится в разработке. Вернитесь к Уровню 1 для тренировки.</p>
+      <button type="button" class="btn-main" style="margin-top: 10px;" onclick="switchLevel(1)">Перейти к Уровню 1</button>
+    </div>
+
+    <div class="reset-link" onclick="confirmReset()">Начать 1 уровень заново (перемешать)</div>
+  </div>
+
+  <div class="modal-overlay" id="theoryModal" onclick="closeTheoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title">Грамматика 1 Уровня: Формы ます</div>
+      <div class="modal-body">
+        <p><strong>4 базовые вежливые формы:</strong></p>
+        <p>1. <strong>〜ます</strong> — Настоящее-будущее <em>(Делаю / Сделаю)</em></p>
+        <p>2. <strong>〜ました</strong> — Прошедшее <em>(Сделал)</em></p>
+        <p>3. <strong>〜ません</strong> — Отрицание <em>(Не делаю)</em></p>
+        <p>4. <strong>〜ませんでした</strong> — Прошедшее отрицание <em>(Не делал)</em></p>
+        <br>
+        <p><strong>Правила изменения глаголов (3 спр.):</strong></p>
+        <p>• <strong>1 спр. (-u):</strong> Замените последнюю «у» на «и» + форма.</p>
+        <p>• <strong>2 спр. (-iru / -eru):</strong> Уберите слог «ру» + форма.</p>
+        <p>• <strong>3 спр. (исключения):</strong> Изменяется корень + форма:</p>
+        <p style="padding-left: 12px; margin-top: 4px;">
+          — <code>suru</code> → <code>shi-</code><br>
+          — <code>kuru</code> → <code>ki-</code>
+        </p>
+      </div>
+      <button type="button" class="modal-close-btn" onclick="closeTheoryModal()">Понятно</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       БАЗА ДАННЫХ 1-ГО УРОВНЯ (124 ГЛАГОЛА ПО 4 ФОРМЫ С ОБНОВЛЕННЫМИ ПЕРЕВОДАМИ)
+       ========================================================================== */
+    const RAW_LEVEL_1_DATA = [
+      { id: 1, nounK: "友達", nounR: "ともだち", nounT: "друг", verbK: "会う", verbR: "あう", verbT: "встречаться", forms: [
+        { type: "masu", ru: "Встречаюсь с другом.", kanji: "友達に会います", kana: "ともだちにあいます" },
+        { type: "mashita", ru: "Встречался с другом.", kanji: "友達に会いました", kana: "ともだちにあいました" },
+        { type: "masen", ru: "Не встречаюсь с другом.", kanji: "友達に会いません", kana: "ともだちにあいません" },
+        { type: "masendeshita", ru: "Не встречался с другом.", kanji: "友達に会いませんでした", kana: "ともだちにあいませんでした" }
+      ]},
+      { id: 2, nounK: "ドア", nounR: "ドア", nounT: "дверь", verbK: "開く", verbR: "あく", verbT: "открываться", forms: [
+        { type: "masu", ru: "Открывается дверь.", kanji: "ドアが開きます", kana: "ドアがあきます" },
+        { type: "mashita", ru: "Открывалась дверь.", kanji: "ドアが開きました", kana: "ドアがあきました" },
+        { type: "masen", ru: "Дверь не открывается.", kanji: "ドアが開きません", kana: "ドアがあきません" },
+        { type: "masendeshita", ru: "Дверь не открывалась.", kanji: "ドアが開きませんでした", kana: "ドアがあきませんでした" }
+      ]},
+      { id: 3, nounK: "窓", nounR: "まど", nounT: "окно", verbK: "開ける", verbR: "あける", verbT: "открывать", forms: [
+        { type: "masu", ru: "Открываю окно.", kanji: "窓を開けます", kana: "まどをあけます" },
+        { type: "mashita", ru: "Открывал окно.", kanji: "窓を開けました", kana: "まどをあけました" },
+        { type: "masen", ru: "Не открываю окно.", kanji: "窓を開けません", kana: "まどをあけません" },
+        { type: "masendeshita", ru: "Не открывал окно.", kanji: "窓を開けませんでした", kana: "まどをあけませんでした" }
+      ]},
+      { id: 4, nounK: "プレゼント", nounR: "プレゼント", nounT: "подарок", verbK: "あげる", verbR: "あげる", verbT: "дарить", forms: [
+        { type: "masu", ru: "Дарю подарок.", kanji: "プレゼントをあげます", kana: "プレゼントをあげます" },
+        { type: "mashita", ru: "Дарил подарок.", kanji: "プレゼントをあげました", kana: "プレゼントをあげました" },
+        { type: "masen", ru: "Не дарю подарок.", kanji: "プレゼントをあげません", kana: "プレゼントをあげません" },
+        { type: "masendeshita", ru: "Не дарил подарок.", kanji: "プレゼントをあげませんでした", kana: "プレゼントをあげませんでした" }
+      ]},
+      { id: 5, nounK: "公園", nounR: "こうえん", nounT: "парк", verbK: "遊ぶ", verbR: "あそぶ", verbT: "играть", forms: [
+        { type: "masu", ru: "Играю в парке.", kanji: "公園で遊びます", kana: "こうえんであそびます" },
+        { type: "mashita", ru: "Играл в парке.", kanji: "公園で遊びました", kana: "こうえんであそびました" },
+        { type: "masen", ru: "Не играю в парке.", kanji: "公園で遊びません", kana: "こうえんであそびません" },
+        { type: "masendeshita", ru: "Не играл в парке.", kanji: "公園で遊びませんでした", kana: "こうえんであそびませんでした" }
+      ]},
+      { id: 6, nounK: "シャワー", nounR: "シャワー", nounT: "душ", verbK: "浴びる", verbR: "あびる", verbT: "принимать", forms: [
+        { type: "masu", ru: "Принимаю душ.", kanji: "シャワーを浴びます", kana: "シャワーをあびます" },
+        { type: "mashita", ru: "Принимал душ.", kanji: "シャワーを浴びました", kana: "シャワーをあびました" },
+        { type: "masen", ru: "Не принимаю душ.", kanji: "シャワーを浴びません", kana: "シャワーをあびません" },
+        { type: "masendeshita", ru: "Не принимал душ.", kanji: "シャワーを浴びませんでした", kana: "シャワーをあびませんでした" }
+      ]},
+      { id: 7, nounK: "手", nounR: "て", nounT: "рука", verbK: "洗う", verbR: "あらう", verbT: "мыть", forms: [
+        { type: "masu", ru: "Мою руки.", kanji: "手を洗います", kana: "てをあらいます" },
+        { type: "mashita", ru: "Мыл руки.", kanji: "手を洗いました", kana: "てをあらいました" },
+        { type: "masen", ru: "Не мою руки.", kanji: "手を洗いません", kana: "てをあらいません" },
+        { type: "masendeshita", ru: "Не мыл руки.", kanji: "手を洗いませんでした", kana: "てをあらいませんでした" }
+      ]},
+      { id: 8, nounK: "新聞", nounR: "しんぶん", nounT: "газета", verbK: "ある", verbR: "ある", verbT: "быть (неодуш.)", forms: [
+        { type: "masu", ru: "Есть газета.", kanji: "新聞があります", kana: "しんぶんがあります" },
+        { type: "mashita", ru: "Была газета.", kanji: "新聞がありました", kana: "しんぶんがありました" },
+        { type: "masen", ru: "Газеты нет.", kanji: "新聞がありません", kana: "しんぶんがありません" },
+        { type: "masendeshita", ru: "Газеты не было.", kanji: "新聞がありませんでした", kana: "しんぶんがありませんでした" }
+      ]},
+      { id: 9, nounK: "道", nounR: "みち", nounT: "дорога", verbK: "歩く", verbR: "あるく", verbT: "идти пешком", forms: [
+        { type: "masu", ru: "Иду пешком по дороге.", kanji: "道を歩きます", kana: "みちをあるきます" },
+        { type: "mashita", ru: "Шёл пешком по дороге.", kanji: "道を歩きました", kana: "みちをあるきました" },
+        { type: "masen", ru: "Не иду пешком по дороге.", kanji: "道を歩きません", kana: "みちをあるきません" },
+        { type: "masendeshita", ru: "Не шёл пешком по дороге.", kanji: "道を歩きませんでした", kana: "みちをあるきませんでした" }
+      ]},
+      { id: 10, nounK: "名前", nounR: "なまえ", nounT: "имя", verbK: "言う", verbR: "いう", verbT: "называть, говорить", forms: [
+        { type: "masu", ru: "Называю имя.", kanji: "名前を言います", kana: "なまえをいいます" },
+        { type: "mashita", ru: "Называл имя.", kanji: "名前を言いました", kana: "なまえをいいました" },
+        { type: "masen", ru: "Не называю имя.", kanji: "名前を言いません", kana: "なまえをいいません" },
+        { type: "masendeshita", ru: "Не называл имя.", kanji: "名前を言いませんでした", kana: "なまえをいいませんでした" }
+      ]},
+      { id: 11, nounK: "学校", nounR: "がっこう", nounT: "школа", verbK: "行く", verbR: "いく", verbT: "идти, ходить", forms: [
+        { type: "masu", ru: "Иду в школу.", kanji: "学校に行きます", kana: "がっこうにいきます" },
+        { type: "mashita", ru: "Ходил в школу.", kanji: "学校に行きました", kana: "がっこうにいきました" },
+        { type: "masen", ru: "В школу не хожу.", kanji: "学校に行きません", kana: "がっこうにいきません" },
+        { type: "masendeshita", ru: "В школу не ходил.", kanji: "学校に行きませんでした", kana: "があっこうにいきませんでした" }
+      ]},
+      { id: 12, nounK: "猫", nounR: "ねこ", nounT: "кот", verbK: "いる", verbR: "いる", verbT: "быть (одуш.)", forms: [
+        { type: "masu", ru: "Есть кот.", kanji: "猫がいます", kana: "ねこがいます" },
+        { type: "mashita", ru: "Был кот.", kanji: "猫がいました", kana: "ねこがいました" },
+        { type: "masen", ru: "Кота нет.", kanji: "猫がいません", kana: "ねこがいません" },
+        { type: "masendeshita", ru: "Кота не было.", kanji: "猫がいませんでした", kana: "ねこがいませんでした" }
+      ]},
+      { id: 13, nounK: "お金", nounR: "おかね", nounT: "деньги", verbK: "要る", verbR: "いる", verbT: "требоваться", forms: [
+        { type: "masu", ru: "Нужны деньги.", kanji: "お金が要ります", kana: "おかねがいります" },
+        { type: "mashita", ru: "Были нужны деньги.", kanji: "お金が要りました", kana: "おかねがいりました" },
+        { type: "masen", ru: "Деньги не нужны.", kanji: "お金が要りません", kana: "おかねがいりません" },
+        { type: "masendeshita", ru: "Деньги не требовались.", kanji: "お金が要りませんでした", kana: "おかねがいりませんでした" }
+      ]},
+      { id: 14, nounK: "かばん", nounR: "かばん", nounT: "сумка", verbK: "入れる", verbR: "いれる", verbT: "класть", forms: [
+        { type: "masu", ru: "Кладу в сумку.", kanji: "かばんに入れます", kana: "かばんにいれます" },
+        { type: "mashita", ru: "Клал в сумку.", kanji: "かばんに入れました", kana: "かばんにいれました" },
+        { type: "masen", ru: "Не кладу в сумку.", kanji: "かばんに入れません", kana: "かばんにいれません" },
+        { type: "masendeshita", ru: "Не клал в сумку.", kanji: "かばんに入れませんでした", kana: "かばんにいれませんでした" }
+      ]},
+      { id: 15, nounK: "歌", nounR: "うた", nounT: "песня", verbK: "歌う", verbR: "うたう", verbT: "петь", forms: [
+        { type: "masu", ru: "Пою песню.", kanji: "歌を歌います", kana: "うたをうたいます" },
+        { type: "mashita", ru: "Пел песню.", kanji: "歌を歌いました", kana: "うたをうたいました" },
+        { type: "masen", ru: "Не пою песню.", kanji: "歌を歌いません", kana: "うたをうたいません" },
+        { type: "masendeshita", ru: "Не пел песню.", kanji: "歌を歌いませんでした", kana: "うたをうたいませんでした" }
+      ]},
+      { id: 16, nounK: "赤ちゃん", nounR: "あかちゃん", nounT: "ребёнок", verbK: "生まれる", verbR: "うまれる", verbT: "рождаться", forms: [
+        { type: "masu", ru: "Рождается ребёнок.", kanji: "赤ちゃんが生まれます", kana: "あかちゃんがうまれます" },
+        { type: "mashita", ru: "Рождался ребёнок.", kanji: "赤ちゃんが生まれました", kana: "あかちゃんがうまれました" },
+        { type: "masen", ru: "Ребёнок не рождается.", kanji: "赤ちゃんが生まれません", kana: "あかちゃんがうまれません" },
+        { type: "masendeshita", ru: "Ребёнок не родился.", kanji: "赤ちゃんが生まれませんでした", kana: "あかちゃんがうまれませんでした" }
+      ]},
+      { id: 17, nounK: "りんご", nounR: "りんご", nounT: "яблоки", verbK: "売る", verbR: "うる", verbT: "продавать", forms: [
+        { type: "masu", ru: "Продаю яблоки.", kanji: "りんごを売ります", kana: "りんごをうります" },
+        { type: "mashita", ru: "Продавал яблоки.", kanji: "りんごを売りました", kana: "りんごをうりました" },
+        { type: "masen", ru: "Не продаю яблоки.", kanji: "りんごを売りません", kana: "りんごをうりません" },
+        { type: "masendeshita", ru: "Не продавал яблоки.", kanji: "りんごを売りませんでした", kana: "りんごをうりませんでした" }
+      ]},
+      { id: 18, nounK: "朝", nounR: "あさ", nounT: "утро", verbK: "起きる", verbR: "おきる", verbT: "просыпаться", forms: [
+        { type: "masu", ru: "Просыпаюсь рано утром.", kanji: "朝早く起きます", kana: "あさはやくおきます" },
+        { type: "mashita", ru: "Просыпался рано утром.", kanji: "朝早く起きました", kana: "あさはやくおきました" },
+        { type: "masen", ru: "Не просыпаюсь рано утром.", kanji: "朝早く起きません", kana: "あさはやくおきません" },
+        { type: "masendeshita", ru: "Не просыпался рано утром.", kanji: "朝早く起きませんでした", kana: "あさはやくおきませんでした" }
+      ]},
+      { id: 19, nounK: "机", nounR: "つくえ", nounT: "стол", verbK: "置く", verbR: "おく", verbT: "ставить", forms: [
+        { type: "masu", ru: "Ставлю на стол.", kanji: "机の上に置きます", kana: "つくえのうえにおきます" },
+        { type: "mashita", ru: "Ставил на стол.", kanji: "机の上に置きました", kana: "つくえのうえにおきました" },
+        { type: "masen", ru: "На стол не ставлю.", kanji: "机の上に置きません", kana: "つくえのうえにおきません" },
+        { type: "masendeshita", ru: "На стол не ставил.", kanji: "机の上に置きませんでした", kana: "つくえのうえにおきませんでした" }
+      ]},
+      { id: 20, nounK: "手紙", nounR: "てがみ", nounT: "письмо", verbK: "送る", verbR: "おくる", verbT: "отправлять", forms: [
+        { type: "masu", ru: "Отправляю письмо.", kanji: "手紙を送ります", kana: "てがみをおくります" },
+        { type: "mashita", ru: "Отправлял письмо.", kanji: "手紙を送りました", kana: "てがみをおくりました" },
+        { type: "masen", ru: "Не отправляю письмо.", kanji: "手紙を送りません", kana: "てがみをおくりません" },
+        { type: "masendeshita", ru: "Не отправлял письмо.", kanji: "手紙を送りませんでした", kana: "てがみをおくりませんでした" }
+      ]},
+      { id: 21, nounK: "ボタン", nounR: "ボタン", nounT: "кнопка", verbK: "押す", verbR: "おす", verbT: "нажимать", forms: [
+        { type: "masu", ru: "Нажимаю кнопку.", kanji: "ボタンを押します", kana: "ボタンをおします" },
+        { type: "mashita", ru: "Нажимал кнопку.", kanji: "ボタンを押しました", kana: "ボタンをおしました" },
+        { type: "masen", ru: "Не нажимаю кнопку.", kanji: "ボタンを押しません", kana: "ボタンをおしません" },
+        { type: "masendeshita", ru: "Не нажимал кнопку.", kanji: "ボタンを押しませんでした", kana: "ボタンをおしませんでした" }
+      ]},
+      { id: 22, nounK: "単語", nounR: "たんご", nounT: "слова", verbK: "覚える", verbR: "おぼえる", verbT: "запоминать", forms: [
+        { type: "masu", ru: "Запоминаю слова.", kanji: "単語を覚えます", kana: "たんごをおぼえます" },
+        { type: "mashita", ru: "Запоминал слова.", kanji: "単語を覚えました", kana: "たんごをおぼえました" },
+        { type: "masen", ru: "Не запоминаю слова.", kanji: "単語を覚えません", kana: "たんごをおぼえません" },
+        { type: "masendeshita", ru: "Не запоминал слова.", kanji: "単語を覚えませんでした", kana: "たんごをおぼえませんでした" }
+      ]},
+      { id: 23, nounK: "海", nounR: "うみ", nounT: "море", verbK: "泳ぐ", verbR: "およぐ", verbT: "плавать", forms: [
+        { type: "masu", ru: "Плаваю в море.", kanji: "海で泳ぎます", kana: "うみでおよぎます" },
+        { type: "mashita", ru: "Плавал в море.", kanji: "海で泳ぎました", kana: "うみでおよぎました" },
+        { type: "masen", ru: "В море не плаваю.", kanji: "海で泳ぎません", kana: "うみでおよぎません" },
+        { type: "masendeshita", ru: "В море не плавал.", kanji: "海で泳ぎませんでした", kana: "うみでおよぎませんでした" }
+      ]},
+      { id: 24, nounK: "バス", nounR: "バス", nounT: "автобус", verbK: "降りる", verbR: "おりる", verbT: "выходить", forms: [
+        { type: "masu", ru: "Выхожу из автобуса.", kanji: "バスを降ります", kana: "バスをおります" },
+        { type: "mashita", ru: "Выходил из автобуса.", kanji: "バスを降りました", kana: "バスをおりました" },
+        { type: "masen", ru: "Из автобуса не выхожу.", kanji: "バスを降りません", kana: "バスをおりません" },
+        { type: "masendeshita", ru: "Из автобуса не выходил.", kanji: "バスを降りませんでした", kana: "バスをおりませんでした" }
+      ]},
+      { id: 25, nounK: "授業", nounR: "じゅぎょう", nounT: "урок", verbK: "終わる", verbR: "おわる", verbT: "заканчиваться", forms: [
+        { type: "masu", ru: "Урок заканчивается.", kanji: "授業が終わります", kana: "じゅぎょうがおわります" },
+        { type: "mashita", ru: "Заканчивался урок.", kanji: "授業が終わりました", kana: "じゅぎょうがおわりました" },
+        { type: "masen", ru: "Урок не заканчивается.", kanji: "授業が終わりません", kana: "じゅぎょうがおわりません" },
+        { type: "masendeshita", ru: "Урок не закончился.", kanji: "授業が終わりませんでした", kana: "じゅぎょうがおわりませんでした" }
+      ]},
+      { id: 26, nounK: "スーパー", nounR: "スーパー", nounT: "супермаркет", verbK: "買い物する", verbR: "かいものする", verbT: "делать покупки", forms: [
+        { type: "masu", ru: "Делаю покупки в супермаркете.", kanji: "スーパーで買い物をします", kana: "スーパーでかいものをします" },
+        { type: "mashita", ru: "Делал покупки в супермаркете.", kanji: "スーパーで買い物をしました", kana: "スーパーでかいものをしました" },
+        { type: "masen", ru: "В супермаркете не делаю покупки.", kanji: "スーパーで買い物をしません", kana: "スーパーでかいものをしません" },
+        { type: "masendeshita", ru: "В супермаркете не делал покупки.", kanji: "スーパーで買い物をしませんでした", kana: "スーパーでかいものをしませんでした" }
+      ]},
+      { id: 27, nounK: "服", nounR: "ふく", nounT: "одежда", verbK: "買う", verbR: "かう", verbT: "покупать", forms: [
+        { type: "masu", ru: "Покупаю одежду.", kanji: "服を買います", kana: "ふくをかいます" },
+        { type: "mashita", ru: "Покупал одежду.", kanji: "服を買いました", kana: "ふくをかいました" },
+        { type: "masen", ru: "Одежду не покупаю.", kanji: "服を買いません", kana: "ふくをかいません" },
+        { type: "masendeshita", ru: "Одежду не покупал.", kanji: "服を買いませんでした", kana: "ふくをかいませんでした" }
+      ]},
+      { id: 28, nounK: "本", nounR: "ほん", nounT: "книга", verbK: "返す", verbR: "かえす", verbT: "возвращать", forms: [
+        { type: "masu", ru: "Возвращаю книгу.", kanji: "本を返します", kana: "ほんをかえします" },
+        { type: "mashita", ru: "Возвращал книгу.", kanji: "本を返しました", kana: "ほんをかえしました" },
+        { type: "masen", ru: "Книгу не возвращаю.", kanji: "本を返しません", kana: "ほんをかえしません" },
+        { type: "masendeshita", ru: "Книгу не возвращал.", kanji: "本を返しませんでした", kana: "ほんをかえしませんでした" }
+      ]},
+      { id: 29, nounK: "家", nounR: "いえ", nounT: "дом", verbK: "帰る", verbR: "かえる", verbT: "возвращаться домой", forms: [
+        { type: "masu", ru: "Возвращаюсь домой.", kanji: "家に帰ります", kana: "いえにかえります" },
+        { type: "mashita", ru: "Возвращался домой.", kanji: "家に帰りました", kana: "いえにかえりました" },
+        { type: "masen", ru: "Домой не возвращаюсь.", kanji: "家に帰りません", kana: "いえにかえりません" },
+        { type: "masendeshita", ru: "Домой не возвращался.", kanji: "家に帰りませんでした", kana: "いえにかえりませんでした" }
+      ]},
+      { id: 30, nounK: "時間", nounR: "じかん", nounT: "время", verbK: "かかる", verbR: "かかる", verbT: "тратить время", forms: [
+        { type: "masu", ru: "Трачу время.", kanji: "時間がかかります", kana: "じかんがかかります" },
+        { type: "mashita", ru: "Тратил время.", kanji: "時間がかかりました", kana: "じかんがかかりました" },
+        { type: "masen", ru: "Время не трачу.", kanji: "時間がかかりません", kana: "じかんがかかりません" },
+        { type: "masendeshita", ru: "Время не тратил.", kanji: "時間がかかりませんでした", kana: "じかんがかかりませんでした" }
+      ]},
+      { id: 31, nounK: "漢字", nounR: "かんじ", nounT: "иероглиф", verbK: "書く", verbR: "かく", verbT: "писать", forms: [
+        { type: "masu", ru: "Пишу иероглиф.", kanji: "漢字を書きます", kana: "かんじをかきます" },
+        { type: "mashita", ru: "Писал иероглиф.", kanji: "漢字を書きました", kana: "かんじをかきました" },
+        { type: "masen", ru: "Иероглиф не пишу.", kanji: "漢字を書きません", kana: "かんじをかきません" },
+        { type: "masendeshita", ru: "Иероглиф не писал.", kanji: "漢字を書きませんでした", kana: "かんじをかきませんでした" }
+      ]},
+      { id: 32, nounK: "電話", nounR: "でんわ", nounT: "телефон", verbK: "かける", verbR: "かける", verbT: "звонить", forms: [
+        { type: "masu", ru: "Звоню по телефону.", kanji: "電話をかけます", kana: "でんわをかけます" },
+        { type: "mashita", ru: "Звонил по телефону.", kanji: "電話をかけました", kana: "でんわをかけました" },
+        { type: "masen", ru: "По телефону не звоню.", kanji: "電話をかけません", kana: "でんわをかけません" },
+        { type: "masendeshita", ru: "По телефону не звонил.", kanji: "電話をかけませんでした", kana: "でんわをかけませんでした" }
+      ]},
+      { id: 33, nounK: "ペン", nounR: "ペン", nounT: "ручка", verbK: "貸す", verbR: "かす", verbT: "одалживать", forms: [
+        { type: "masu", ru: "Одалживаю ручку.", kanji: "ペンを貸します", kana: "ペンをかします" },
+        { type: "mashita", ru: "Одалживал ручку.", kanji: "ペンを貸しました", kana: "ペンをかしました" },
+        { type: "masen", ru: "Ручку не одалживаю.", kanji: "ペンを貸しません", kana: "ペンをかしません" },
+        { type: "masendeshita", ru: "Ручку не одалживал.", kanji: "ペンを貸しませんでした", kana: "ペンをかしませんでした" }
+      ]},
+      { id: 34, nounK: "帽子", nounR: "ぼうし", nounT: "шляпа", verbK: "かぶる", verbR: "かぶる", verbT: "надевать", forms: [
+        { type: "masu", ru: "Надеваю шляпу.", kanji: "帽子をかぶります", kana: "ぼうしをかぶります" },
+        { type: "mashita", ru: "Надевал шляпу.", kanji: "帽子をかぶりました", kana: "ぼうしをかぶりました" },
+        { type: "masen", ru: "Шляпу не надеваю.", kanji: "帽子をかぶりません", kana: "ぼうしをかぶりません" },
+        { type: "masendeshita", ru: "Шляпу не надевал.", kanji: "帽子をかぶりませんでした", kana: "ぼうしをかぶりませんでした" }
+      ]},
+      { id: 35, nounK: "辞書", nounR: "じしょ", nounT: "словарь", verbK: "借りる", verbR: "かりる", verbT: "брать взаймы", forms: [
+        { type: "masu", ru: "Беру взаймы словарь.", kanji: "辞書を借ります", kana: "じしょをかります" },
+        { type: "mashita", ru: "Брал взаймы словарь.", kanji: "辞書を借りました", kana: "じしょをかりました" },
+        { type: "masen", ru: "Словарь не беру взаймы.", kanji: "辞書を借りません", kana: "じしょをかりません" },
+        { type: "masendeshita", ru: "Словарь не брал взаймы.", kanji: "辞書を借りませんでした", kana: "じしょをかりませんでした" }
+      ]},
+      { id: 36, nounK: "電気", nounR: "でんき", nounT: "свет", verbK: "消える", verbR: "きえる", verbT: "гаснуть", forms: [
+        { type: "masu", ru: "Гаснет свет.", kanji: "電気が消えます", kana: "でんきがきえます" },
+        { type: "mashita", ru: "Гас свет.", kanji: "電気が消えました", kana: "でんきがきえました" },
+        { type: "masen", ru: "Свет не гаснет.", kanji: "電気が消えません", kana: "でんきがきえません" },
+        { type: "masendeshita", ru: "Свет не погас.", kanji: "電気が消えませんでした", kana: "でんきがきえませんでした" }
+      ]},
+      { id: 37, nounK: "音楽", nounR: "おんがく", nounT: "музыка", verbK: "聞く", verbR: "きく", verbT: "слушать", forms: [
+        { type: "masu", ru: "Слушаю музыку.", kanji: "音楽を聞きます", kana: "おんがくをききます" },
+        { type: "mashita", ru: "Слушал музыку.", kanji: "音楽を聞きました", kana: "おんがくをききました" },
+        { type: "masen", ru: "Музыку не слушаю.", kanji: "音楽を聞きません", kana: "おんがくをききません" },
+        { type: "masendeshita", ru: "Музыку не слушал.", kanji: "音楽を聞きませんでした", kana: "おんがくをききませんでした" }
+      ]},
+      { id: 38, nounK: "紙", nounR: "かみ", nounT: "бумага", verbK: "切る", verbR: "きる", verbT: "резать", forms: [
+        { type: "masu", ru: "Режу бумагу.", kanji: "紙を切ります", kana: "かみをきります" },
+        { type: "mashita", ru: "Резал бумагу.", kanji: "紙を切りました", kana: "かみをきりました" },
+        { type: "masen", ru: "Бумагу не режу.", kanji: "紙を切りません", kana: "かみをきりません" },
+        { type: "masendeshita", ru: "Бумагу не резал.", kanji: "紙を切りませんでした", kana: "かみをきりませんでした" }
+      ]},
+      { id: 39, nounK: "シャツ", nounR: "シャツ", nounT: "рубашка", verbK: "着る", verbR: "きる", verbT: "надевать", forms: [
+        { type: "masu", ru: "Надеваю рубашку.", kanji: "シャツを着ます", kana: "シャツをきます" },
+        { type: "mashita", ru: "Надевал рубашку.", kanji: "シャツを着ました", kana: "シャツをきました" },
+        { type: "masen", ru: "Рубашку не надеваю.", kanji: "シャツを着ません", kana: "シャツをきません" },
+        { type: "masendeshita", ru: "Рубашку не надевал.", kanji: "シャツを着ませんでした", kana: "シャツをきませんでした" }
+      ]},
+      { id: 40, nounK: "先生", nounR: "せんせい", nounT: "учитель", verbK: "来る", verbR: "くる", verbT: "приходить", forms: [
+        { type: "masu", ru: "Приходит учитель.", kanji: "先生が来ます", kana: "せんせいがきます" },
+        { type: "mashita", ru: "Приходил учитель.", kanji: "先生が来ました", kana: "せんせいがきました" },
+        { type: "masen", ru: "Учитель не приходит.", kanji: "先生が来ません", kana: "せんせいがきません" },
+        { type: "masendeshita", ru: "Учитель не пришёл.", kanji: "先生が来ませんでした", kana: "せんせいがきませんでした" }
+      ]},
+      { id: 41, nounK: "女の人", nounR: "おんなのひと", nounT: "женщина", verbK: "結婚する", verbR: "けっこんする", verbT: "жениться", forms: [
+        { type: "masu", ru: "Женюсь на этой женщине.", kanji: "女の人と結婚します", kana: "おんなのひととけっこんします" },
+        { type: "mashita", ru: "Женился на этой женщине.", kanji: "女の人と結婚しました", kana: "おんなのひととけっこんしました" },
+        { type: "masen", ru: "На этой женщине не женюсь.", kanji: "女の人と結婚しません", kana: "おんなのひととけっこんしません" },
+        { type: "masendeshita", ru: "На этой женщине не женился.", kanji: "女の人と結婚しませんでした", kana: "おんなのひととけっこんしませんでした" }
+      ]},
+      { id: 42, nounK: "テレビ", nounR: "テレビ", nounT: "телевизор", verbK: "消す", verbR: "けす", verbT: "выключать", forms: [
+        { type: "masu", ru: "Выключаю телевизор.", kanji: "テレビを消します", kana: "テレビをけします" },
+        { type: "mashita", ru: "Выключал телевизор.", kanji: "テレビを消しました", kana: "テレビをけしました" },
+        { type: "masen", ru: "Телевизор не выключаю.", kanji: "テレビを消しません", kana: "テレビをけしません" },
+        { type: "masendeshita", ru: "Телевизор не выключал.", kanji: "テレビを消しませんでした", kana: "テレビをけしませんでした" }
+      ]},
+      { id: 43, nounK: "質問", nounR: "しつもん", nounT: "вопрос", verbK: "答える", verbR: "こたえる", verbT: "отвечать", forms: [
+        { type: "masu", ru: "Отвечаю на вопрос.", kanji: "質問に答えます", kana: "しつもんにこたえます" },
+        { type: "mashita", ru: "Отвечал на вопрос.", kanji: "質問に答えました", kana: "しつもんにこたえました" },
+        { type: "masen", ru: "На вопрос не отвечаю.", kanji: "質問に答えません", kana: "しつもんにこたえません" },
+        { type: "masendeshita", ru: "На вопрос не отвечал.", kanji: "質問に答えませんでした", kana: "しつもんにこたえませんでした" }
+      ]},
+      { id: 44, nounK: "ノート", nounR: "ノート", nounT: "тетрадь", verbK: "コピーする", verbR: "コピーする", verbT: "копировать", forms: [
+        { type: "masu", ru: "Копирую тетрадь.", kanji: "ノートをコピーします", kana: "ノートをコピーします" },
+        { type: "mashita", ru: "Копировал тетрадь.", kanji: "ノートをコピーしました", kana: "ノートをコピーしました" },
+        { type: "masen", ru: "Тетрадь не копирую.", kanji: "ノートをコピーしません", kana: "ノートをコピーしません" },
+        { type: "masendeshita", ru: "Тетрадь не копировал.", kanji: "ノートをコピーしませんでした", kana: "ノートをコピーしませんでした" }
+      ]},
+      { id: 45, nounK: "仕事", nounR: "しごと", nounT: "работа", verbK: "困る", verbR: "こまる", verbT: "испытывать трудности", forms: [
+        { type: "masu", ru: "Испытываю трудности на работе.", kanji: "仕事で困ります", kana: "しごとでこまります" },
+        { type: "mashita", ru: "Испытывал трудности на работе.", kanji: "仕事で困りました", kana: "しごとでこまりました" },
+        { type: "masen", ru: "На работе трудности не испытываю.", kanji: "仕事で困りません", kana: "しごとでこまりません" },
+        { type: "masendeshita", ru: "На работе трудностей не испытывал.", kanji: "仕事で困りませんでした", kana: "しごとでこまりませんでした" }
+      ]},
+      { id: 46, nounK: "花", nounR: "はな", nounT: "цветок", verbK: "咲く", verbR: "さく", verbT: "цвести", forms: [
+        { type: "masu", ru: "Цветёт цветок.", kanji: "花が咲きます", kana: "はながさきます" },
+        { type: "mashita", ru: "Цвёл цветок.", kanji: "花が咲きました", kana: "はながさきました" },
+        { type: "masen", ru: "Цветок не цветёт.", kanji: "花が咲きません", kana: "はながさきません" },
+        { type: "masendeshita", ru: "Цветок не зацвёл.", kanji: "花が咲きませんでした", kana: "はながさきませんでした" }
+      ]},
+      { id: 47, nounK: "傘", nounR: "かさ", nounT: "зонт", verbK: "差す", verbR: "さす", verbT: "раскрывать", forms: [
+        { type: "masu", ru: "Раскрываю зонт.", kanji: "傘を差します", kana: "かさをさします" },
+        { type: "mashita", ru: "Раскрывал зонт.", kanji: "傘を差しました", kana: "かさをさしました" },
+        { type: "masen", ru: "Зонт не раскрываю.", kanji: "傘を差しません", kana: "かさをさしません" },
+        { type: "masendeshita", ru: "Зонт не раскрывал.", kanji: "傘を差しませんでした", kana: "かさをさしませんでした" }
+      ]},
+      { id: 48, nounK: "犬", nounR: "いぬ", nounT: "собака", verbK: "散歩する", verbR: "さんぽする", verbT: "гулять", forms: [
+        { type: "masu", ru: "Гуляю с собакой.", kanji: "犬と散歩します", kana: "いぬとさんぽします" },
+        { type: "mashita", ru: "Гулял с собакой.", kanji: "犬と散歩しました", kana: "いぬとさんぽしました" },
+        { type: "masen", ru: "С собакой не гуляю.", kanji: "犬と散歩しません", kana: "いぬとさんぽしません" },
+        { type: "masendeshita", ru: "С собакой не гулял.", kanji: "犬と散歩しませんでした", kana: "いぬとさんぽしませんでした" }
+      ]},
+      { id: 49, nounK: "魚", nounR: "さかな", nounT: "рыба", verbK: "死ぬ", verbR: "しぬ", verbT: "умирать", forms: [
+        { type: "masu", ru: "Умирает рыба.", kanji: "魚が死にます", kana: "さかながしにます" },
+        { type: "mashita", ru: "Умирала рыба.", kanji: "魚が死にました", kana: "さかながしにました" },
+        { type: "masen", ru: "Рыба не умирает.", kanji: "魚が死にません", kana: "さかながしにません" },
+        { type: "masendeshita", ru: "Рыба не умерла.", kanji: "魚が死にませんでした", kana: "さかながしにませんでした" }
+      ]},
+      { id: 50, nounK: "店", nounR: "みせ", nounT: "магазин", verbK: "閉まる", verbR: "しまる", verbT: "закрываться", forms: [
+        { type: "masu", ru: "Закрывается магазин.", kanji: "店が閉まります", kana: "みせがしまります" },
+        { type: "mashita", ru: "Закрывался магазин.", kanji: "店が閉まりました", kana: "みせがしまりました" },
+        { type: "masen", ru: "Магазин не закрывается.", kanji: "店が閉まりません", kana: "みせがしまりません" },
+        { type: "masendeshita", ru: "Магазин не закрылся.", kanji: "店が閉まりませんでした", kana: "みせがしまりませんでした" }
+      ]},
+      { id: 51, nounK: "箱", nounR: "はこ", nounT: "коробка", verbK: "閉める", verbR: "しめる", verbT: "закрывать", forms: [
+        { type: "masu", ru: "Закрываю коробку.", kanji: "箱を閉めます", kana: "はこをしめます" },
+        { type: "mashita", ru: "Закрывал коробку.", kanji: "箱を閉めました", kana: "はこをしめました" },
+        { type: "masen", ru: "Коробку не закрываю.", kanji: "箱を閉めません", kana: "はこをしめません" },
+        { type: "masendeshita", ru: "Коробку не закрывал.", kanji: "箱を閉めませんでした", kana: "はこをしめませんでした" }
+      ]},
+      { id: 52, nounK: "ネクタイ", nounR: "ネクタイ", nounT: "галстук", verbK: "締める", verbR: "しめる", verbT: "завязывать", forms: [
+        { type: "masu", ru: "Завязываю галстук.", kanji: "ネクタイを締めます", kana: "ネクタイをしめます" },
+        { type: "mashita", ru: "Завязывал галстук.", kanji: "ネクタイを締めました", kana: "ネクタイをしめました" },
+        { type: "masen", ru: "Галстук не завязываю.", kanji: "ネクタイを締めません", kana: "ネクタイをしめません" },
+        { type: "masendeshita", ru: "Галстук не завязывал.", kanji: "ネクタイを締めませんでした", kana: "ネクタイをしめませんでした" }
+      ]},
+      { id: 53, nounK: "写真", nounR: "しゃしん", nounT: "фотография", verbK: "撮る", verbR: "とる", verbT: "фотографировать", forms: [
+        { type: "masu", ru: "Фотографирую.", kanji: "写真を撮ります", kana: "しゃしんをとります" },
+        { type: "mashita", ru: "Фотографировал.", kanji: "写真を撮りました", kana: "しゃしんをとりました" },
+        { type: "masen", ru: "Не фотографирую.", kanji: "写真を撮りません", kana: "しゃしんをとりません" },
+        { type: "masendeshita", ru: "Не фотографировал.", kanji: "写真を撮りませんでした", kana: "しゃしんをとりませんでした" }
+      ]},
+      { id: 54, nounK: "医者", nounR: "いしゃ", nounT: "врач", verbK: "質問する", verbR: "しつもんする", verbT: "спрашивать", forms: [
+        { type: "masu", ru: "Спрашиваю у врача.", kanji: "医者に質問します", kana: "いしゃにしつもんします" },
+        { type: "mashita", ru: "Спрашивал у врача.", kanji: "医者に質問しました", kana: "いしゃにしつもんしました" },
+        { type: "masen", ru: "У врача не спрашиваю.", kanji: "医者に質問しません", kana: "いしゃにしつもんしません" },
+        { type: "masendeshita", ru: "У врача не спрашивал.", kanji: "医者に質問しませんでした", kana: "いしゃにしつもんしませんでした" }
+      ]},
+      { id: 55, nounK: "ニュース", nounR: "ニュース", nounT: "новости", verbK: "知る", verbR: "しる", verbT: "узнавать", forms: [
+        { type: "masu", ru: "Узнаю новости.", kanji: "ニュースを知ります", kana: "ニュースをしります" },
+        { type: "mashita", ru: "Узнавал новости.", kanji: "ニュースを知りました", kana: "ニュースをしりました" },
+        { type: "masen", ru: "Новости не узнаю.", kanji: "ニュースを知りません", kana: "ニュースをしりません" },
+        { type: "masendeshita", ru: "Новости не узнавал.", kanji: "ニュースを知りませんでした", kana: "ニュースをしりませんでした" }
+      ]},
+      { id: 56, nounK: "たばこ", nounR: "たばこ", nounT: "сигарета", verbK: "吸う", verbR: "すう", verbT: "курить", forms: [
+        { type: "masu", ru: "Курю сигарету.", kanji: "たばこを吸います", kana: "たばこをすいます" },
+        { type: "mashita", ru: "Курил сигарету.", kanji: "たばこを吸いました", kana: "たばこをすいました" },
+        { type: "masen", ru: "Сигарету не курю.", kanji: "たばこを吸いません", kana: "たばこをすいません" },
+        { type: "masendeshita", ru: "Сигарету не курил.", kanji: "たばこを吸いませんでした", kana: "たばこをすいませんでした" }
+      ]},
+      { id: 57, nounK: "町", nounR: "まち", nounT: "город", verbK: "住む", verbR: "すむ", verbT: "жить", forms: [
+        { type: "masu", ru: "Живу в городе.", kanji: "町に住みます", kana: "まちにすみます" },
+        { type: "mashita", ru: "Жил в городе.", kanji: "町に住みました", kana: "まちにすみました" },
+        { type: "masen", ru: "В городе не живу.", kanji: "町に住みません", kana: "まちにすみません" },
+        { type: "masendeshita", ru: "В городе не жил.", kanji: "町に住みませんでした", kana: "まちにすみませんでした" }
+      ]},
+      { id: 58, nounK: "宿題", nounR: "しゅくだい", nounT: "домашнее задание", verbK: "する", verbR: "する", verbT: "делать", forms: [
+        { type: "masu", ru: "Делаю домашнее задание.", kanji: "宿題をします", kana: "しゅくだいをします" },
+        { type: "mashita", ru: "Делал домашнее задание.", kanji: "宿題をしました", kana: "しゅくだいをしました" },
+        { type: "masen", ru: "Домашнее задание не делаю.", kanji: "宿題をしません", kana: "しゅくだいをしません" },
+        { type: "masendeshita", ru: "Домашнее задание не делал.", kanji: "宿題をしませんでした", kana: "しゅくだいをしませんでした" }
+      ]},
+      { id: 59, nounK: "椅子", nounR: "いす", nounT: "стул", verbK: "座る", verbR: "すわる", verbT: "садиться", forms: [
+        { type: "masu", ru: "Сажусь на стул.", kanji: "椅子に座ります", kana: "いすにすわります" },
+        { type: "mashita", ru: "Садился на стул.", kanji: "椅子に座りました", kana: "いすにすわりました" },
+        { type: "masen", ru: "На стул не сажусь.", kanji: "椅子に座りません", kana: "いすにすわりません" },
+        { type: "masendeshita", ru: "На стул не садился.", kanji: "椅子に座りませんでした", kana: "いすにすわりませんでした" }
+      ]},
+      { id: 60, nounK: "ズボン", nounR: "ズボン", nounT: "брюки", verbK: "洗濯する", verbR: "せんたくする", verbT: "стирать", forms: [
+        { type: "masu", ru: "Стираю брюки.", kanji: "ズボンを洗濯します", kana: "ズボンをせんたくします" },
+        { type: "mashita", ru: "Стирал брюки.", kanji: "ズボンを洗濯しました", kana: "ズボンをせんたくしました" },
+        { type: "masen", ru: "Брюки не стираю.", kanji: "ズボンを洗濯しません", kana: "ズボンをせんたくしません" },
+        { type: "masendeshita", ru: "Брюки не стирал.", kanji: "ズボンを洗濯しませんでした", kana: "ズボンをせんたくしませんでした" }
+      ]},
+      { id: 61, nounK: "部屋", nounR: "へや", nounT: "комната", verbK: "掃除する", verbR: "そうじする", verbT: "убирать", forms: [
+        { type: "masu", ru: "Убираю комнату.", kanji: "部屋を掃除します", kana: "へやをそうじします" },
+        { type: "mashita", ru: "Убирал комнату.", kanji: "部屋を掃除しました", kana: "へやをそうじしました" },
+        { type: "masen", ru: "Комнату не убираю.", kanji: "部屋を掃除しません", kana: "へやをそうじしません" },
+        { type: "masendeshita", ru: "Комнату не убирал.", kanji: "部屋を掃除しませんでした", kana: "へやをそうじしませんでした" }
+      ]},
+      { id: 62, nounK: "ごみ", nounR: "ごみ", nounT: "мусор", verbK: "出す", verbR: "だす", verbT: "выносить", forms: [
+        { type: "masu", ru: "Выношу мусор.", kanji: "ごみを出します", kana: "ごみをだします" },
+        { type: "mashita", ru: "Выносил мусор.", kanji: "ごみを出しました", kana: "ごみをだしました" },
+        { type: "masen", ru: "Мусор не выношу.", kanji: "ごみを出しません", kana: "ごみをだしません" },
+        { type: "masendeshita", ru: "Мусор не выносил.", kanji: "ごみを出しませんでした", kana: "ごみをだしませんでした" }
+      ]},
+      { id: 63, nounK: "駅", nounR: "えき", nounT: "вокзал", verbK: "立つ", verbR: "たつ", verbT: "стоять", forms: [
+        { type: "masu", ru: "Стою перед вокзалом.", kanji: "駅の前に立ちます", kana: "えきのまえにたちます" },
+        { type: "mashita", ru: "Стоял перед вокзалом.", kanji: "駅の前に立ちました", kana: "えきのまえにたちました" },
+        { type: "masen", ru: "Перед вокзалом не стою.", kanji: "駅の前に立ちません", kana: "えきのまえにたちません" },
+        { type: "masendeshita", ru: "Перед вокзалом не стоял.", kanji: "駅の前に立ちませんでした", kana: "えきのまえにたちませんでした" }
+      ]},
+      { id: 64, nounK: "コーヒー", nounR: "コーヒー", nounT: "кофе", verbK: "頼む", verbR: "たのむ", verbT: "заказывать", forms: [
+        { type: "masu", ru: "Заказываю кофе.", kanji: "コーヒーを頼みます", kana: "コーヒーをたのみます" },
+        { type: "mashita", ru: "Заказывал кофе.", kanji: "コーヒーを頼みました", kana: "コーヒーをたのみました" },
+        { type: "masen", ru: "Кофе не заказываю.", kanji: "コーヒーを頼みません", kana: "コーヒーをたのみません" },
+        { type: "masendeshita", ru: "Кофе не заказывал.", kanji: "コーヒーを頼みませんでした", kana: "コーヒーをたのみませんでした" }
+      ]},
+      { id: 65, nounK: "ご飯", nounR: "ごはん", nounT: "еда", verbK: "食べる", verbR: "たべる", verbT: "есть", forms: [
+        { type: "masu", ru: "Ем.", kanji: "ご飯を食べます", kana: "ごはんをたべます" },
+        { type: "mashita", ru: "Ел.", kanji: "ご飯を食べました", kana: "ごはんをたべました" },
+        { type: "masen", ru: "Еду не ем.", kanji: "ご飯を食べません", kana: "ごはんをたべません" },
+        { type: "masendeshita", ru: "Не ел.", kanji: "ご飯を食べませんでした", kana: "ごはんをたべませんでした" }
+      ]},
+      { id: 66, nounK: "色", nounR: "いろ", nounT: "цвет", verbK: "違う", verbR: "ちがう", verbT: "отличаться", forms: [
+        { type: "masu", ru: "Отличается цвет.", kanji: "色が違います", kana: "いろがちがいます" },
+        { type: "mashita", ru: "Отличался цвет.", kanji: "色が違いました", kana: "いろがちがいました" },
+        { type: "masen", ru: "Цвет не отличается.", kanji: "色が違いません", kana: "いろがちがいません" },
+        { type: "masendeshita", ru: "Цвет не отличался.", kanji: "色が違いませんでした", kana: "いろがちがいませんでした" }
+      ]},
+      { id: 67, nounK: "パソコン", nounR: "パソコン", nounT: "компьютер", verbK: "使う", verbR: "つかう", verbT: "использовать", forms: [
+        { type: "masu", ru: "Использую компьютер.", kanji: "パソコンを使います", kana: "パソコンをつかいます" },
+        { type: "mashita", ru: "Использовал компьютер.", kanji: "パソコンを使いました", kana: "パソコンをつかいました" },
+        { type: "masen", ru: "Компьютер не использую.", kanji: "パソコンを使いません", kana: "パソコンをつかいません" },
+        { type: "masendeshita", ru: "Компьютер не использовал.", kanji: "パソコンを使いませんでした", kana: "パソコンをつかいませんでした" }
+      ]},
+      { id: 68, nounK: "旅行", nounR: "りょこう", nounT: "путешествие", verbK: "疲れる", verbR: "つかれる", verbT: "уставать", forms: [
+        { type: "masu", ru: "Устаю от путешествия.", kanji: "旅行で疲れます", kana: "りょこうでつかれます" },
+        { type: "mashita", ru: "Уставал от путешествия.", kanji: "旅行で疲れました", kana: "りょこうでつかれました" },
+        { type: "masen", ru: "От путешествия не устаю.", kanji: "旅行で疲れません", kana: "りょこうでつかれません" },
+        { type: "masendeshita", ru: "От путешествия не устал.", kanji: "旅行で疲れませんでした", kana: "りょこうでつかれませんでした" }
+      ]},
+      { id: 69, nounK: "空港", nounR: "くうこう", nounT: "аэропорт", verbK: "着く", verbR: "つく", verbT: "прибывать", forms: [
+        { type: "masu", ru: "Прибываю в аэропорт.", kanji: "空港に着きます", kana: "くうこうにつきます" },
+        { type: "mashita", ru: "Прибывал в аэропорт.", kanji: "空港に着きました", kana: "くうこうにつきました" },
+        { type: "masen", ru: "В аэропорт не прибываю.", kanji: "空港に着きません", kana: "くうこうにつきません" },
+        { type: "masendeshita", ru: "В аэропорт не прибывал.", kanji: "空港に着きませんでした", kana: "くうこうにつきませんでした" }
+      ]},
+      { id: 70, nounK: "料理", nounR: "りょうり", nounT: "еда", verbK: "作る", verbR: "つくる", verbT: "готовить", forms: [
+        { type: "masu", ru: "Готовлю еду.", kanji: "料理を作ります", kana: "りょうりをつくります" },
+        { type: "mashita", ru: "Готовил еду.", kanji: "料理を作りました", kana: "りょうりをつくりました" },
+        { type: "masen", ru: "Еду не готовлю.", kanji: "料理を作りません", kana: "りょうりをつくりません" },
+        { type: "masendeshita", ru: "Еду не готовил.", kanji: "料理を作りませんでした", kana: "りょうりをつくりませんでした" }
+      ]},
+      { id: 71, nounK: "ラジオ", nounR: "ラジオ", nounT: "радио", verbK: "点ける", verbR: "つける", verbT: "включать", forms: [
+        { type: "masu", ru: "Включаю радио.", kanji: "ラジオを点けます", kana: "ラジオをつけます" },
+        { type: "mashita", ru: "Включал радио.", kanji: "ラジオを点けました", kana: "ラジオをつけました" },
+        { type: "masen", ru: "Радио не включаю.", kanji: "ラジオを点けません", kana: "ラジオをつけません" },
+        { type: "masendeshita", ru: "Радио не включал.", kanji: "ラジオを点けませんでした", kana: "ラジオをつけませんでした" }
+      ]},
+      { id: 72, nounK: "会社", nounR: "かいしゃ", nounT: "компания", verbK: "勤める", verbR: "つとめる", verbT: "работать", forms: [
+        { type: "masu", ru: "Работаю в компании.", kanji: "会社に勤めます", kana: "かいしゃにつとめます" },
+        { type: "mashita", ru: "Работал в компании.", kanji: "会社に勤めました", kana: "かいしゃにつとめました" },
+        { type: "masen", ru: "В компании не работаю.", kanji: "会社に勤めません", kana: "かいしゃにつとめません" },
+        { type: "masendeshita", ru: "В компании не работал.", kanji: "会社に勤めませんでした", kana: "かいしゃにつとめませんでした" }
+      ]},
+      { id: 73, nounK: "散歩", nounR: "さんぽ", nounT: "прогулка", verbK: "出かける", verbR: "でかける", verbT: "выходить", forms: [
+        { type: "masu", ru: "Выхожу на прогулку.", kanji: "散歩に出かけます", kana: "さんぽにでかけます" },
+        { type: "mashita", ru: "Выходил на прогулку.", kanji: "散歩に出かけました", kana: "さんぽにでかけました" },
+        { type: "masen", ru: "На прогулку не выхожу.", kanji: "散歩に出かけません", kana: "さんぽにでかけません" },
+        { type: "masendeshita", ru: "На прогулку не выходил.", kanji: "散歩に出かけませんでした", kana: "さんぽにでかけませんでした" }
+      ]},
+      { id: 74, nounK: "日本語", nounR: "にほんご", nounT: "японский язык", verbK: "できる", verbR: "できる", verbT: "уметь", forms: [
+        { type: "masu", ru: "Умею говорить по-японски.", kanji: "日本語ができます", kana: "にほんごができます" },
+        { type: "mashita", ru: "Умел говорить по-японски.", kanji: "日本語ができました", kana: "にほんごができました" },
+        { type: "masen", ru: "По-японски не умею говорить.", kanji: "日本語ができません", kana: "にほんごができません" },
+        { type: "masendeshita", ru: "По-японски не умел говорить.", kanji: "日本語ができませんでした", kana: "にほんごができませんでした" }
+      ]},
+      { id: 75, nounK: "大学", nounR: "だいがく", nounT: "университет", verbK: "出る", verbR: "でる", verbT: "оканчивать", forms: [
+        { type: "masu", ru: "Оканчиваю университет.", kanji: "大学を出ます", kana: "だいがくをでます" },
+        { type: "mashita", ru: "Окончил университет.", kanji: "大学を出ました", kana: "だいがくをでました" },
+        { type: "masen", ru: "Университет не оканчиваю.", kanji: "大学を出ません", kana: "だいがくをでません" },
+        { type: "masendeshita", ru: "Университет не оканчивал.", kanji: "大学を出ませんでした", kana: "だいがくをでませんでした" }
+      ]},
+      { id: 76, nounK: "病院", nounR: "びょういん", nounT: "больница", verbK: "電話する", verbR: "でんわする", verbT: "звонить", forms: [
+        { type: "masu", ru: "Звоню в больницу.", kanji: "病院に電話します", kana: "びょういんにでんわします" },
+        { type: "mashita", ru: "Звонил в больницу.", kanji: "病院に電話しました", kana: "びょういんにでんわしました" },
+        { type: "masen", ru: "В больницу не звоню.", kanji: "病院に電話しません", kana: "びょういんにでんわしません" },
+        { type: "masendeshita", ru: "В больницу не звонил.", kanji: "病院に電話しませんでした", kana: "びょういんにでんわしませんでした" }
+      ]},
+      { id: 77, nounK: "飛行機", nounR: "ひこうき", nounT: "самолёт", verbK: "飛ぶ", verbR: "とぶ", verbT: "летать", forms: [
+        { type: "masu", ru: "Летает самолёт.", kanji: "飛行機が飛びます", kana: "ひこうきがとびます" },
+        { type: "mashita", ru: "Летал самолёт.", kanji: "飛行機が飛びました", kana: "ひこうきがとびました" },
+        { type: "masen", ru: "Самолёт не летает.", kanji: "飛行機が飛びません", kana: "ひこうきがとびません" },
+        { type: "masendeshita", ru: "Самолёт не летал.", kanji: "飛行機が飛びませんでした", kana: "ひこうきがとびませんでした" }
+      ]},
+      { id: 78, nounK: "車", nounR: "くるま", nounT: "машина", verbK: "止まる", verbR: "とまる", verbT: "останавливаться", forms: [
+        { type: "masu", ru: "Останавливается машина.", kanji: "車が止まります", kana: "くるまがとまります" },
+        { type: "mashita", ru: "Останавливалась машина.", kanji: "車が止まりました", kana: "くるまがとまりました" },
+        { type: "masen", ru: "Машина не останавливается.", kanji: "車が止まりません", kana: "くるまがとまりません" },
+        { type: "masendeshita", ru: "Машина не остановилась.", kanji: "車が止まりませんでした", kana: "くるまがとまりませんでした" }
+      ]},
+      { id: 79, nounK: "休み", nounR: "やすみ", nounT: "выходной", verbK: "取る", verbR: "とる", verbT: "брать", forms: [
+        { type: "masu", ru: "Беру выходной.", kanji: "休みを取ります", kana: "やすみをとります" },
+        { type: "mashita", ru: "Брал выходной.", kanji: "休みを取りました", kana: "やすみをとりました" },
+        { type: "masen", ru: "Выходной не беру.", kanji: "休みを取りません", kana: "やすみをとりません" },
+        { type: "masendeshita", ru: "Выходной не брал.", kanji: "休みを取りませんでした", kana: "やすみをとりませんでした" }
+      ]},
+      { id: 80, nounK: "カメラ", nounR: "カメラ", nounT: "камера", verbK: "撮る", verbR: "とる", verbT: "снимать", forms: [
+        { type: "masu", ru: "Снимаю камерой.", kanji: "カメラで撮ります", kana: "カメラでとります" },
+        { type: "mashita", ru: "Снимал камерой.", kanji: "カメラで撮りました", kana: "カメラでとりました" },
+        { type: "masen", ru: "Камерой не снимаю.", kanji: "カメラで撮りません", kana: "カメラでとりません" },
+        { type: "masendeshita", ru: "Камерой не снимал.", kanji: "カメラで撮りませんでした", kana: "カメラでとりませんでした" }
+      ]},
+      { id: 81, nounK: "鳥", nounR: "とり", nounT: "птица", verbK: "鳴く", verbR: "なく", verbT: "петь", forms: [
+        { type: "masu", ru: "Поёт птица.", kanji: "鳥が鳴きます", kana: "とりがなきます" },
+        { type: "mashita", ru: "Пела птица.", kanji: "鳥が鳴きました", kana: "とりがなきました" },
+        { type: "masen", ru: "Птица не поёт.", kanji: "鳥が鳴きません", kana: "とりがなきません" },
+        { type: "masendeshita", ru: "Птица не пела.", kanji: "鳥が鳴きませんでした", kana: "とりがなきませんでした" }
+      ]},
+      { id: 82, nounK: "銀行", nounR: "ぎんこう", nounT: "банк", verbK: "並ぶ", verbR: "ならぶ", verbT: "стоять в очереди", forms: [
+        { type: "masu", ru: "Стою в очереди в банке.", kanji: "銀行で並びます", kana: "ぎんこうでならびます" },
+        { type: "mashita", ru: "Стоял в очереди в банке.", kanji: "銀行で並びました", kana: "ぎんこうでならびました" },
+        { type: "masen", ru: "В очереди в банке не стою.", kanji: "銀行で並びません", kana: "ぎんこうでならびません" },
+        { type: "masendeshita", ru: "В очереди в банке не стоял.", kanji: "銀行で並びませんでした", kana: "ぎんこうでならびませんでした" }
+      ]},
+      { id: 83, nounK: "お皿", nounR: "おさら", nounT: "тарелка", verbK: "並べる", verbR: "ならべる", verbT: "расставлять", forms: [
+        { type: "masu", ru: "Расставляю тарелки.", kanji: "お皿を並べます", kana: "おさらをならべます" },
+        { type: "mashita", ru: "Расставлял тарелки.", kanji: "お皿を並べました", kana: "おさらをならべました" },
+        { type: "masen", ru: "Тарелки не расставляю.", kanji: "お皿を並べません", kana: "おさらをならべません" },
+        { type: "masendeshita", ru: "Тарелки не расставлял.", kanji: "お皿を並べませんでした", kana: "おさらをならべませんでした" }
+      ]},
+      { id: 84, nounK: "大人", nounR: "おとな", nounT: "взрослый", verbK: "なる", verbR: "なる", verbT: "становиться", forms: [
+        { type: "masu", ru: "Становлюсь взрослым.", kanji: "大人になります", kana: "おとなになります" },
+        { type: "mashita", ru: "Становился взрослым.", kanji: "大人になりました", kana: "おとなになりました" },
+        { type: "masen", ru: "Взрослым не становлюсь.", kanji: "大人になりません", kana: "おとなになりません" },
+        { type: "masendeshita", ru: "Взрослым не становился.", kanji: "大人になりませんでした", kana: "おとなになりませんでした" }
+      ]},
+      { id: 85, nounK: "靴", nounR: "くつ", nounT: "обувь", verbK: "脱ぐ", verbR: "ぬぐ", verbT: "снимать", forms: [
+        { type: "masu", ru: "Снимаю обувь.", kanji: "靴を脱ぎます", kana: "くつをぬぎます" },
+        { type: "mashita", ru: "Снимал обувь.", kanji: "靴を脱ぎました", kana: "くつをぬぎました" },
+        { type: "masen", ru: "Обувь не снимаю.", kanji: "靴を脱ぎません", kana: "くつをぬぎません" },
+        { type: "masendeshita", ru: "Обувь не снимал.", kanji: "靴を脱ぎませんでした", kana: "くつをぬぎませんでした" }
+      ]},
+      { id: 86, nounK: "ベッド", nounR: "ベッド", nounT: "кровать", verbK: "寝る", verbR: "ねる", verbT: "спать", forms: [
+        { type: "masu", ru: "Сплю в кровати.", kanji: "ベッドで寝ます", kana: "ベッドでねます" },
+        { type: "mashita", ru: "Спал в кровати.", kanji: "ベッドで寝ました", kana: "ベッドでねました" },
+        { type: "masen", ru: "В кровати не сплю.", kanji: "ベッドで寝ません", kana: "ベッドでねません" },
+        { type: "masendeshita", ru: "В кровати не спал.", kanji: "ベッドで寝ませんでした", kana: "ベッドでねませんでした" }
+      ]},
+      { id: 87, nounK: "山", nounR: "やま", nounT: "гора", verbK: "登る", verbR: "のぼる", verbT: "подниматься", forms: [
+        { type: "masu", ru: "Поднимаюсь на гору.", kanji: "山に登ります", kana: "やまにのぼります" },
+        { type: "mashita", ru: "Поднимался на гору.", kanji: "山に登りました", kana: "やまにのぼりました" },
+        { type: "masen", ru: "На гору не поднимаюсь.", kanji: "山に登りません", kana: "やまにのぼりません" },
+        { type: "masendeshita", ru: "На гору не поднимался.", kanji: "山に登りませんでした", kana: "やまにのぼりませんでした" }
+      ]},
+      { id: 88, nounK: "お茶", nounR: "おちゃ", nounT: "чай", verbK: "飲む", verbR: "のむ", verbT: "пить", forms: [
+        { type: "masu", ru: "Пью чай.", kanji: "お茶を飲みます", kana: "おちゃをのみます" },
+        { type: "mashita", ru: "Пил чай.", kanji: "お茶を飲みました", kana: "おちゃをのみました" },
+        { type: "masen", ru: "Чай не пью.", kanji: "お茶を飲みません", kana: "おちゃをのみません" },
+        { type: "masendeshita", ru: "Чай не пил.", kanji: "お茶を飲みませんでした", kana: "おちゃをのみませんでした" }
+      ]},
+      { id: 89, nounK: "電車", nounR: "でんしゃ", nounT: "поезд", verbK: "乗る", verbR: "のる", verbT: "садиться", forms: [
+        { type: "masu", ru: "Сажусь на поезд.", kanji: "電車に乗ります", kana: "でんしゃにのります" },
+        { type: "mashita", ru: "Садился на поезд.", kanji: "電車に乗りました", kana: "でんしゃにのりました" },
+        { type: "masen", ru: "На поезд не сажусь.", kanji: "電車に乗りません", kana: "でんしゃにのりません" },
+        { type: "masendeshita", ru: "На поезд не садился.", kanji: "電車に乗りませんでした", kana: "でんしゃにのりませんでした" }
+      ]},
+      { id: 90, nounK: "教室", nounR: "きょうしつ", nounT: "класс", verbK: "入る", verbR: "はいる", verbT: "входить", forms: [
+        { type: "masu", ru: "Вхожу в класс.", kanji: "教室に入ります", kana: "きょうしつにはいります" },
+        { type: "mashita", ru: "Входил в класс.", kanji: "教室に入りました", kana: "きょうしつにはいりました" },
+        { type: "masen", ru: "В класс не вхожу.", kanji: "教室に入りません", kana: "きょうしつにはいりません" },
+        { type: "masendeshita", ru: "В класс не входил.", kanji: "教室に入りませんでした", kana: "きょうしつにはいりませんでした" }
+      ]},
+      { id: 91, nounK: "靴下", nounR: "くつした", nounT: "носки", verbK: "履く", verbR: "はく", verbT: "надевать", forms: [
+        { type: "masu", ru: "Надеваю носки.", kanji: "靴下を履きます", kana: "くつしたをはきます" },
+        { type: "mashita", ru: "Надевал носки.", kanji: "靴下を履きました", kana: "くつしたをはきました" },
+        { type: "masen", ru: "Носки не надеваю.", kanji: "靴下を履きません", kana: "くつしたをはきません" },
+        { type: "masendeshita", ru: "Носки не надевал.", kanji: "靴下を履きませんでした", kana: "くつしたをはきませんでした" }
+      ]},
+      { id: 92, nounK: "川沿い", nounR: "かわぞい", nounT: "река", verbK: "走る", verbR: "はしる", verbT: "бежать", forms: [
+        { type: "masu", ru: "Бегу вдоль реки.", kanji: "川沿いを走ります", kana: "かわぞいをはしります" },
+        { type: "mashita", ru: "Бежал вдоль реки.", kanji: "川沿いを走りました", kana: "かわぞいをはしりました" },
+        { type: "masen", ru: "Вдоль реки не бегу.", kanji: "川沿いを走りません", kana: "かわぞいをはしりません" },
+        { type: "masendeshita", ru: "Вдоль реки не бежал.", kanji: "川沿いを走りませんでした", kana: "かわぞいをはしりませんでした" }
+      ]},
+      { id: 93, nounK: "レストラン", nounR: "レストラン", nounT: "ресторан", verbK: "働く", verbR: "はたらく", verbT: "работать", forms: [
+        { type: "masu", ru: "Работаю в ресторане.", kanji: "レストランで働きます", kana: "レストランではたらきます" },
+        { type: "mashita", ru: "Работал в ресторане.", kanji: "レストランで働きました", kana: "レストランではたらきました" },
+        { type: "masen", ru: "В ресторане не работаю.", kanji: "レストランで働きません", kana: "レストランではたらきません" },
+        { type: "masendeshita", ru: "В ресторане не работал.", kanji: "レストランで働きませんでした", kana: "レストランではたらきませんでした" }
+      ]},
+      { id: 94, nounK: "英語", nounR: "えいご", nounT: "английский язык", verbK: "話す", verbR: "はなす", verbT: "говорить", forms: [
+        { type: "masu", ru: "Говорю по-английски.", kanji: "英語を話します", kana: "えいごをはなします" },
+        { type: "mashita", ru: "Говорил по-английски.", kanji: "英語を話しました", kana: "えいごをはなしました" },
+        { type: "masen", ru: "По-английски не говорю.", kanji: "英語を話しません", kana: "えいごをはなしません" },
+        { type: "masendeshita", ru: "По-английски не говорил.", kanji: "英語を話しませんでした", kana: "えいごをはなしませんでした" }
+      ]},
+      { id: 95, nounK: "切手", nounR: "きって", nounT: "марка", verbK: "貼る", verbR: "はる", verbT: "наклеивать", forms: [
+        { type: "masu", ru: "Наклеиваю марку.", kanji: "切手を貼ります", kana: "きってをはります" },
+        { type: "mashita", ru: "Наклеивал марку.", kanji: "切手を貼りました", kana: "きってをはりました" },
+        { type: "masen", ru: "Марку не наклеиваю.", kanji: "切手を貼りません", kana: "きってをはりません" },
+        { type: "masendeshita", ru: "Марку не наклеивал.", kanji: "切手を貼りませんでした", kana: "きってをはりませんでした" }
+      ]},
+      { id: 96, nounK: "天気", nounR: "てんき", nounT: "погода", verbK: "晴れる", verbR: "はれる", verbT: "проясняться", forms: [
+        { type: "masu", ru: "Проясняется погода.", kanji: "天気が晴れます", kana: "てんきがはれます" },
+        { type: "mashita", ru: "Прояснялась погода.", kanji: "天気が晴れました", kana: "てんきがはれました" },
+        { type: "masen", ru: "Погода не проясняется.", kanji: "天気が晴れません", kana: "てんきがはれません" },
+        { type: "masendeshita", ru: "Погода не прояснилась.", kanji: "天気が晴れませんでした", kana: "てんきがはれませんでした" }
+      ]},
+      { id: 97, nounK: "風邪", nounR: "かぜ", nounT: "простуда", verbK: "引く", verbR: "ひく", verbT: "простужаться", forms: [
+        { type: "masu", ru: "Простужаюсь.", kanji: "風邪を引きます", kana: "かぜをひきます" },
+        { type: "mashita", ru: "Простужался.", kanji: "風邪を引きました", kana: "かぜをひきました" },
+        { type: "masen", ru: "Не простужаюсь.", kanji: "風邪を引きません", kana: "かぜをひきません" },
+        { type: "masendeshita", ru: "Не простужался.", kanji: "風邪を引きませんでした", kana: "かぜをひきませんでした" }
+      ]},
+      { id: 98, nounK: "ピアノ", nounR: "ピアノ", nounT: "пианино", verbK: "弾く", verbR: "ひく", verbT: "играть", forms: [
+        { type: "masu", ru: "Играю на пианино.", kanji: "ピアノを弾きます", kana: "ピアノをひきます" },
+        { type: "mashita", ru: "Играл на пианино.", kanji: "ピアノを弾きました", kana: "ピアノをひきました" },
+        { type: "masen", ru: "На пианино не играю.", kanji: "ピアノを弾きません", kana: "ピアノをひきません" },
+        { type: "masendeshita", ru: "На пианино не играл.", kanji: "ピアノを弾きませんでした", kana: "ピアノをひきませんでした" }
+      ]},
+      { id: 99, nounK: "風", nounR: "かぜ", nounT: "ветер", verbK: "吹く", verbR: "ふく", verbT: "дуть", forms: [
+        { type: "masu", ru: "Дует ветер.", kanji: "風が吹きます", kana: "かぜがふきます" },
+        { type: "mashita", ru: "Дул ветер.", kanji: "風が吹きました", kana: "かぜがふきました" },
+        { type: "masen", ru: "Ветер не дует.", kanji: "風が吹きません", kana: "かぜがふきません" },
+        { type: "masendeshita", ru: "Ветер не дул.", kanji: "風が吹きませんでした", kana: "かぜがふきませんでした" }
+      ]},
+      { id: 100, nounK: "雨", nounR: "あめ", nounT: "дождь", verbK: "降る", verbR: "ふる", verbT: "идти", forms: [
+        { type: "masu", ru: "Идёт дождь.", kanji: "雨が降ります", kana: "あめがふります" },
+        { type: "mashita", ru: "Шёл дождь.", kanji: "雨が降りました", kana: "あめがふりました" },
+        { type: "masen", ru: "Дождь не идёт.", kanji: "雨が降りません", kana: "あめがふりません" },
+        { type: "masendeshita", ru: "Дождь не шёл.", kanji: "雨が降りませんでした", kana: "あめがふりませんでした" }
+      ]},
+      { id: 101, nounK: "図書館", nounR: "としょかん", nounT: "библиотека", verbK: "勉強する", verbR: "べんきょうする", verbT: "учиться", forms: [
+        { type: "masu", ru: "Учусь в библиотеке.", kanji: "図書館で勉強します", kana: "としょかんでべんきょうします" },
+        { type: "mashita", ru: "Учился в библиотеке.", kanji: "図書館で勉強しました", kana: "としょかんでべんきょうしました" },
+        { type: "masen", ru: "В библиотеке не учусь.", kanji: "図書館で勉強しません", kana: "としょかんでべんきょうしません" },
+        { type: "masendeshita", ru: "В библиотеке не учился.", kanji: "図書館で勉強しませんでした", kana: "としょかんでべんきょうしませんでした" }
+      ]},
+      { id: 102, nounK: "角", nounR: "かど", nounT: "угол", verbK: "曲がる", verbR: "まがる", verbT: "поворачивать", forms: [
+        { type: "masu", ru: "Поворачиваю на углу.", kanji: "角を曲がります", kana: "かどをまがります" },
+        { type: "mashita", ru: "Поворачивал на углу.", kanji: "角を曲がりました", kana: "かどをまがりました" },
+        { type: "masen", ru: "На углу не поворачиваю.", kanji: "角を曲がりません", kana: "かどをまがりません" },
+        { type: "masendeshita", ru: "На углу не поворачивал.", kanji: "角を曲がりませんでした", kana: "かどをまがりませんでした" }
+      ]},
+      { id: 103, nounK: "タクシー", nounR: "タクシー", nounT: "такси", verbK: "待つ", verbR: "まつ", verbT: "ждать", forms: [
+        { type: "masu", ru: "Жду такси.", kanji: "タクシーを待ちます", kana: "タクシーをまちます" },
+        { type: "mashita", ru: "Ждал такси.", kanji: "タクシーを待ちました", kana: "タクシーをまちました" },
+        { type: "masen", ru: "Такси не жду.", kanji: "タクシーを待ちません", kana: "タクシーをまちません" },
+        { type: "masendeshita", ru: "Такси не ждал.", kanji: "タクシーを待ちませんでした", kana: "タクシーをまちませんでした" }
+      ]},
+      { id: 104, nounK: "歯", nounR: "は", nounT: "зубы", verbK: "磨く", verbR: "みがく", verbT: "чистить", forms: [
+        { type: "masu", ru: "Чищу зубы.", kanji: "歯を磨きます", kana: "はをみがきます" },
+        { type: "mashita", ru: "Чистил зубы.", kanji: "歯を磨きました", kana: "はをみがきました" },
+        { type: "masen", ru: "Зубы не чищу.", kanji: "歯を磨きません", kana: "はをみがきません" },
+        { type: "masendeshita", ru: "Зубы не чистил.", kanji: "歯を磨きませんでした", kana: "はをみがきませんでした" }
+      ]},
+      { id: 105, nounK: "絵", nounR: "え", nounT: "картина", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "masu", ru: "Показываю картину.", kanji: "絵を見せます", kana: "えをみせます" },
+        { type: "mashita", ru: "Показывал картину.", kanji: "絵を見せました", kana: "えをみせました" },
+        { type: "masen", ru: "Картину не показываю.", kanji: "絵を見せません", kana: "えをみせません" },
+        { type: "masendeshita", ru: "Картину не показывал.", kanji: "絵を見せませんでした", kana: "えをみせませんでした" }
+      ]},
+      { id: 106, nounK: "映画", nounR: "えいが", nounT: "фильм", verbK: "見る", verbR: "みる", verbT: "смотреть", forms: [
+        { type: "masu", ru: "Смотрю фильм.", kanji: "映画を見ます", kana: "えいがをみます" },
+        { type: "mashita", ru: "Смотрел фильм.", kanji: "映画を見ました", kana: "えいがをみました" },
+        { type: "masen", ru: "Фильм не смотрю.", kanji: "映画を見ません", kana: "えいがをみません" },
+        { type: "masendeshita", ru: "Фильм не смотрел.", kanji: "映画を見ませんでした", kana: "えいがをみませんでした" }
+      ]},
+      { id: 107, nounK: "荷物", nounR: "にもつ", nounT: "багаж", verbK: "持つ", verbR: "もつ", verbT: "держать", forms: [
+        { type: "masu", ru: "Держу багаж.", kanji: "荷物を持ちます", kana: "にもつをもちます" },
+        { type: "mashita", ru: "Держал багаж.", kanji: "荷物を持ちました", kana: "にもつをもちました" },
+        { type: "masen", ru: "Багаж не держу.", kanji: "荷物を持ちません", kana: "にもつをもちません" },
+        { type: "masendeshita", ru: "Багаж не держал.", kanji: "荷物を持ちませんでした", kana: "にもつをもちませんでした" }
+      ]},
+      { id: 108, nounK: "先輩", nounR: "せんぱい", nounT: "старший товарищ", verbK: "呼ぶ", verbR: "よぶ", verbT: "звать", forms: [
+        { type: "masu", ru: "Зову старшего товарища.", kanji: "先輩を呼びます", kana: "せんぱいをよびます" },
+        { type: "mashita", ru: "Звал старшего товарища.", kanji: "先輩を呼びました", kana: "せんぱいをよびました" },
+        { type: "masen", ru: "Старшего товарища не зову.", kanji: "先輩を呼びません", kana: "せんぱいをよびません" },
+        { type: "masendeshita", ru: "Старшего товарища не звал.", kanji: "先輩を呼びませんでした", kana: "せんぱいをよびませんでした" }
+      ]},
+      { id: 109, nounK: "雑誌", nounR: "ざっし", nounT: "журнал", verbK: "読む", verbR: "よむ", verbT: "читать", forms: [
+        { type: "masu", ru: "Читаю журнал.", kanji: "雑誌を読みます", kana: "ざっしをよみます" },
+        { type: "mashita", ru: "Читал журнал.", kanji: "雑誌を読みました", kana: "ざっしをよみました" },
+        { type: "masen", ru: "Журнал не читаю.", kanji: "雑誌を読みません", kana: "ざっしをよみません" },
+        { type: "masendeshita", ru: "Журнал не читал.", kanji: "雑誌を読みませんでした", kana: "ざっしをよみませんでした" }
+      ]},
+      { id: 110, nounK: "外国", nounR: "がいこく", nounT: "заграница", verbK: "旅行する", verbR: "りょこうする", verbT: "путешествовать", forms: [
+        { type: "masu", ru: "Путешествую за границей.", kanji: "外国を旅行します", kana: "がいこくをりょこうします" },
+        { type: "mashita", ru: "Путешествовал за границей.", kanji: "外国を旅行しました", kana: "がいこくをりょこうしました" },
+        { type: "masen", ru: "За границей не путешествую.", kanji: "外国を旅行しません", kana: "がいこくをりょこうしません" },
+        { type: "masendeshita", ru: "За границей не путешествовал.", kanji: "外国を旅行しませんでした", kana: "がいこくをりょこうしませんでした" }
+      ]},
+      { id: 111, nounK: "スポーツ", nounR: "スポーツ", nounT: "спорт", verbK: "練習する", verbR: "れんしゅうする", verbT: "тренироваться", forms: [
+        { type: "masu", ru: "Тренируюсь в спорте.", kanji: "スポーツを練習します", kana: "スポーツをれんしゅうします" },
+        { type: "mashita", ru: "Тренировался в спорте.", kanji: "スポーツを練習しました", kana: "スポーツをれんしゅうしました" },
+        { type: "masen", ru: "В спорте не тренируюсь.", kanji: "スポーツを練習しません", kana: "スポーツをれんしゅうしません" },
+        { type: "masendeshita", ru: "В спорте не тренировался.", kanji: "スポーツを練習しませんでした", kana: "スポーツをれんしゅうしませんでした" }
+      ]},
+      { id: 112, nounK: "意味", nounR: "いみ", nounT: "смысл", verbK: "分かる", verbR: "わかる", verbT: "понимать", forms: [
+        { type: "masu", ru: "Понимаю смысл.", kanji: "意味が分かります", kana: "いみがわかります" },
+        { type: "mashita", ru: "Понимал смысл.", kanji: "意味が分かりました", kana: "いみがわかりました" },
+        { type: "masen", ru: "Смысл не понимаю.", kanji: "意味が分かりません", kana: "いみがわかりません" },
+        { type: "masendeshita", ru: "Смысл не понимал.", kanji: "意味が分かりませんでした", kana: "いみがわかりませんでした" }
+      ]},
+      { id: 113, nounK: "約束", nounR: "やくそく", nounT: "обещание", verbK: "忘れる", verbR: "わすれる", verbT: "забывать", forms: [
+        { type: "masu", ru: "Забываю обещание.", kanji: "約束を忘れます", kana: "やくそくをわすれます" },
+        { type: "mashita", ru: "Забывал обещание.", kanji: "約束を忘れました", kana: "やくそくをわすれました" },
+        { type: "masen", ru: "Обещание не забываю.", kanji: "約束を忘れません", kana: "やくそくをわすれません" },
+        { type: "masendeshita", ru: "Обещание не забывал.", kanji: "約束を忘れませんでした", kana: "やくそくをわすれませんでした" }
+      ]},
+      { id: 114, nounK: "切符", nounR: "きっぷ", nounT: "билет", verbK: "渡す", verbR: "わたす", verbT: "передавать", forms: [
+        { type: "masu", ru: "Передаю билет.", kanji: "切符を渡します", kana: "きっぷをわたします" },
+        { type: "mashita", ru: "Передавал билет.", kanji: "切符を渡しました", kana: "きっぷをわたしました" },
+        { type: "masen", ru: "Билет не передаю.", kanji: "切符を渡しません", kana: "きっぷをわたしません" },
+        { type: "masendeshita", ru: "Билет не передавал.", kanji: "切符を渡しませんでした", kana: "きっぷをわたしませんでした" }
+      ]},
+      { id: 115, nounK: "橋", nounR: "はし", nounT: "мост", verbK: "渡る", verbR: "わたる", verbT: "переходить", forms: [
+        { type: "masu", ru: "Перехожу мост.", kanji: "橋を渡ります", kana: "はしをわたります" },
+        { type: "mashita", ru: "Переходил мост.", kanji: "橋を渡りました", kana: "はしをわたりました" },
+        { type: "masen", ru: "Мост не перехожу.", kanji: "橋を渡りません", kana: "はしをわたりません" },
+        { type: "masendeshita", ru: "Мост не переходил.", kanji: "橋を渡りませんでした", kana: "はしをわたりませんでした" }
+      ]},
+      { id: 116, nounK: "子供", nounR: "こども", nounT: "ребёнок", verbK: "教える", verbR: "おしえる", verbT: "обучать", forms: [
+        { type: "masu", ru: "Обучаю ребёнка.", kanji: "子供に教えます", kana: "こどもにおしえます" },
+        { type: "mashita", ru: "Обучал ребёнка.", kanji: "子供に教えました", kana: "こどもにおしえました" },
+        { type: "masen", ru: "Ребёнка не обучаю.", kanji: "子供に教えません", kana: "こどもにおしえません" },
+        { type: "masendeshita", ru: "Ребёнка не обучал.", kanji: "子供に教えませんでした", kana: "こどもにおしえませんでした" }
+      ]},
+      { id: 117, nounK: "試験", nounR: "しけん", nounT: "экзамен", verbK: "始まる", verbR: "はじまる", verbT: "начинаться", forms: [
+        { type: "masu", ru: "Начинается экзамен.", kanji: "試験が始まります", kana: "しけんがはじまります" },
+        { type: "mashita", ru: "Начинался экзамен.", kanji: "試験が始まりました", kana: "しけんがはじまりました" },
+        { type: "masen", ru: "Экзамен не начинается.", kanji: "試験が始まりません", kana: "しけんがはじまりません" },
+        { type: "masendeshita", ru: "Экзамен не начался.", kanji: "試験が始まりませんでした", kana: "しけんがはじまりませんでした" }
+      ]},
+      { id: 118, nounK: "勉強", nounR: "べんきょう", nounT: "учёба", verbK: "始める", verbR: "はじめる", verbT: "начинать", forms: [
+        { type: "masu", ru: "Начинаю учёбу.", kanji: "勉強を始めます", kana: "べんきょうをはじめます" },
+        { type: "mashita", ru: "Начинал учёбу.", kanji: "勉強を始めました", kana: "べんきょうをはじめました" },
+        { type: "masen", ru: "Учёбу не начинаю.", kanji: "勉強を始めません", kana: "べんきょうをはじめません" },
+        { type: "masendeshita", ru: "Учёбу не начинал.", kanji: "勉強を始めませんでした", kana: "べんきょうをはじめませんでした" }
+      ]},
+      { id: 119, nounK: "お土産", nounR: "おみやげ", nounT: "сувенир", verbK: "もらう", verbR: "もらう", verbT: "получать", forms: [
+        { type: "masu", ru: "Получаю сувенир.", kanji: "お土産をもらいます", kana: "おみやげをもらいます" },
+        { type: "mashita", ru: "Получал сувенир.", kanji: "お土産をもらいました", kana: "おみやげをもらいました" },
+        { type: "masen", ru: "Сувенир не получаю.", kanji: "お土産をもらいません", kana: "おみやげをもらいません" },
+        { type: "masendeshita", ru: "Сувенир не получал.", kanji: "お土産をもらいませんでした", kana: "おみやげをもらいませんでした" }
+      ]},
+      { id: 120, nounK: "お菓子", nounR: "おかし", nounT: "сладости", verbK: "くれる", verbR: "くれる", verbT: "давать", forms: [
+        { type: "masu", ru: "Даю сладости.", kanji: "お菓子をくれます", kana: "おかしをくれます" },
+        { type: "mashita", ru: "Давал сладости.", kanji: "お菓子をくれました", kana: "おかしをくれました" },
+        { type: "masen", ru: "Сладости не даю.", kanji: "お菓子をくれません", kana: "おかしをくれません" },
+        { type: "masendeshita", ru: "Сладости не давал.", kanji: "お菓子をくれませんでした", kana: "おかしをくれませんでした" }
+      ]},
+      { id: 121, nounK: "女の子", nounR: "おんなのこ", nounT: "девочка", verbK: "泣く", verbR: "なく", verbT: "плакать", forms: [
+        { type: "masu", ru: "Плачет девочка.", kanji: "女の子が泣きます", kana: "おんなのこがなきます" },
+        { type: "mashita", ru: "Плакала девочка.", kanji: "女の子が泣きました", kana: "おんなのこがなきました" },
+        { type: "masen", ru: "Девочка не плачет.", kanji: "女の子が泣きません", kana: "おんなのこがなきません" },
+        { type: "masendeshita", ru: "Девочка не плакала.", kanji: "女の子が泣きませんでした", kana: "おんなのこがなきませんでした" }
+      ]},
+      { id: 122, nounK: "地図", nounR: "ちず", nounT: "карта", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "masu", ru: "Показываю карту.", kanji: "地図を見せます", kana: "ちずをみせます" },
+        { type: "mashita", ru: "Показывал карту.", kanji: "地図を見せました", kana: "ちずをみせました" },
+        { type: "masen", ru: "Карту не показываю.", kanji: "地図を見せません", kana: "ちずをみせません" },
+        { type: "masendeshita", ru: "Карту не показывал.", kanji: "地図を見せませんでした", kana: "ちずをみせませんでした" }
+      ]},
+      { id: 123, nounK: "学生", nounR: "がくせい", nounT: "студент", verbK: "テストする", verbR: "テストする", verbT: "тестировать", forms: [
+        { type: "masu", ru: "Тестирую студентов.", kanji: "学生をテストします", kana: "がくせいをテストします" },
+        { type: "mashita", ru: "Тестировал студентов.", kanji: "学生をテストしました", kana: "がくせいをテストしました" },
+        { type: "masen", ru: "Студентов не тестирую.", kanji: "学生をテストしません", kana: "がくせいをテストしません" },
+        { type: "masendeshita", ru: "Студентов не тестировал.", kanji: "学生をテストしませんでした", kana: "がくせいをテストしませんでした" }
+      ]},
+      { id: 124, nounK: "パーティー", nounR: "パーティー", nounT: "вечеринка", verbK: "する", verbR: "する", verbT: "устраивать", forms: [
+        { type: "masu", ru: "Устраиваю вечеринку.", kanji: "パーティーをします", kana: "パーティーをします" },
+        { type: "mashita", ru: "Устраивал вечеринку.", kanji: "パーティーをしました", kana: "パーティーをしました" },
+        { type: "masen", ru: "Вечеринку не устраиваю.", kanji: "パーティーをしません", kana: "パーティーをしません" },
+        { type: "masendeshita", ru: "Вечеринку не устраивал.", kanji: "パーティーをしませんでした", kana: "パーティーをしませんでした" }
+      ]}
+    ];
+
+    /* ==========================================================================
+       ЛОГИКА СОСТОЯНИЯ
+       ========================================================================== */
+    const STORAGE_KEY = "jp_app_save_v7_pure";
+
+    let state = {
+      mode: "level",
+      currentLevel: 1,
+      wordIndex: 0,
+      formSubIndex: 0,
+      playlist: [],
+      currentFormOrder: [0, 1, 2, 3],
+      errors: []
+    };
+
+    let isAnswerChecked = false;
+    let lastSpokenKana = "";
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Storage error", e);
+      }
+      updateErrorsBadge();
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            state = Object.assign(state, parsed);
+          }
+        }
+      } catch (e) {
+        console.warn("Resetting corrupt storage");
+      }
+
+      if (!Array.isArray(state.playlist) || state.playlist.length !== RAW_LEVEL_1_DATA.length) {
+        resetLevelPlaylist();
+      }
+      if (state.wordIndex < 0 || state.wordIndex >= RAW_LEVEL_1_DATA.length) {
+        state.wordIndex = 0;
+      }
+      if (state.formSubIndex < 0 || state.formSubIndex > 3) {
+        state.formSubIndex = 0;
+      }
+      if (!Array.isArray(state.currentFormOrder) || state.currentFormOrder.length !== 4) {
+        state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+      }
+      if (!Array.isArray(state.errors)) {
+        state.errors = [];
+      }
+    }
+
+    function resetLevelPlaylist() {
+      const indices = RAW_LEVEL_1_DATA.map((_, i) => i);
+      state.playlist = shuffleArray(indices);
+      state.wordIndex = 0;
+      state.formSubIndex = 0;
+      state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+    }
+
+    function confirmReset() {
+      if (confirm("Перемешать и начать 1 уровень с первого слова?")) {
+        resetLevelPlaylist();
+        state.mode = "level";
+        state.currentLevel = 1;
+        saveState();
+        renderScreen();
+      }
+    }
+
+    /* ==========================================================================
+       ОЗВУЧКА WEB SPEECH API
+       ========================================================================== */
+    let jaVoice = null;
+    function initVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      jaVoice = voices.find(v => (v.lang === 'ja-JP' || v.lang === 'ja_JP') && v.name.includes('Kyoko')) 
+             || voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.startsWith('ja')) 
+             || null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      initVoices();
+    }
+
+    function playAudio(kanaText) {
+      if (!('speechSynthesis' in window) || !kanaText) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(kanaText);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.88;
+        if (jaVoice) utterance.voice = jaVoice;
+        window.speechSynthesis.speak(utterance);
+        lastSpokenKana = kanaText;
+      } catch(e) {
+        console.warn("Audio warning", e);
+      }
+    }
+
+    function replayAudio() {
+      if (lastSpokenKana) {
+        playAudio(lastSpokenKana);
+      }
+    }
+
+    /* ==========================================================================
+       РЕНДЕР ЭКРАНА
+       ========================================================================== */
+    function getCurrentTask() {
+      if (state.mode === "errors") {
+        if (!state.errors || state.errors.length === 0) return null;
+        return state.errors[0];
+      }
+
+      if (!state.playlist || state.wordIndex >= state.playlist.length) {
+        return null;
+      }
+
+      const itemIdx = state.playlist[state.wordIndex];
+      const wordObj = RAW_LEVEL_1_DATA[itemIdx];
+      if (!wordObj || !wordObj.forms) return null;
+
+      const formOrder = (state.currentFormOrder && state.currentFormOrder.length === 4) 
+        ? state.currentFormOrder 
+        : [0, 1, 2, 3];
+      const formIdx = formOrder[state.formSubIndex] !== undefined ? formOrder[state.formSubIndex] : 0;
+      const formObj = wordObj.forms[formIdx];
+      if (!formObj) return null;
+
+      return { wordObj, formObj };
+    }
+
+    function renderScreen() {
+      updateErrorsBadge();
+
+      document.querySelectorAll(".nav-pill").forEach(p => {
+        p.classList.remove("active");
+        if (state.mode === "level" && p.innerText.trim() === String(state.currentLevel)) {
+          p.classList.add("active");
+        }
+      });
+      if (state.mode === "errors") {
+        document.getElementById("errorsNavBtn").classList.add("active");
+      }
+
+      const gameCard = document.getElementById("gameCard");
+      const placeholder = document.getElementById("placeholderView");
+      const progressWrap = document.getElementById("progressWrap");
+      const theoryBanner = document.getElementById("theoryBanner");
+
+      if (state.mode === "level" && state.currentLevel !== 1) {
+        gameCard.style.display = "none";
+        progressWrap.style.display = "none";
+        theoryBanner.style.display = "none";
+        placeholder.classList.add("active");
+        document.getElementById("placeholderTitle").innerText = `Уровень ${state.currentLevel}`;
+        return;
+      } else {
+        gameCard.style.display = "flex";
+        progressWrap.style.display = "flex";
+        theoryBanner.style.display = "flex";
+        placeholder.classList.remove("active");
+      }
+
+      isAnswerChecked = false;
+      const input = document.getElementById("userInput");
+      const actionBtn = document.getElementById("actionBtn");
+      const feedback = document.getElementById("feedbackBox");
+      
+      input.value = "";
+      input.readOnly = false;
+      actionBtn.innerText = "Проверить";
+      feedback.className = "feedback-box";
+
+      const task = getCurrentTask();
+
+      if (!task) {
+        if (state.mode === "errors") {
+          alert("🎉 Все ошибки успешно исправлены!");
+          state.mode = "level";
+          saveState();
+          renderScreen();
+          return;
+        } else {
+          alert(`🏆 Поздравляем! Все 124 слова 1 уровня пройдены!`);
+          resetLevelPlaylist();
+          saveState();
+          renderScreen();
+          return;
+        }
+      }
+
+      // 1. Заполняем опорные слова
+      document.getElementById("refNounKanji").innerText = task.wordObj.nounK;
+      document.getElementById("refNounKana").innerText = "- " + task.wordObj.nounR;
+      document.getElementById("refNounTrans").innerText = "- " + task.wordObj.nounT;
+
+      document.getElementById("refVerbKanji").innerText = task.wordObj.verbK;
+      document.getElementById("refVerbKana").innerText = "- " + task.wordObj.verbR;
+      document.getElementById("refVerbTrans").innerText = "- " + task.wordObj.verbT;
+
+      // 2. Вопрос
+      document.getElementById("promptRu").innerText = task.formObj.ru;
+      document.getElementById("modeLabel").innerText = state.mode === "errors" ? "Исправление ошибки" : "Переведите фразу";
+
+      // 3. Прогресс
+      if (state.mode === "level") {
+        const total = RAW_LEVEL_1_DATA.length;
+        const currentNum = state.wordIndex + 1;
+        document.getElementById("progressWordLabel").innerText = `Слово ${currentNum} из ${total}`;
+        const pct = Math.round(((state.wordIndex * 4 + state.formSubIndex) / (total * 4)) * 100);
+        document.getElementById("progressPercentLabel").innerText = `${pct}%`;
+        document.getElementById("progressBarFill").style.width = `${pct}%`;
+
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`dot${i}`);
+          dot.className = "form-dot";
+          if (i < state.formSubIndex) dot.classList.add("done");
+          else if (i === state.formSubIndex) dot.classList.add("active");
+        }
+      } else {
+        document.getElementById("progressWordLabel").innerText = `Ошибок осталось: ${state.errors.length}`;
+        document.getElementById("progressPercentLabel").innerText = `Ошибки`;
+        document.getElementById("progressBarFill").style.width = `100%`;
+        for (let i = 0; i < 4; i++) {
+          document.getElementById(`dot${i}`).className = "form-dot";
+        }
+      }
+    }
+
+    /* ==========================================================================
+       ПРОВЕРКА ОТВЕТА (ТОЛЬКО КАНДЗИ И ХИРАГАНА / КАТАКАНА)
+       ========================================================================== */
+    function cleanText(str) {
+      return (str || '').replace(/[\s　。、.!,?]/g, '').trim();
+    }
+
+    function handleAction() {
+      if (!isAnswerChecked) {
+        checkAnswer();
+      } else {
+        nextQuestion();
+      }
+    }
+
+    function checkAnswer() {
+      const task = getCurrentTask();
+      if (!task) return;
+
+      const input = document.getElementById("userInput");
+      const userVal = cleanText(input.value);
+      if (!userVal) {
+        return;
+      }
+
+      const targetKanji = cleanText(task.formObj.kanji);
+      const targetKana = cleanText(task.formObj.kana);
+
+      // Строгое соответствие: только кандзи или хирагана
+      const isCorrect = (userVal === targetKanji || userVal === targetKana);
+
+      playAudio(task.formObj.kana);
+
+      const feedback = document.getElementById("feedbackBox");
+      const statusText = document.getElementById("feedbackStatus");
+      const fKanji = document.getElementById("feedbackKanji");
+      const fKana = document.getElementById("feedbackKana");
+
+      fKanji.innerText = task.formObj.kanji;
+      fKana.innerText = task.formObj.kana;
+
+      if (isCorrect) {
+        feedback.className = "feedback-box correct";
+        statusText.innerText = "✓ Правильно!";
+        if (state.mode === "errors") {
+          state.errors.shift();
+        }
+      } else {
+        feedback.className = "feedback-box incorrect";
+        statusText.innerText = "✕ Ошибка";
+        if (state.mode === "level") {
+          const alreadyExists = state.errors.some(e => e.formObj.kanji === task.formObj.kanji);
+          if (!alreadyExists) {
+            state.errors.push(task);
+          }
+        } else if (state.mode === "errors") {
+          state.errors.push(state.errors.shift());
+        }
+      }
+
+      input.readOnly = true;
+      isAnswerChecked = true;
+      document.getElementById("actionBtn").innerText = "Дальше ➔";
+      saveState();
+    }
+
+    function nextQuestion() {
+      if (state.mode === "level") {
+        state.formSubIndex++;
+        if (state.formSubIndex >= 4) {
+          state.formSubIndex = 0;
+          state.wordIndex++;
+          state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+        }
+      }
+      saveState();
+      renderScreen();
+    }
+
+    /* ==========================================================================
+       НАВИГАЦИЯ И СОБЫТИЯ
+       ========================================================================== */
+    function updateErrorsBadge() {
+      const btn = document.getElementById("errorsNavBtn");
+      if (!btn) return;
+      const count = (state.errors || []).length;
+      btn.innerText = `Ошибки (${count})`;
+      if (count > 0) btn.classList.add("has-errors");
+      else btn.classList.remove("has-errors");
+    }
+
+    function openErrorsTab() {
+      if (!state.errors || state.errors.length === 0) {
+        alert("У вас нет сохранённых ошибок! Отличный результат!");
+        return;
+      }
+      state.mode = "errors";
+      saveState();
+      renderScreen();
+    }
+
+   function switchLevel(lvl) {
+      const levelPages = {
+        1: '1ур.html',
+        2: '2ур.html',
+        3: '3ур.html',
+        4: '4ур.html',
+        5: '5ур.html',
+        6: '6ур.html',
+        7: '7ур.html'
+      };
+
+      if (lvl !== state.currentLevel && levelPages[lvl]) {
+        window.location.href = levelPages[lvl];
+        return;
+      }
+
+      state.mode = "level";
+      state.currentLevel = lvl;
+      saveState();
+      renderScreen();
+    }
+
+    function openTheoryModal() {
+      document.getElementById("theoryModal").classList.add("open");
+    }
+    function closeTheoryModal() {
+      document.getElementById("theoryModal").classList.remove("open");
+    }
+
+    // Инициализация при старте
+    loadState();
+    renderScreen();
+
+    // Горячие клавиши: Alt + Enter, Cmd + Enter (и Ctrl + Enter)
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && (e.altKey || e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleAction();
+      }
+    });
+  </script>
+</body>
+</html>

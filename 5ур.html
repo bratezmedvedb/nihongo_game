@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Японский тренажёр — 5 Уровень</title>
+  <style>
+    /* ==========================================================================
+       1. ЦВЕТОВАЯ ПАЛИТРА И СТИЛЬ (WARM PAPER MINIMALIST)
+       ========================================================================== */
+    :root {
+      --bg-page: #f4f1ea;
+      --bg-card: #ffffff;
+      --text-main: #2c2c2a;
+      --text-muted: #6b6a63;
+      --text-sub: #9a988f;
+      --border-color: #d3d1c7;
+      --border-light: #e5e2d8;
+      
+      --accent: #d97757;
+      --accent-hover: #c46445;
+
+      --selected-bg: #eeecf0;
+      --selected-border: #7f77dd;
+      --selected-text: #3c3489;
+
+      --success-bg: #eaf3de;
+      --success-border: #97c459;
+      --success-text: #386014;
+
+      --error-bg: #fdf0ee;
+      --error-border: #a32d2d;
+      --error-text: #a32d2d;
+
+      --radius-card: 14px;
+      --radius-pill: 20px;
+      --radius-btn: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px 12px 32px 12px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       2. ВЕРХНЯЯ НАВИГАЦИЯ
+       ========================================================================== */
+    .nav-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+      align-items: center;
+    }
+    .nav-bar::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      min-width: 38px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+
+    .nav-pill.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
+    .nav-pill.errors-pill {
+      margin-left: auto;
+      min-width: auto;
+      padding: 0 14px;
+      border-color: var(--border-color);
+    }
+    .nav-pill.errors-pill.has-errors {
+      color: var(--error-border);
+      border-color: var(--error-border);
+      background: #fff6f5;
+    }
+    .nav-pill.errors-pill.active {
+      background: var(--error-border);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       3. ПАНЕЛЬ ТЕОРИИ И ПРОГРЕСС-БАР
+       ========================================================================== */
+    .theory-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ==========================================================================
+       4. КАРТОЧКА ТРЕНАЖЁРА
+       ========================================================================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .target-ref-box {
+      background: var(--bg-page);
+      border-radius: var(--radius-btn);
+      padding: 16px 20px;
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ref-line {
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ref-kanji {
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .ref-kana {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+    .ref-trans {
+      color: var(--selected-text);
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .form-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .form-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-light);
+    }
+    .form-dot.done { background: var(--success-border); }
+    .form-dot.active { background: var(--accent); }
+
+    .prompt-box {
+      text-align: center;
+      padding: 4px 0;
+    }
+    .prompt-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .prompt-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: #faf9f6;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 0 14px;
+      font-size: 16px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      background: #ffffff;
+    }
+    .input-field[readonly] {
+      background: #f0eee6;
+      color: var(--text-muted);
+    }
+
+    .btn-main {
+      height: 46px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-main:active { background: var(--accent-hover); }
+
+    .feedback-box {
+      display: none;
+      border-radius: var(--radius-btn);
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feedback-box.correct {
+      display: flex !important;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+    .feedback-box.incorrect {
+      display: flex !important;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+    }
+
+    .feedback-status {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .feedback-box.correct .feedback-status { color: var(--success-text); }
+    .feedback-box.incorrect .feedback-status { color: var(--error-text); }
+
+    .feedback-sentence-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .feedback-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .feedback-text-kanji {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+    .feedback-text-kana {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .btn-audio-right {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.1s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-audio-right:active { transform: scale(0.90); }
+
+    .placeholder-view {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 40px 20px;
+      text-align: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .placeholder-view.active { display: flex; }
+
+    .reset-link {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-sub);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 8px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 44, 42, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-color);
+      max-width: 440px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-body { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+    .modal-body strong { color: var(--text-main); }
+    .modal-close-btn {
+      align-self: flex-end;
+      padding: 8px 16px;
+      background: var(--text-main);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      font-size: 13px;
+      touch-action: manipulation;
+    }
+  
+  /* Кнопка возврата в главное меню */
+  .back-to-menu {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+    text-decoration: none;
+    color: #6b6a63;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    background: #fff;
+    border: 1px solid #d3d1c7;
+    border-radius: 20px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+  }
+  .back-to-menu:hover, .back-to-menu:active {
+    background: #2c2c2a;
+    color: #fff;
+    border-color: #2c2c2a;
+  }
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <a href="index.html" class="back-to-menu">← Меню</a>
+    <div class="nav-bar">
+      <button type="button" class="nav-pill" onclick="switchLevel(1)">1</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(2)">2</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(3)">3</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(4)">4</button>
+      <button type="button" class="nav-pill active" onclick="switchLevel(5)">5</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(6)">6</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(7)">7</button>
+      <button type="button" class="nav-pill errors-pill" id="errorsNavBtn" onclick="openErrorsTab()">Ошибки (0)</button>
+    </div>
+
+    <div class="theory-banner" id="theoryBanner" onclick="openTheoryModal()">
+      <span id="theoryBannerText">📖 Теория 5 уровня (Формы 〜た / Опыт / Перечисление / Условие)</span>
+      <span>➔</span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-labels">
+        <span id="progressWordLabel">Слово 1 из 124</span>
+        <span id="progressPercentLabel">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="card" id="gameCard">
+      <div class="target-ref-box">
+        <div class="ref-line">
+          <span class="ref-kanji" id="refNounKanji">友達</span>
+          <span class="ref-kana" id="refNounKana">- ともだち</span>
+          <span class="ref-trans" id="refNounTrans">- друг</span>
+        </div>
+        <div class="ref-line">
+          <span class="ref-kanji" id="refVerbKanji">会う</span>
+          <span class="ref-kana" id="refVerbKana">- あう</span>
+          <span class="ref-trans" id="refVerbTrans">- встречаться</span>
+        </div>
+      </div>
+
+      <div class="form-dots">
+        <div class="form-dot" id="dot0"></div>
+        <div class="form-dot" id="dot1"></div>
+        <div class="form-dot" id="dot2"></div>
+        <div class="form-dot" id="dot3"></div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label" id="modeLabel">Переведите фразу</div>
+        <div class="prompt-text" id="promptRu">Встречался с другом.</div>
+      </div>
+
+      <div class="input-wrap">
+        <input 
+          type="text" 
+          id="userInput" 
+          class="input-field" 
+          placeholder="Введите кандзи или хираганой..." 
+          autocomplete="off" 
+          autocorrect="off" 
+          autocapitalize="off" 
+          spellcheck="false"
+        />
+        <button type="button" class="btn-main" id="actionBtn" onclick="handleAction()">Проверить</button>
+      </div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-status" id="feedbackStatus">✓ Правильно!</div>
+        <div class="feedback-sentence-row">
+          <div class="feedback-texts">
+            <div class="feedback-text-kanji" id="feedbackKanji">友達に会った</div>
+            <div class="feedback-text-kana" id="feedbackKana">ともだちにあった</div>
+          </div>
+          <button type="button" class="btn-audio-right" title="Послушать ещё раз" onclick="replayAudio()">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="placeholder-view" id="placeholderView">
+      <h3 id="placeholderTitle" style="font-size: 18px; color: var(--text-main);">Уровень</h3>
+      <p style="font-size: 14px; color: var(--text-muted);">Переход к выбранному уровню...</p>
+      <button type="button" class="btn-main" style="margin-top: 10px;" onclick="switchLevel(5)">Вернуться к Уровню 5</button>
+    </div>
+
+    <div class="reset-link" onclick="confirmReset()">Начать 5 уровень заново (перемешать)</div>
+  </div>
+
+  <div class="modal-overlay" id="theoryModal" onclick="closeTheoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title">Грамматика 5 Уровня: Формы на 〜た</div>
+      <div class="modal-body">
+        <p><strong>4 ключевые конструкции уровня:</strong></p>
+        <p>1. <strong>〜た</strong> — Простое прошедшее время <em>(Сделал)</em></p>
+        <p>2. <strong>〜たことがある</strong> — Опыт в прошлом <em>(Доводилось делать)</em></p>
+        <p>3. <strong>〜たり(〜たりする)</strong> — Перечисление действий <em>(То делал..., то делал...)</em></p>
+        <p>4. <strong>〜たら</strong> — Условие/время <em>(Если / Когда сделаю)</em></p>
+        <br>
+        <p><strong>Правило образования формы 〜た:</strong></p>
+        <p>Образуется точно так же, как форма на <code>〜て</code>, только окончание заменяется на <code>た</code> (или <code>だ</code>):</p>
+        <p style="padding-left: 12px; margin-top: 4px;">
+          • う、つ、る → <strong>った</strong> (会った、待った、取った)<br>
+          • む、ぶ、ぬ → <strong>んだ</strong> (飲んだ、遊んだ、死んだ)<br>
+          • く → <strong>いた</strong> (書いた) [искл: 行く → <strong>行った</strong>]<br>
+          • ぐ → <strong>いだ</strong> (泳いだ)<br>
+          • す → <strong>した</strong> (話した)<br>
+          • 2 спр. (る) → <strong>た</strong> (食べた、見た)<br>
+          • 3 спр. → する → <strong>した</strong>, くる → <strong>きた (来た)</strong>
+        </p>
+      </div>
+      <button type="button" class="modal-close-btn" onclick="closeTheoryModal()">Понятно</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       БАЗА ДАННЫХ 5-ГО УРОВНЯ (124 ГЛАГОЛА ПО 4 ФОРМЫ)
+       ========================================================================== */
+    const RAW_LEVEL_5_DATA = [
+      { id: 1, nounK: "友達", nounR: "ともだち", nounT: "друг", verbK: "会う", verbR: "あう", verbT: "встречаться", forms: [
+        { type: "ta", ru: "Встречался с другом.", kanji: "友達に会った", kana: "ともだちにあった" },
+        { type: "takoto", ru: "Доводилось встречаться с другом.", kanji: "友達に会ったことがあります", kana: "ともだちにあったことがあります" },
+        { type: "tari", ru: "То встречаться с другом, то...", kanji: "友達に会ったり", kana: "ともだちにあったり" },
+        { type: "tara", ru: "Если встречаться с другом, ...", kanji: "友達に会ったら", kana: "ともだちにあったら" }
+      ]},
+      { id: 2, nounK: "ドア", nounR: "ドア", nounT: "дверь", verbK: "開く", verbR: "あく", verbT: "открываться", forms: [
+        { type: "ta", ru: "Дверь открылась.", kanji: "ドアが開いた", kana: "ドアがあいた" },
+        { type: "takoto", ru: "Доводилось открывать дверь.", kanji: "ドアが開いたことがあります", kana: "ドアがあいたことがあります" },
+        { type: "tari", ru: "То дверь открывается, то...", kanji: "ドアが開いたり", kana: "ドアがあいたり" },
+        { type: "tara", ru: "Если дверь открывается, ...", kanji: "ドアが開いたら", kana: "ドアがあいたら" }
+      ]},
+      { id: 3, nounK: "窓", nounR: "まど", nounT: "окно", verbK: "開ける", verbR: "あける", verbT: "открывать", forms: [
+        { type: "ta", ru: "Открыл окно.", kanji: "窓を開けた", kana: "まどをあけた" },
+        { type: "takoto", ru: "Доводилось открывать окно.", kanji: "窓を開けたことがあります", kana: "まどをあけたことがあります" },
+        { type: "tari", ru: "То открывать окно, то...", kanji: "窓を開けたり", kana: "まどをあけたり" },
+        { type: "tara", ru: "Если открывать окно, ...", kanji: "窓を開けたら", kana: "まどをあけたら" }
+      ]},
+      { id: 4, nounK: "プレゼント", nounR: "プレゼント", nounT: "подарок", verbK: "あげる", verbR: "あげる", verbT: "дарить", forms: [
+        { type: "ta", ru: "Подарил подарок.", kanji: "プレゼントをあげた", kana: "プレゼントをあげた" },
+        { type: "takoto", ru: "Доводилось дарить подарок.", kanji: "プレゼントをあげたことがあります", kana: "プレゼントをあげたことがあります" },
+        { type: "tari", ru: "То дарить подарок, то...", kanji: "プレゼントをあげたり", kana: "プレゼントをあげたり" },
+        { type: "tara", ru: "Если дарить подарок, ...", kanji: "プレゼントをあげたら", kana: "プレゼントをあげたら" }
+      ]},
+      { id: 5, nounK: "公園", nounR: "こうえん", nounT: "парк", verbK: "遊ぶ", verbR: "あそぶ", verbT: "играть", forms: [
+        { type: "ta", ru: "Играл в парке.", kanji: "公園で遊んだ", kana: "こうえんであそんだ" },
+        { type: "takoto", ru: "Доводилось играть в парке.", kanji: "公園で遊んだことがあります", kana: "こうえんであそんだことがあります" },
+        { type: "tari", ru: "То играть в парке, то...", kanji: "公園で遊んだり", kana: "こうえんであそんだり" },
+        { type: "tara", ru: "Если играть в парке, ...", kanji: "公園で遊んだら", kana: "こうえんであそんだら" }
+      ]},
+      { id: 6, nounK: "シャワー", nounR: "シャワー", nounT: "душ", verbK: "浴びる", verbR: "あびる", verbT: "принимать", forms: [
+        { type: "ta", ru: "Принял душ.", kanji: "シャワーを浴びた", kana: "シャワーをあびた" },
+        { type: "takoto", ru: "Доводилось принимать душ.", kanji: "シャワーを浴びたことがあります", kana: "シャワーをあびたことがあります" },
+        { type: "tari", ru: "То принимать душ, то...", kanji: "シャワーを浴びたり", kana: "シャワーをあびたり" },
+        { type: "tara", ru: "Если принимать душ, ...", kanji: "シャワーを浴びたら", kana: "シャワーをあびたら" }
+      ]},
+      { id: 7, nounK: "手", nounR: "て", nounT: "рука", verbK: "洗う", verbR: "あらう", verbT: "мыть", forms: [
+        { type: "ta", ru: "Помыл руки.", kanji: "手を洗った", kana: "てをあらった" },
+        { type: "takoto", ru: "Доводилось мыть руки.", kanji: "手を洗ったことがあります", kana: "てをあらったことがあります" },
+        { type: "tari", ru: "То мыть руки, то...", kanji: "手を洗ったり", kana: "てをあらったり" },
+        { type: "tara", ru: "Если мыть руки, ...", kanji: "手を洗ったら", kana: "てをあらったら" }
+      ]},
+      { id: 8, nounK: "新聞", nounR: "しんぶん", nounT: "газета", verbK: "ある", verbR: "ある", verbT: "иметься", forms: [
+        { type: "ta", ru: "Газета была.", kanji: "新聞があった", kana: "しんぶんがあった" },
+        { type: "takoto", ru: "Доводилось иметь газету.", kanji: "新聞があったことがあります", kana: "しんぶんがあったことがあります" },
+        { type: "tari", ru: "То газета имеется, то...", kanji: "新聞があったり", kana: "しんぶんがあったり" },
+        { type: "tara", ru: "Если газета имеется, ...", kanji: "新聞があったら", kana: "しんぶんがあったら" }
+      ]},
+      { id: 9, nounK: "道", nounR: "みち", nounT: "дорога", verbK: "歩く", verbR: "あるく", verbT: "идти пешком", forms: [
+        { type: "ta", ru: "Пошёл пешком по дороге.", kanji: "道を歩いた", kana: "みちをあるいた" },
+        { type: "takoto", ru: "Доводилось идти пешком по дороге.", kanji: "道を歩いたことがあります", kana: "みちをあるいたことがあります" },
+        { type: "tari", ru: "То идти пешком по дороге, то...", kanji: "道を歩いたり", kana: "みちをあるいたり" },
+        { type: "tara", ru: "Если идти пешком по дороге, ...", kanji: "道を歩いたら", kana: "みちをあるいたら" }
+      ]},
+      { id: 10, nounK: "名前", nounR: "なまえ", nounT: "имя", verbK: "言う", verbR: "いう", verbT: "говорить", forms: [
+        { type: "ta", ru: "Назвал имя.", kanji: "名前を言った", kana: "なまえをいった" },
+        { type: "takoto", ru: "Доводилось называть имя.", kanji: "名前を言ったことがあります", kana: "なまえをいったことがあります" },
+        { type: "tari", ru: "То говорить имя, то...", kanji: "名前を言ったり", kana: "なまえをいったり" },
+        { type: "tara", ru: "Если говорить имя, ...", kanji: "名前を言ったら", kana: "なまえをいったら" }
+      ]},
+      { id: 11, nounK: "学校", nounR: "がっこう", nounT: "школа", verbK: "行く", verbR: "いく", verbT: "идти, ехать", forms: [
+        { type: "ta", ru: "Пошёл в школу.", kanji: "学校に行った", kana: "がっこうにいった" },
+        { type: "takoto", ru: "Доводилось ходить в школу.", kanji: "学校に行ったことがあります", kana: "がっこうにいったことがあります" },
+        { type: "tari", ru: "То идти, ехать в школу, то...", kanji: "学校に行ったり", kana: "がっこうにいったり" },
+        { type: "tara", ru: "Если идти, ехать в школу, ...", kanji: "学校に行ったら", kana: "がっこうにいったら" }
+      ]},
+      { id: 12, nounK: "猫", nounR: "ねこ", nounT: "кот", verbK: "いる", verbR: "いる", verbT: "находиться", forms: [
+        { type: "ta", ru: "Кот был.", kanji: "猫がいた", kana: "ねこがいた" },
+        { type: "takoto", ru: "Доводилось держать кота.", kanji: "猫がいたことがあります", kana: "ねこがいたことがあります" },
+        { type: "tari", ru: "То кот находится, то...", kanji: "猫がいたり", kana: "ねこがいたり" },
+        { type: "tara", ru: "Если кот находится, ...", kanji: "猫がいたら", kana: "ねこがいたら" }
+      ]},
+      { id: 13, nounK: "お金", nounR: "おかね", nounT: "деньги", verbK: "要る", verbR: "いる", verbT: "требоваться", forms: [
+        { type: "ta", ru: "Деньги были нужны.", kanji: "お金が要った", kana: "おかねがいった" },
+        { type: "takoto", ru: "Доводилось иметь деньги.", kanji: "お金が要ったことがあります", kana: "おかねがいったことがあります" },
+        { type: "tari", ru: "То деньги требуются, то...", kanji: "お金が要ったり", kana: "おかねがいったり" },
+        { type: "tara", ru: "Если деньги требуются, ...", kanji: "お金が要ったら", kana: "おかねがいったら" }
+      ]},
+      { id: 14, nounK: "かばん", nounR: "かばん", nounT: "сумка", verbK: "入れる", verbR: "いれる", verbT: "класть внутрь", forms: [
+        { type: "ta", ru: "Положил в сумку.", kanji: "かばんに入れた", kana: "かばんにいれた" },
+        { type: "takoto", ru: "Доводилось класть в сумку.", kanji: "かばんに入れたことがあります", kana: "かばんにいれたことがあります" },
+        { type: "tari", ru: "То класть в сумку, то...", kanji: "かばんに入れたり", kana: "かばんにいれたり" },
+        { type: "tara", ru: "Если класть в сумку, ...", kanji: "かばんに入れたら", kana: "かばんにいれたら" }
+      ]},
+      { id: 15, nounK: "歌", nounR: "うた", nounT: "песня", verbK: "歌う", verbR: "うたう", verbT: "петь", forms: [
+        { type: "ta", ru: "Спел песню.", kanji: "歌を歌った", kana: "うたをうたった" },
+        { type: "takoto", ru: "Доводилось петь песню.", kanji: "歌を歌ったことがあります", kana: "うたをうたったことがあります" },
+        { type: "tari", ru: "То петь песню, то...", kanji: "歌を歌ったり", kana: "うたをうたったり" },
+        { type: "tara", ru: "Если петь песню, ...", kanji: "歌を歌ったら", kana: "うたをうたったら" }
+      ]},
+      { id: 16, nounK: "赤ちゃん", nounR: "あかちゃん", nounT: "ребёнок", verbK: "生まれる", verbR: "うまれる", verbT: "рождаться", forms: [
+        { type: "ta", ru: "Ребёнок родился.", kanji: "赤ちゃんが生まれた", kana: "あかちゃんがうまれた" },
+        { type: "takoto", ru: "Доводилось рожать ребёнка.", kanji: "赤ちゃんが生まれたことがあります", kana: "あかちゃんがうまれたことがあります" },
+        { type: "tari", ru: "То ребёнок рождается, то...", kanji: "赤ちゃんが生まれたり", kana: "あかちゃんがうまれたり" },
+        { type: "tara", ru: "Если ребёнок рождается, ...", kanji: "赤ちゃんが生まれたら", kana: "あかちゃんがうまれたら" }
+      ]},
+      { id: 17, nounK: "りんご", nounR: "りんご", nounT: "яблоко", verbK: "売る", verbR: "うる", verbT: "продавать", forms: [
+        { type: "ta", ru: "Продал яблоки.", kanji: "りんごを売った", kana: "りんごをうった" },
+        { type: "takoto", ru: "Доводилось продавать яблоки.", kanji: "りんごを売ったことがあります", kana: "りんごをうったことがあります" },
+        { type: "tari", ru: "То продавать яблоки, то...", kanji: "りんごを売ったり", kana: "りんごをうったり" },
+        { type: "tara", ru: "Если продавать яблоки, ...", kanji: "りんごを売ったら", kana: "りんごをうったら" }
+      ]},
+      { id: 18, nounK: "朝", nounR: "あさ", nounT: "утро", verbK: "起きる", verbR: "おきる", verbT: "просыпаться", forms: [
+        { type: "ta", ru: "Проснулся рано утром.", kanji: "朝早く起きた", kana: "あさはやくおきた" },
+        { type: "takoto", ru: "Доводилось просыпаться рано утром.", kanji: "朝早く起きたことがあります", kana: "あさはやくおきたことがあります" },
+        { type: "tari", ru: "То просыпаться рано утром, то...", kanji: "朝早く起きたり", kana: "あさはやくおきたり" },
+        { type: "tara", ru: "Если просыпаться рано утром, ...", kanji: "朝早く起きたら", kana: "あさはやくおきたら" }
+      ]},
+      { id: 19, nounK: "机", nounR: "つくえ", nounT: "стол", verbK: "置く", verbR: "おく", verbT: "ставить, класть", forms: [
+        { type: "ta", ru: "Поставил на стол.", kanji: "机の上に置いた", kana: "つくえのうえにおいた" },
+        { type: "takoto", ru: "Доводилось ставить на стол.", kanji: "机の上に置いたことがあります", kana: "つくえのうえにおいたことがあります" },
+        { type: "tari", ru: "То ставить, класть на стол, то...", kanji: "机の上に置いたり", kana: "つくえのうえにおいたり" },
+        { type: "tara", ru: "Если ставить, класть на стол, ...", kanji: "机の上に置いたら", kana: "つくえのうえにおいたら" }
+      ]},
+      { id: 20, nounK: "手紙", nounR: "てがみ", nounT: "письмо", verbK: "送る", verbR: "おくる", verbT: "отправлять", forms: [
+        { type: "ta", ru: "Отправил письмо.", kanji: "手紙を送った", kana: "てがみをおくった" },
+        { type: "takoto", ru: "Доводилось отправлять письмо.", kanji: "手紙を送ったことがあります", kana: "てがみをおくったことがあります" },
+        { type: "tari", ru: "То отправлять письмо, то...", kanji: "手紙を送ったり", kana: "てがみをおくったり" },
+        { type: "tara", ru: "Если отправлять письмо, ...", kanji: "手紙を送ったら", kana: "てがみをおくったら" }
+      ]},
+      { id: 21, nounK: "ボタン", nounR: "ボタン", nounT: "кнопка", verbK: "押す", verbR: "おす", verbT: "нажимать", forms: [
+        { type: "ta", ru: "Нажал кнопку.", kanji: "ボタンを押した", kana: "ボタンをおした" },
+        { type: "takoto", ru: "Доводилось нажимать кнопку.", kanji: "ボタンを押したことがあります", kana: "ボタンをおしたことがあります" },
+        { type: "tari", ru: "То нажимать кнопку, то...", kanji: "ボタンを押したり", kana: "ボタンをおしたり" },
+        { type: "tara", ru: "Если нажимать кнопку, ...", kanji: "ボタンを押したら", kana: "ボタンをおしたら" }
+      ]},
+      { id: 22, nounK: "単語", nounR: "たんご", nounT: "слово", verbK: "覚える", verbR: "おぼえる", verbT: "запоминать", forms: [
+        { type: "ta", ru: "Запомнил слова.", kanji: "単語を覚えた", kana: "たんごをおぼえた" },
+        { type: "takoto", ru: "Доводилось запоминать слова.", kanji: "単語を覚えたことがあります", kana: "たんごをおぼえたことがあります" },
+        { type: "tari", ru: "То запоминать слова, то...", kanji: "単語を覚えたり", kana: "たんごをおぼえたり" },
+        { type: "tara", ru: "Если запоминать слова, ...", kanji: "単語を覚えたら", kana: "たんごをおぼえたら" }
+      ]},
+      { id: 23, nounK: "海", nounR: "うみ", nounT: "море", verbK: "泳ぐ", verbR: "およぐ", verbT: "плавать", forms: [
+        { type: "ta", ru: "Плавал в море.", kanji: "海で泳いだ", kana: "うみでおよいだ" },
+        { type: "takoto", ru: "Доводилось плавать в море.", kanji: "海で泳いだことがあります", kana: "うみでおよいだことがあります" },
+        { type: "tari", ru: "То плавать в море, то...", kanji: "海で泳いだり", kana: "うみでおよいだり" },
+        { type: "tara", ru: "Если плавать в море, ...", kanji: "海で泳いだら", kana: "うみでおよいだら" }
+      ]},
+      { id: 24, nounK: "バス", nounR: "バス", nounT: "автобус", verbK: "降りる", verbR: "おりる", verbT: "выходить из транспорта", forms: [
+        { type: "ta", ru: "Вышел из автобуса.", kanji: "バスを降りた", kana: "バスをおりた" },
+        { type: "takoto", ru: "Доводилось выходить из автобуса.", kanji: "バスを降りたことがあります", kana: "バスをおりたことがあります" },
+        { type: "tari", ru: "То выходить из автобуса, то...", kanji: "バスを降りたり", kana: "バスをおりたり" },
+        { type: "tara", ru: "Если выходить из автобуса, ...", kanji: "バスを降りたら", kana: "バスをおりたら" }
+      ]},
+      { id: 25, nounK: "授業", nounR: "じゅぎょう", nounT: "урок", verbK: "終わる", verbR: "おわる", verbT: "заканчиваться", forms: [
+        { type: "ta", ru: "Урок закончился.", kanji: "授業が終わった", kana: "じゅぎょうがおわった" },
+        { type: "takoto", ru: "Доводилось заканчивать урок.", kanji: "授業が終わったことがあります", kana: "じゅぎょうがおわったことがあります" },
+        { type: "tari", ru: "То урок заканчивается, то...", kanji: "授業が終わったり", kana: "じゅぎょうがおわったり" },
+        { type: "tara", ru: "Если урок заканчивается, ...", kanji: "授業が終わったら", kana: "じゅぎょうがおわったら" }
+      ]},
+      { id: 26, nounK: "スーパー", nounR: "スーパー", nounT: "супермаркет", verbK: "買い物する", verbR: "かいものする", verbT: "делать покупки", forms: [
+        { type: "ta", ru: "Сделал покупки в супермаркете.", kanji: "スーパーで買い物をした", kana: "スーパーでかいものをした" },
+        { type: "takoto", ru: "Доводилось делать покупки в супермаркете.", kanji: "スーパーで買い物をしたことがあります", kana: "スーパーでかいものをしたことがあります" },
+        { type: "tari", ru: "То делать покупки в супермаркете, то...", kanji: "スーパーで買い物をしたり", kana: "スーパーでかいものをしたり" },
+        { type: "tara", ru: "Если делать покупки в супермаркете, ...", kanji: "スーパーで買い物をしたら", kana: "スーパーでかいものをしたら" }
+      ]},
+      { id: 27, nounK: "服", nounR: "ふく", nounT: "одежда", verbK: "買う", verbR: "かう", verbT: "покупать", forms: [
+        { type: "ta", ru: "Купил одежду.", kanji: "服を買った", kana: "ふくをかった" },
+        { type: "takoto", ru: "Доводилось покупать одежду.", kanji: "服を買ったことがあります", kana: "ふくをかったことがあります" },
+        { type: "tari", ru: "То покупать одежду, то...", kanji: "服を買ったり", kana: "ふくをかったり" },
+        { type: "tara", ru: "Если покупать одежду, ...", kanji: "服を買ったら", kana: "ふくをかったら" }
+      ]},
+      { id: 28, nounK: "本", nounR: "ほん", nounT: "книга", verbK: "返す", verbR: "かえす", verbT: "возвращать", forms: [
+        { type: "ta", ru: "Вернул книгу.", kanji: "本を返した", kana: "ほんをかえした" },
+        { type: "takoto", ru: "Доводилось возвращать книгу.", kanji: "本を返したことがあります", kana: "ほんをかえしたことがあります" },
+        { type: "tari", ru: "То возвращать книгу, то...", kanji: "本を返したり", kana: "ほんをかえしたり" },
+        { type: "tara", ru: "Если возвращать книгу, ...", kanji: "本を返したら", kana: "ほんをかえしたら" }
+      ]},
+      { id: 29, nounK: "家", nounR: "いえ", nounT: "дом", verbK: "帰る", verbR: "かえる", verbT: "возвращаться домой", forms: [
+        { type: "ta", ru: "Вернулся домой.", kanji: "家に帰った", kana: "いえにかえった" },
+        { type: "takoto", ru: "Доводилось возвращаться домой.", kanji: "家に帰ったことがあります", kana: "いえにかえったことがあります" },
+        { type: "tari", ru: "То возвращаться домой, то...", kanji: "家に帰ったり", kana: "いえにかえったり" },
+        { type: "tara", ru: "Если возвращаться домой, ...", kanji: "家に帰ったら", kana: "いえにかえったら" }
+      ]},
+      { id: 30, nounK: "時間", nounR: "じかん", nounT: "время", verbK: "かかる", verbR: "かかる", verbT: "требоваться (о времени)", forms: [
+        { type: "ta", ru: "Потратил время.", kanji: "時間がかかった", kana: "じかんがかかった" },
+        { type: "takoto", ru: "Доводилось тратить время.", kanji: "時間がかかったことがあります", kana: "じかんがかかったことがあります" },
+        { type: "tari", ru: "То время требуется (о времени), то...", kanji: "時間がかかったり", kana: "じかんがかかったり" },
+        { type: "tara", ru: "Если время требуется (о времени), ...", kanji: "時間がかかったら", kana: "じかんがかかったら" }
+      ]},
+      { id: 31, nounK: "漢字", nounR: "かんじ", nounT: "иероглиф", verbK: "書く", verbR: "かく", verbT: "писать", forms: [
+        { type: "ta", ru: "Написал иероглиф.", kanji: "漢字を書いた", kana: "かんじをかいた" },
+        { type: "takoto", ru: "Доводилось писать иероглиф.", kanji: "漢字を書いたことがあります", kana: "かんじをかいたことがあります" },
+        { type: "tari", ru: "То писать иероглиф, то...", kanji: "漢字を書いたり", kana: "かんじをかいたり" },
+        { type: "tara", ru: "Если писать иероглиф, ...", kanji: "漢字を書いたら", kana: "かんじをかいたら" }
+      ]},
+      { id: 32, nounK: "電話", nounR: "でんわ", nounT: "телефон", verbK: "かける", verbR: "かける", verbT: "звонить", forms: [
+        { type: "ta", ru: "Позвонил по телефону.", kanji: "電話をかけた", kana: "でんわをかけた" },
+        { type: "takoto", ru: "Доводилось звонить по телефону.", kanji: "電話をかけたことがあります", kana: "でんわをかけたことがあります" },
+        { type: "tari", ru: "То звонить по телефону, то...", kanji: "電話をかけたり", kana: "でんわをかけたり" },
+        { type: "tara", ru: "Если звонить по телефону, ...", kanji: "電話をかけたら", kana: "でんわをかけたら" }
+      ]},
+      { id: 33, nounK: "ペン", nounR: "ペン", nounT: "ручка", verbK: "貸す", verbR: "かす", verbT: "одалживать", forms: [
+        { type: "ta", ru: "Одолжил ручку.", kanji: "ペンを貸した", kana: "ペンをかした" },
+        { type: "takoto", ru: "Доводилось одалживать ручку.", kanji: "ペンを貸したことがあります", kana: "ペンをかしたことがあります" },
+        { type: "tari", ru: "То одалживать ручку, то...", kanji: "ペンを貸したり", kana: "ペンをかしたり" },
+        { type: "tara", ru: "Если одалживать ручку, ...", kanji: "ペンを貸したら", kana: "ペンをかしたら" }
+      ]},
+      { id: 34, nounK: "帽子", nounR: "ぼうし", nounT: "шляпа", verbK: "かぶる", verbR: "かぶる", verbT: "надевать на голову", forms: [
+        { type: "ta", ru: "Надел шляпу.", kanji: "帽子をかぶった", kana: "ぼうしをかぶった" },
+        { type: "takoto", ru: "Доводилось надевать шляпу.", kanji: "帽子をかぶったことがあります", kana: "ぼうしをかぶったことがあります" },
+        { type: "tari", ru: "То надевать на голову шляпу, то...", kanji: "帽子をかぶったり", kana: "ぼうしをかぶったり" },
+        { type: "tara", ru: "Если надевать на голову шляпу, ...", kanji: "帽子をかぶったら", kana: "ぼうしをかぶったら" }
+      ]},
+      { id: 35, nounK: "辞書", nounR: "じしょ", nounT: "словарь", verbK: "借りる", verbR: "かりる", verbT: "брать взаймы", forms: [
+        { type: "ta", ru: "Взял взаймы словарь.", kanji: "辞書を借りた", kana: "じしょをかりた" },
+        { type: "takoto", ru: "Доводилось брать взаймы словарь.", kanji: "辞書を借りたことがあります", kana: "じしょをかりたことがあります" },
+        { type: "tari", ru: "То брать взаймы словарь, то...", kanji: "辞書を借りたり", kana: "じしょをかりたり" },
+        { type: "tara", ru: "Если брать взаймы словарь, ...", kanji: "辞書を借りたら", kana: "じしょをかりたら" }
+      ]},
+      { id: 36, nounK: "電気", nounR: "でんき", nounT: "свет", verbK: "消える", verbR: "きえる", verbT: "гаснуть", forms: [
+        { type: "ta", ru: "Свет погас.", kanji: "電気が消えた", kana: "でんきがきえた" },
+        { type: "takoto", ru: "Доводилось гасить свет.", kanji: "電気が消えたことがあります", kana: "でんきがきえたことがあります" },
+        { type: "tari", ru: "То свет гаснет, то...", kanji: "電気が消えたり", kana: "でんきがきえたり" },
+        { type: "tara", ru: "Если свет гаснет, ...", kanji: "電気が消えたら", kana: "でんきがきえたら" }
+      ]},
+      { id: 37, nounK: "音楽", nounR: "おんがく", nounT: "музыка", verbK: "聞く", verbR: "きく", verbT: "слушать", forms: [
+        { type: "ta", ru: "Послушал музыку.", kanji: "音楽を聞いた", kana: "おんがくをきいた" },
+        { type: "takoto", ru: "Доводилось слушать музыку.", kanji: "音楽を聞いたことがあります", kana: "おんがくをきいたことがあります" },
+        { type: "tari", ru: "То слушать музыку, то...", kanji: "音楽を聞いたり", kana: "おんがくをきいたり" },
+        { type: "tara", ru: "Если слушать музыку, ...", kanji: "音楽を聞いたら", kana: "おんがくをきいたら" }
+      ]},
+      { id: 38, nounK: "紙", nounR: "かみ", nounT: "бумага", verbK: "切る", verbR: "きる", verbT: "резать", forms: [
+        { type: "ta", ru: "Разрезал бумагу.", kanji: "紙を切った", kana: "かみをきった" },
+        { type: "takoto", ru: "Доводилось резать бумагу.", kanji: "紙を切ったことがあります", kana: "かみをきったことがあります" },
+        { type: "tari", ru: "То резать бумагу, то...", kanji: "紙を切ったり", kana: "かみをきったり" },
+        { type: "tara", ru: "Если резать бумагу, ...", kanji: "紙を切ったら", kana: "かみをきったら" }
+      ]},
+      { id: 39, nounK: "シャツ", nounR: "シャツ", nounT: "рубашка", verbK: "着る", verbR: "きる", verbT: "надевать на тело", forms: [
+        { type: "ta", ru: "Надел рубашку.", kanji: "シャツを着た", kana: "シャツをきた" },
+        { type: "takoto", ru: "Доводилось надевать рубашку.", kanji: "シャツを着たことがあります", kana: "シャツをきたことがあります" },
+        { type: "tari", ru: "То надевать на тело рубашку, то...", kanji: "シャツを着たり", kana: "シャツをきたり" },
+        { type: "tara", ru: "Если надевать на тело рубашку, ...", kanji: "シャツを着たら", kana: "シャツをきたら" }
+      ]},
+      { id: 40, nounK: "先生", nounR: "せんせい", nounT: "учитель", verbK: "来る", verbR: "くる", verbT: "приходить", forms: [
+        { type: "ta", ru: "Учитель пришёл.", kanji: "先生が来た", kana: "せんせいがきた" },
+        { type: "takoto", ru: "Доводилось приходить к учителю.", kanji: "先生が来たことがあります", kana: "せんせいがきたことがあります" },
+        { type: "tari", ru: "То учитель приходит, то...", kanji: "先生が来たり", kana: "せんせいがきたり" },
+        { type: "tara", ru: "Если учитель приходит, ...", kanji: "先生が来たら", kana: "せんせいがきたら" }
+      ]},
+      { id: 41, nounK: "女の人", nounR: "おんなのひと", nounT: "женщина", verbK: "結婚する", verbR: "けっこんする", verbT: "жениться", forms: [
+        { type: "ta", ru: "Женился на этой женщине.", kanji: "女の人と結婚した", kana: "おんなのひととけっこんした" },
+        { type: "takoto", ru: "Доводилось жениться на этой женщине.", kanji: "女の人と結婚したことがあります", kana: "おんなのひととけっこんしたことがあります" },
+        { type: "tari", ru: "То жениться на этой женщине, то...", kanji: "女の人と結婚したり", kana: "おんなのひととけっこんしたり" },
+        { type: "tara", ru: "Если жениться на этой женщине, ...", kanji: "女の人と結婚したら", kana: "おんなのひととけっこんしたら" }
+      ]},
+      { id: 42, nounK: "テレビ", nounR: "テレビ", nounT: "телевизор", verbK: "消す", verbR: "けす", verbT: "выключать", forms: [
+        { type: "ta", ru: "Выключил телевизор.", kanji: "テレビを消した", kana: "テレビをけした" },
+        { type: "takoto", ru: "Доводилось выключать телевизор.", kanji: "テレビを消したことがあります", kana: "テレビをけしたことがあります" },
+        { type: "tari", ru: "То выключать телевизор, то...", kanji: "テレビを消したり", kana: "テレビをけしたり" },
+        { type: "tara", ru: "Если выключать телевизор, ...", kanji: "テレビを消したら", kana: "テレビをけしたら" }
+      ]},
+      { id: 43, nounK: "質問", nounR: "しつもん", nounT: "вопрос", verbK: "答える", verbR: "こたえる", verbT: "отвечать", forms: [
+        { type: "ta", ru: "Ответил на вопрос.", kanji: "質問に答えた", kana: "しつもんにこたえた" },
+        { type: "takoto", ru: "Доводилось отвечать на вопрос.", kanji: "質問に答えたことがあります", kana: "しつもんにこたえたことがあります" },
+        { type: "tari", ru: "То отвечать на вопрос, то...", kanji: "質問に答えたり", kana: "しつもんにこたえたり" },
+        { type: "tara", ru: "Если отвечать на вопрос, ...", kanji: "質問に答えたら", kana: "しつもんにこたえたら" }
+      ]},
+      { id: 44, nounK: "ノート", nounR: "ノート", nounT: "тетрадь", verbK: "コピーする", verbR: "コピーする", verbT: "копировать", forms: [
+        { type: "ta", ru: "Скопировал тетрадь.", kanji: "ノートをコピーした", kana: "ノートをコピーした" },
+        { type: "takoto", ru: "Доводилось копировать тетрадь.", kanji: "ノートをコピーしたことがあります", kana: "ノートをコピーしたことがあります" },
+        { type: "tari", ru: "То копировать тетрадь, то...", kanji: "ノートをコピーしたり", kana: "ノートをコピーしたり" },
+        { type: "tara", ru: "Если копировать тетрадь, ...", kanji: "ノートをコピーしたら", kana: "ノートをコピーしたら" }
+      ]},
+      { id: 45, nounK: "仕事", nounR: "しごと", nounT: "работа", verbK: "困る", verbR: "こまる", verbT: "испытывать затруднения", forms: [
+        { type: "ta", ru: "Испытывал трудности на работе.", kanji: "仕事で困った", kana: "しごとでこまった" },
+        { type: "takoto", ru: "Доводилось испытывать трудности на работе.", kanji: "仕事で困ったことがあります", kana: "しごとでこまったことがあります" },
+        { type: "tari", ru: "То испытывать затруднения на работе, то...", kanji: "仕事で困ったり", kana: "しごとでこまったり" },
+        { type: "tara", ru: "Если испытывать затруднения на работе, ...", kanji: "仕事で困ったら", kana: "しごとでこまったら" }
+      ]},
+      { id: 46, nounK: "花", nounR: "はな", nounT: "цветок", verbK: "咲く", verbR: "さく", verbT: "цвести", forms: [
+        { type: "ta", ru: "Цветок зацвёл.", kanji: "花が咲いた", kana: "はながさいた" },
+        { type: "takoto", ru: "Доводилось видеть, как цветёт цветок.", kanji: "花が咲いたことがあります", kana: "はながさいたことがあります" },
+        { type: "tari", ru: "То цветок цветёт, то...", kanji: "花が咲いたり", kana: "はながさいたり" },
+        { type: "tara", ru: "Если цветок цветёт, ...", kanji: "花が咲いたら", kana: "はながさいたら" }
+      ]},
+      { id: 47, nounK: "傘", nounR: "かさ", nounT: "зонт", verbK: "差す", verbR: "さす", verbT: "раскрывать", forms: [
+        { type: "ta", ru: "Раскрыл зонт.", kanji: "傘を差した", kana: "かさをさした" },
+        { type: "takoto", ru: "Доводилось раскрывать зонт.", kanji: "傘を差したことがあります", kana: "かさをさしたことがあります" },
+        { type: "tari", ru: "То раскрывать зонт, то...", kanji: "傘を差したり", kana: "かさをさしたり" },
+        { type: "tara", ru: "Если раскрывать зонт, ...", kanji: "傘を差したら", kana: "かさをさしたら" }
+      ]},
+      { id: 48, nounK: "犬", nounR: "いぬ", nounT: "собака", verbK: "散歩する", verbR: "さんぽする", verbT: "гулять", forms: [
+        { type: "ta", ru: "Погулял с собакой.", kanji: "犬と散歩した", kana: "いぬとさんぽした" },
+        { type: "takoto", ru: "Доводилось гулять с собакой.", kanji: "犬と散歩したことがあります", kana: "いぬとさんぽしたことがあります" },
+        { type: "tari", ru: "То гулять с собакой, то...", kanji: "犬と散歩したり", kana: "いぬとさんぽしたり" },
+        { type: "tara", ru: "Если гулять с собакой, ...", kanji: "犬と散歩したら", kana: "いぬとさんぽしたら" }
+      ]},
+      { id: 49, nounK: "魚", nounR: "さかな", nounT: "рыба", verbK: "死ぬ", verbR: "しぬ", verbT: "умирать", forms: [
+        { type: "ta", ru: "Рыба умерла.", kanji: "魚が死んだ", kana: "さかながしんだ" },
+        { type: "takoto", ru: "Доводилось видеть, как умирает рыба.", kanji: "魚が死んだことがあります", kana: "さかながしんだことがあります" },
+        { type: "tari", ru: "То рыба умирает, то...", kanji: "魚が死んだり", kana: "さかながしんだり" },
+        { type: "tara", ru: "Если рыба умирает, ...", kanji: "魚が死んだら", kana: "さかながしんだら" }
+      ]},
+      { id: 50, nounK: "店", nounR: "みせ", nounT: "магазин", verbK: "閉まる", verbR: "しまる", verbT: "закрываться", forms: [
+        { type: "ta", ru: "Магазин закрылся.", kanji: "店が閉まった", kana: "みせがしまった" },
+        { type: "takoto", ru: "Доводилось закрывать магазин.", kanji: "店が閉まったことがあります", kana: "みせがしまったことがあります" },
+        { type: "tari", ru: "То магазин закрывается, то...", kanji: "店が閉まったり", kana: "みせがしまったり" },
+        { type: "tara", ru: "Если магазин закрывается, ...", kanji: "店が閉まったら", kana: "みせがしまったら" }
+      ]},
+      { id: 51, nounK: "箱", nounR: "はこ", nounT: "коробка", verbK: "閉める", verbR: "しめる", verbT: "закрывать", forms: [
+        { type: "ta", ru: "Закрыл коробку.", kanji: "箱を閉めた", kana: "はこをしめた" },
+        { type: "takoto", ru: "Доводилось закрывать коробку.", kanji: "箱を閉めたことがあります", kana: "はこをしめたことがあります" },
+        { type: "tari", ru: "То закрывать коробку, то...", kanji: "箱を閉めたり", kana: "はこをしめたり" },
+        { type: "tara", ru: "Если закрывать коробку, ...", kanji: "箱を閉めたら", kana: "はこをしめたら" }
+      ]},
+      { id: 52, nounK: "ネクタイ", nounR: "ネクタイ", nounT: "галстук", verbK: "締める", verbR: "しめる", verbT: "завязывать", forms: [
+        { type: "ta", ru: "Завязал галстук.", kanji: "ネクタイを締めた", kana: "ネクタイをしめた" },
+        { type: "takoto", ru: "Доводилось завязывать галстук.", kanji: "ネクタイを締めたことがあります", kana: "ネクタイをしめたことがあります" },
+        { type: "tari", ru: "То завязывать галстук, то...", kanji: "ネクタイを締めたり", kana: "ネクタイをしめたり" },
+        { type: "tara", ru: "Если завязывать галстук, ...", kanji: "ネクタイを締めたら", kana: "ネクタイをしめたら" }
+      ]},
+      { id: 53, nounK: "写真", nounR: "しゃしん", nounT: "фотография", verbK: "撮る", verbR: "とる", verbT: "фотографировать", forms: [
+        { type: "ta", ru: "Сфотографировал.", kanji: "写真を撮った", kana: "しゃしんをとった" },
+        { type: "takoto", ru: "Доводилось фотографировать.", kanji: "写真を撮ったことがあります", kana: "しゃしんをとったことがあります" },
+        { type: "tari", ru: "То фотографировать, то...", kanji: "写真を撮ったり", kana: "しゃしんをとったり" },
+        { type: "tara", ru: "Если фотографировать, ...", kanji: "写真を撮ったら", kana: "しゃしんをとったら" }
+      ]},
+      { id: 54, nounK: "医者", nounR: "いしゃ", nounT: "врач", verbK: "質問する", verbR: "しつもんする", verbT: "спрашивать", forms: [
+        { type: "ta", ru: "Спросил у врача.", kanji: "医者に質問した", kana: "いしゃにしつもんした" },
+        { type: "takoto", ru: "Доводилось спрашивать врача.", kanji: "医者に質問したことがあります", kana: "いしゃにしつもんしたことがあります" },
+        { type: "tari", ru: "То спрашивать врача, то...", kanji: "医者に質問したり", kana: "いしゃにしつもんしたり" },
+        { type: "tara", ru: "Если спрашивать врача, ...", kanji: "医者に質問したら", kana: "いしゃにしつもんしたら" }
+      ]},
+      { id: 55, nounK: "ニュース", nounR: "ニュース", nounT: "новость", verbK: "知る", verbR: "しる", verbT: "узнавать", forms: [
+        { type: "ta", ru: "Узнал новости.", kanji: "ニュースを知った", kana: "ニュースをしった" },
+        { type: "takoto", ru: "Доводилось узнавать новости.", kanji: "ニュースを知ったことがあります", kana: "ニュースをしったことがあります" },
+        { type: "tari", ru: "То узнавать новости, то...", kanji: "ニュースを知ったり", kana: "ニュースをしったり" },
+        { type: "tara", ru: "Если узнавать новости, ...", kanji: "ニュースを知ったら", kana: "ニュースをしったら" }
+      ]},
+      { id: 56, nounK: "たばこ", nounR: "たばこ", nounT: "сигарета", verbK: "吸う", verbR: "すう", verbT: "курить", forms: [
+        { type: "ta", ru: "Покурил сигарету.", kanji: "たばこを吸った", kana: "たばこをすった" },
+        { type: "takoto", ru: "Доводилось курить сигарету.", kanji: "たばこを吸ったことがあります", kana: "たばこをすったことがあります" },
+        { type: "tari", ru: "То курить сигарету, то...", kanji: "たばこを吸ったり", kana: "たばこをすったり" },
+        { type: "tara", ru: "Если курить сигарету, ...", kanji: "たばこを吸ったら", kana: "たばこをすったら" }
+      ]},
+      { id: 57, nounK: "町", nounR: "まち", nounT: "город", verbK: "住む", verbR: "すむ", verbT: "жить", forms: [
+        { type: "ta", ru: "Жил в городе.", kanji: "町に住んだ", kana: "まちにすんだ" },
+        { type: "takoto", ru: "Доводилось жить в городе.", kanji: "町に住んだことがあります", kana: "まちにすんだことがあります" },
+        { type: "tari", ru: "То жить в городе, то...", kanji: "町に住んだり", kana: "まちにすんだり" },
+        { type: "tara", ru: "Если жить в городе, ...", kanji: "町に住んだら", kana: "まちにすんだら" }
+      ]},
+      { id: 58, nounK: "宿題", nounR: "しゅくだい", nounT: "домашнее задание", verbK: "する", verbR: "する", verbT: "делать", forms: [
+        { type: "ta", ru: "Сделал домашнее задание.", kanji: "宿題をした", kana: "しゅくだいをした" },
+        { type: "takoto", ru: "Доводилось делать домашнее задание.", kanji: "宿題をしたことがあります", kana: "しゅくだいをしたことがあります" },
+        { type: "tari", ru: "То делать домашнее задание, то...", kanji: "宿題をしたり", kana: "しゅくだいをしたり" },
+        { type: "tara", ru: "Если делать домашнее задание, ...", kanji: "宿題をしたら", kana: "しゅくだいをしたら" }
+      ]},
+      { id: 59, nounK: "椅子", nounR: "いす", nounT: "стул", verbK: "座る", verbR: "すわる", verbT: "садиться", forms: [
+        { type: "ta", ru: "Сел на стул.", kanji: "椅子に座った", kana: "いすにすわった" },
+        { type: "takoto", ru: "Доводилось садиться на стул.", kanji: "椅子に座ったことがあります", kana: "いすにすわったことがあります" },
+        { type: "tari", ru: "То садиться на стул, то...", kanji: "椅子に座ったり", kana: "いすにすわったり" },
+        { type: "tara", ru: "Если садиться на стул, ...", kanji: "椅子に座ったら", kana: "いすにすわったら" }
+      ]},
+      { id: 60, nounK: "ズボン", nounR: "ズボン", nounT: "брюки", verbK: "洗濯する", verbR: "せんたくする", verbT: "стирать", forms: [
+        { type: "ta", ru: "Постирал брюки.", kanji: "ズボンを洗濯した", kana: "ズボンをせんたくした" },
+        { type: "takoto", ru: "Доводилось стирать брюки.", kanji: "ズボンを洗濯したことがあります", kana: "ズボンをせんたくしたことがあります" },
+        { type: "tari", ru: "То стирать брюки, то...", kanji: "ズボンを洗濯したり", kana: "ズボンをせんたくしたり" },
+        { type: "tara", ru: "Если стирать брюки, ...", kanji: "ズボンを洗濯したら", kana: "ズボンをせんたくしたら" }
+      ]},
+      { id: 61, nounK: "部屋", nounR: "へや", nounT: "комната", verbK: "掃除する", verbR: "そうじする", verbT: "убираться", forms: [
+        { type: "ta", ru: "Убрал комнату.", kanji: "部屋を掃除した", kana: "へやをそうじした" },
+        { type: "takoto", ru: "Доводилось убирать комнату.", kanji: "部屋を掃除したことがあります", kana: "へやをそうじしたことがあります" },
+        { type: "tari", ru: "То убирать комнату, то...", kanji: "部屋を掃除したり", kana: "へやをそうじしたり" },
+        { type: "tara", ru: "Если убирать комнату, ...", kanji: "部屋を掃除したら", kana: "へやをそうじしたら" }
+      ]},
+      { id: 62, nounK: "ごみ", nounR: "ごみ", nounT: "мусор", verbK: "出す", verbR: "だす", verbT: "выносить", forms: [
+        { type: "ta", ru: "Вынес мусор.", kanji: "ごみを出した", kana: "ごみをだした" },
+        { type: "takoto", ru: "Доводилось выносить мусор.", kanji: "ごみを出したことがあります", kana: "ごみをだしたことがあります" },
+        { type: "tari", ru: "То выносить мусор, то...", kanji: "ごみを出したり", kana: "ごみをだしたり" },
+        { type: "tara", ru: "Если выносить мусор, ...", kanji: "ごみを出したら", kana: "ごみをだしたら" }
+      ]},
+      { id: 63, nounK: "駅", nounR: "えき", nounT: "вокзал", verbK: "立つ", verbR: "たつ", verbT: "стоять, вставать", forms: [
+        { type: "ta", ru: "Постоял перед вокзалом.", kanji: "駅の前に立った", kana: "えきのまえにたった" },
+        { type: "takoto", ru: "Доводилось стоять перед вокзалом.", kanji: "駅の前に立ったことがあります", kana: "えきのまえにたったことがあります" },
+        { type: "tari", ru: "То стоять перед вокзалом, то...", kanji: "駅の前に立ったり", kana: "えきのまえにたったり" },
+        { type: "tara", ru: "Если стоять перед вокзалом, ...", kanji: "駅の前に立ったら", kana: "えきのまえにたったら" }
+      ]},
+      { id: 64, nounK: "コーヒー", nounR: "コーヒー", nounT: "кофе", verbK: "頼む", verbR: "たのむ", verbT: "заказывать", forms: [
+        { type: "ta", ru: "Заказал кофе.", kanji: "コーヒーを頼んだ", kana: "コーヒーをたのんだ" },
+        { type: "takoto", ru: "Доводилось заказывать кофе.", kanji: "コーヒーを頼んだことがあります", kana: "コーヒーをたのんだことがあります" },
+        { type: "tari", ru: "То заказывать кофе, то...", kanji: "コーヒーを頼んだり", kana: "コーヒーをたのんだり" },
+        { type: "tara", ru: "Если заказывать кофе, ...", kanji: "コーヒーを頼んだら", kana: "コーヒーをたのんだら" }
+      ]},
+      { id: 65, nounK: "ご飯", nounR: "ごはん", nounT: "еда", verbK: "食べる", verbR: "たべる", verbT: "есть", forms: [
+        { type: "ta", ru: "Поел.", kanji: "ご飯を食べた", kana: "ごはんをたべた" },
+        { type: "takoto", ru: "Доводилось есть.", kanji: "ご飯を食べたことがあります", kana: "ごはんをたべたことがあります" },
+        { type: "tari", ru: "То есть еду, то...", kanji: "ご飯を食べたり", kana: "ごはんをたべたり" },
+        { type: "tara", ru: "Если есть еду, ...", kanji: "ご飯を食べたら", kana: "ごはんをたべたら" }
+      ]},
+      { id: 66, nounK: "色", nounR: "いろ", nounT: "цвет", verbK: "違う", verbR: "ちがう", verbT: "отличаться", forms: [
+        { type: "ta", ru: "Отличался цветом.", kanji: "色が違った", kana: "いろがちがった" },
+        { type: "takoto", ru: "Доводилось отличаться цветом.", kanji: "色が違ったことがあります", kana: "いろがちがったことがあります" },
+        { type: "tari", ru: "То цвет отличается, то...", kanji: "色が違ったり", kana: "いろがちがったり" },
+        { type: "tara", ru: "Если цвет отличается, ...", kanji: "色が違ったら", kana: "いろがちがったら" }
+      ]},
+      { id: 67, nounK: "パソコン", nounR: "パソコン", nounT: "компьютер", verbK: "使う", verbR: "つかう", verbT: "использовать", forms: [
+        { type: "ta", ru: "Использовал компьютер.", kanji: "パソコンを使った", kana: "パソコンをつかった" },
+        { type: "takoto", ru: "Доводилось использовать компьютер.", kanji: "パソコンを使ったことがあります", kana: "パソコンをつかったことがあります" },
+        { type: "tari", ru: "То использовать компьютер, то...", kanji: "パソコンを使ったり", kana: "パソコンをつかったり" },
+        { type: "tara", ru: "Если использовать компьютер, ...", kanji: "パソコンを使ったら", kana: "パソコンをつかったら" }
+      ]},
+      { id: 68, nounK: "旅行", nounR: "りょこう", nounT: "путешествие", verbK: "疲れる", verbR: "つかれる", verbT: "уставать", forms: [
+        { type: "ta", ru: "Устал от путешествия.", kanji: "旅行で疲れた", kana: "りょこうでつかれた" },
+        { type: "takoto", ru: "Доводилось уставать от путешествия.", kanji: "旅行で疲れたことがあります", kana: "りょこうでつかれたことがあります" },
+        { type: "tari", ru: "То уставать от путешествия, то...", kanji: "旅行で疲れたり", kana: "りょこうでつかれたり" },
+        { type: "tara", ru: "Если уставать от путешествия, ...", kanji: "旅行で疲れたら", kana: "りょこうでつかれたら" }
+      ]},
+      { id: 69, nounK: "空港", nounR: "くうこう", nounT: "аэропорт", verbK: "着く", verbR: "つく", verbT: "прибывать", forms: [
+        { type: "ta", ru: "Прибыл в аэропорт.", kanji: "空港に着いた", kana: "くうこうについた" },
+        { type: "takoto", ru: "Доводилось прибывать в аэропорт.", kanji: "空港に着いたことがあります", kana: "くうこうについたことがあります" },
+        { type: "tari", ru: "То прибывать в аэропорт, то...", kanji: "空港に着いたり", kana: "くうこうについたり" },
+        { type: "tara", ru: "Если прибывать в аэропорт, ...", kanji: "空港に着いたら", kana: "くうこうについたら" }
+      ]},
+      { id: 70, nounK: "料理", nounR: "りょうり", nounT: "еда (блюдо)", verbK: "作る", verbR: "つくる", verbT: "готовить", forms: [
+        { type: "ta", ru: "Приготовил еду.", kanji: "料理を作った", kana: "りょうりをつくった" },
+        { type: "takoto", ru: "Доводилось готовить еду.", kanji: "料理を作ったことがあります", kana: "りょうりをつくったことがあります" },
+        { type: "tari", ru: "То готовить еду, то...", kanji: "料理を作ったり", kana: "りょうりをつくったり" },
+        { type: "tara", ru: "Если готовить еду, ...", kanji: "料理を作ったら", kana: "りょうりをつくったら" }
+      ]},
+      { id: 71, nounK: "ラジオ", nounR: "ラジオ", nounT: "радио", verbK: "点ける", verbR: "つける", verbT: "включать", forms: [
+        { type: "ta", ru: "Включил радио.", kanji: "ラジオを点けた", kana: "ラジオをつけた" },
+        { type: "takoto", ru: "Доводилось включать радио.", kanji: "ラジオを点けたことがあります", kana: "ラジオをつけたことがあります" },
+        { type: "tari", ru: "То включать радио, то...", kanji: "ラジオを点けたり", kana: "ラジオをつけたり" },
+        { type: "tara", ru: "Если включать радио, ...", kanji: "ラジオを点けたら", kana: "ラジオをつけたら" }
+      ]},
+      { id: 72, nounK: "会社", nounR: "かいしゃ", nounT: "компания", verbK: "勤める", verbR: "つとめる", verbT: "служить", forms: [
+        { type: "ta", ru: "Работал в компании.", kanji: "会社に勤めた", kana: "かいしゃにつとめた" },
+        { type: "takoto", ru: "Доводилось работать в компании.", kanji: "会社に勤めたことがあります", kana: "かいしゃにつとめたことがあります" },
+        { type: "tari", ru: "То служить в компании, то...", kanji: "会社に勤めたり", kana: "かいしゃにつとめたり" },
+        { type: "tara", ru: "Если служить в компании, ...", kanji: "会社に勤めたら", kana: "かいしゃにつとめたら" }
+      ]},
+      { id: 73, nounK: "散歩", nounR: "さんぽ", nounT: "прогулка", verbK: "出かける", verbR: "でかける", verbT: "выходить из дома", forms: [
+        { type: "ta", ru: "Вышел на прогулку.", kanji: "散歩に出かけた", kana: "さんぽにでかけた" },
+        { type: "takoto", ru: "Доводилось выходить на прогулку.", kanji: "散歩に出かけたことがあります", kana: "さんぽにでかけたことがあります" },
+        { type: "tari", ru: "То выходить из дома на прогулку, то...", kanji: "散歩に出かけたり", kana: "さんぽにでかけたり" },
+        { type: "tara", ru: "Если выходить из дома на прогулку, ...", kanji: "散歩に出かけたら", kana: "さんぽにでかけたら" }
+      ]},
+      { id: 74, nounK: "日本語", nounR: "にほんご", nounT: "японский язык", verbK: "できる", verbR: "できる", verbT: "мочь", forms: [
+        { type: "ta", ru: "Владел японским языком.", kanji: "日本語ができた", kana: "にほんごができた" },
+        { type: "takoto", ru: "Доводилось владеть японским языком.", kanji: "日本語ができたことがあります", kana: "にほんごができたことがあります" },
+        { type: "tari", ru: "То уметь говорить по-японски, то...", kanji: "日本語ができたり", kana: "にほんごができたり" },
+        { type: "tara", ru: "Если уметь говорить по-японски, ...", kanji: "日本語ができたら", kana: "にほんごができたら" }
+      ]},
+      { id: 75, nounK: "大学", nounR: "だいがく", nounT: "университет", verbK: "出る", verbR: "でる", verbT: "выходить, оканчивать", forms: [
+        { type: "ta", ru: "Окончил университет.", kanji: "大学を出た", kana: "だいがくをでた" },
+        { type: "takoto", ru: "Доводилось оканчивать университет.", kanji: "大学を出たことがあります", kana: "だいがくをでたことがあります" },
+        { type: "tari", ru: "То оканчивать университет, то...", kanji: "大学を出たり", kana: "だいがくをでたり" },
+        { type: "tara", ru: "Если оканчивать университет, ...", kanji: "大学を出たら", kana: "だいがくをでたら" }
+      ]},
+      { id: 76, nounK: "病院", nounR: "びょういん", nounT: "больница", verbK: "電話する", verbR: "でんわする", verbT: "звонить по телефону", forms: [
+        { type: "ta", ru: "Позвонил в больницу.", kanji: "病院に電話した", kana: "びょういんにでんわした" },
+        { type: "takoto", ru: "Доводилось звонить в больницу.", kanji: "病院に電話したことがあります", kana: "びょういんにでんわしたことがあります" },
+        { type: "tari", ru: "То звонить по телефону в больницу, то...", kanji: "病院に電話したり", kana: "びょういんにでんわしたり" },
+        { type: "tara", ru: "Если звонить по телефону в больницу, ...", kanji: "病院に電話したら", kana: "びょういんにでんわしたら" }
+      ]},
+      { id: 77, nounK: "飛行機", nounR: "ひこうき", nounT: "самолёт", verbK: "飛ぶ", verbR: "とぶ", verbT: "летать", forms: [
+        { type: "ta", ru: "Самолёт летал.", kanji: "飛行機が飛んだ", kana: "ひこうきがとんだ" },
+        { type: "takoto", ru: "Доводилось летать самолётом.", kanji: "飛行機が飛んだことがあります", kana: "ひこうきがとんだことがあります" },
+        { type: "tari", ru: "То самолёт летает, то...", kanji: "飛行機が飛んだり", kana: "ひこうきがとんだり" },
+        { type: "tara", ru: "Если самолёт летает, ...", kanji: "飛行機が飛んだら", kana: "ひこうきがとんだら" }
+      ]},
+      { id: 78, nounK: "車", nounR: "くるま", nounT: "машина", verbK: "止まる", verbR: "とまる", verbT: "останавливаться", forms: [
+        { type: "ta", ru: "Машина остановилась.", kanji: "車が止まった", kana: "くるまがとまった" },
+        { type: "takoto", ru: "Доводилось останавливать машину.", kanji: "車が止まったことがあります", kana: "くるまがとまったことがあります" },
+        { type: "tari", ru: "То машина останавливается, то...", kanji: "車が止まったり", kana: "くるまがとまったり" },
+        { type: "tara", ru: "Если машина останавливается, ...", kanji: "車が止まったら", kana: "くるまがとまったら" }
+      ]},
+      { id: 79, nounK: "休み", nounR: "やすみ", nounT: "выходной", verbK: "取る", verbR: "とる", verbT: "брать", forms: [
+        { type: "ta", ru: "Взял выходной.", kanji: "休みを取った", kana: "やすみをとった" },
+        { type: "takoto", ru: "Доводилось брать выходной.", kanji: "休みを取ったことがあります", kana: "やすみをとったことがあります" },
+        { type: "tari", ru: "То брать выходной, то...", kanji: "休みを取ったり", kana: "やすみをとったり" },
+        { type: "tara", ru: "Если брать выходной, ...", kanji: "休みを取ったら", kana: "やすみをとったら" }
+      ]},
+      { id: 80, nounK: "カメラ", nounR: "カメラ", nounT: "камера", verbK: "撮る", verbR: "とる", verbT: "снимать (фото)", forms: [
+        { type: "ta", ru: "Снял камерой.", kanji: "カメラで撮った", kana: "カメラでとった" },
+        { type: "takoto", ru: "Доводилось снимать камерой.", kanji: "カメラで撮ったことがあります", kana: "カメラでとったことがあります" },
+        { type: "tari", ru: "То снимать (фото) камерой, то...", kanji: "カメラで撮ったり", kana: "カメラでとったり" },
+        { type: "tara", ru: "Если снимать (фото) камерой, ...", kanji: "カメラで撮ったら", kana: "カメラでとったら" }
+      ]},
+      { id: 81, nounK: "鳥", nounR: "とり", nounT: "птица", verbK: "鳴く", verbR: "なく", verbT: "петь (о птице)", forms: [
+        { type: "ta", ru: "Птица пела.", kanji: "鳥が鳴いた", kana: "とりがないた" },
+        { type: "takoto", ru: "Доводилось слышать, как поёт птица.", kanji: "鳥が鳴いたことがあります", kana: "とりがないたことがあります" },
+        { type: "tari", ru: "То птица поёт (о птице), то...", kanji: "鳥が鳴いたり", kana: "とりがないたり" },
+        { type: "tara", ru: "Если птица поёт (о птице), ...", kanji: "鳥が鳴いたら", kana: "とりがないたら" }
+      ]},
+      { id: 82, nounK: "銀行", nounR: "ぎんこう", nounT: "банк", verbK: "並ぶ", verbR: "ならぶ", verbT: "стоять в очереди", forms: [
+        { type: "ta", ru: "Постоял в очереди в банке.", kanji: "銀行で並んだ", kana: "ぎんこうでならんだ" },
+        { type: "takoto", ru: "Доводилось стоять в очереди в банке.", kanji: "銀行で並んだことがあります", kana: "ぎんこうでならんだことがあります" },
+        { type: "tari", ru: "То стоять в очереди в банке, то...", kanji: "銀行で並んだり", kana: "ぎんこうでならんだり" },
+        { type: "tara", ru: "Если стоять в очереди в банке, ...", kanji: "銀行で並んだら", kana: "ぎんこうでならんだら" }
+      ]},
+      { id: 83, nounK: "お皿", nounR: "おさら", nounT: "тарелка", verbK: "並べる", verbR: "ならべる", verbT: "расставлять", forms: [
+        { type: "ta", ru: "Расставил тарелки.", kanji: "お皿を並べた", kana: "おさらをならべた" },
+        { type: "takoto", ru: "Доводилось расставлять тарелки.", kanji: "お皿を並べたことがあります", kana: "おさらをならべたことがあります" },
+        { type: "tari", ru: "То расставлять тарелки, то...", kanji: "お皿を並べたり", kana: "おさらをならべたり" },
+        { type: "tara", ru: "Если расставлять тарелки, ...", kanji: "お皿を並べたら", kana: "おさらをならべたら" }
+      ]},
+      { id: 84, nounK: "大人", nounR: "おとな", nounT: "взрослый", verbK: "なる", verbR: "なる", verbT: "становиться", forms: [
+        { type: "ta", ru: "Стал взрослым.", kanji: "大人になった", kana: "おとなになった" },
+        { type: "takoto", ru: "Доводилось становиться взрослым.", kanji: "大人になったことがあります", kana: "おとなになったことがあります" },
+        { type: "tari", ru: "То становиться взрослым, то...", kanji: "大人になったり", kana: "おとなになったり" },
+        { type: "tara", ru: "Если становиться взрослым, ...", kanji: "大人になったら", kana: "おとなになったら" }
+      ]},
+      { id: 85, nounK: "靴", nounR: "くつ", nounT: "обувь", verbK: "脱ぐ", verbR: "ぬぐ", verbT: "снимать одежду", forms: [
+        { type: "ta", ru: "Снял обувь.", kanji: "靴を脱いだ", kana: "くつをぬいだ" },
+        { type: "takoto", ru: "Доводилось снимать обувь.", kanji: "靴を脱いだことがあります", kana: "くつをぬいだことがあります" },
+        { type: "tari", ru: "То снимать обувь, то...", kanji: "靴を脱いだり", kana: "くつをぬいだり" },
+        { type: "tara", ru: "Если снимать обувь, ...", kanji: "靴を脱いだら", kana: "くつをぬいだら" }
+      ]},
+      { id: 86, nounK: "ベッド", nounR: "ベッド", nounT: "кровать", verbK: "寝る", verbR: "ねる", verbT: "спать", forms: [
+        { type: "ta", ru: "Поспал в кровати.", kanji: "ベッドで寝た", kana: "ベッドでねた" },
+        { type: "takoto", ru: "Доводилось спать в кровати.", kanji: "ベッドで寝たことがあります", kana: "ベッドでねたことがあります" },
+        { type: "tari", ru: "То спать в кровати, то...", kanji: "ベッドで寝たり", kana: "ベッドでねたり" },
+        { type: "tara", ru: "Если спать в кровати, ...", kanji: "ベッドで寝たら", kana: "ベッドでねたら" }
+      ]},
+      { id: 87, nounK: "山", nounR: "やま", nounT: "гора", verbK: "登る", verbR: "のぼる", verbT: "подниматься", forms: [
+        { type: "ta", ru: "Поднялся на гору.", kanji: "山に登った", kana: "やまにのぼった" },
+        { type: "takoto", ru: "Доводилось подниматься на гору.", kanji: "山に登ったことがあります", kana: "やまにのぼったことがあります" },
+        { type: "tari", ru: "То подниматься на гору, то...", kanji: "山に登ったり", kana: "やまにのぼったり" },
+        { type: "tara", ru: "Если подниматься на гору, ...", kanji: "山に登ったら", kana: "やまにのぼったら" }
+      ]},
+      { id: 88, nounK: "お茶", nounR: "おちゃ", nounT: "чай", verbK: "飲む", verbR: "のむ", verbT: "пить", forms: [
+        { type: "ta", ru: "Выпил чай.", kanji: "お茶を飲んだ", kana: "おちゃをのんだ" },
+        { type: "takoto", ru: "Доводилось пить чай.", kanji: "お茶を飲んだことがあります", kana: "おちゃをのんだことがあります" },
+        { type: "tari", ru: "То пить чай, то...", kanji: "お茶を飲んだり", kana: "おちゃをのんだり" },
+        { type: "tara", ru: "Если пить чай, ...", kanji: "お茶を飲んだら", kana: "おちゃをのんだら" }
+      ]},
+      { id: 89, nounK: "電車", nounR: "でんしゃ", nounT: "поезд", verbK: "乗る", verbR: "のる", verbT: "садиться в транспорт", forms: [
+        { type: "ta", ru: "Сел на поезд.", kanji: "電車に乗った", kana: "でんしゃにのった" },
+        { type: "takoto", ru: "Доводилось садиться на поезд.", kanji: "電車に乗ったことがあります", kana: "でんしゃにのったことがあります" },
+        { type: "tari", ru: "То садиться на поезд, то...", kanji: "電車に乗ったり", kana: "でんしゃにのったり" },
+        { type: "tara", ru: "Если садиться на поезд, ...", kanji: "電車に乗ったら", kana: "でんしゃにのったら" }
+      ]},
+      { id: 90, nounK: "教室", nounR: "きょうしつ", nounT: "класс", verbK: "入る", verbR: "はいる", verbT: "входить", forms: [
+        { type: "ta", ru: "Вошёл в класс.", kanji: "教室に入った", kana: "きょうしつにはいった" },
+        { type: "takoto", ru: "Доводилось входить в класс.", kanji: "教室に入ったことがあります", kana: "きょうしつにはいったことがあります" },
+        { type: "tari", ru: "То входить в класс, то...", kanji: "教室に入ったり", kana: "きょうしつにはいったり" },
+        { type: "tara", ru: "Если входить в класс, ...", kanji: "教室に入ったら", kana: "きょうしつにはいったら" }
+      ]},
+      { id: 91, nounK: "靴下", nounR: "くつした", nounT: "носок", verbK: "履く", verbR: "はく", verbT: "надевать обувь", forms: [
+        { type: "ta", ru: "Надел носки.", kanji: "靴下を履いた", kana: "くつしたをはいた" },
+        { type: "takoto", ru: "Доводилось надевать носки.", kanji: "靴下を履いたことがあります", kana: "くつしたをはいたことがあります" },
+        { type: "tari", ru: "То надевать носки, то...", kanji: "靴下を履いたり", kana: "くつしたをはいたり" },
+        { type: "tara", ru: "Если надевать носки, ...", kanji: "靴下を履いたら", kana: "くつしたをはいたら" }
+      ]},
+      { id: 92, nounK: "川沿い", nounR: "かわぞい", nounT: "река", verbK: "走る", verbR: "はしる", verbT: "бежать", forms: [
+        { type: "ta", ru: "Бежал вдоль реки.", kanji: "川沿いを走った", kana: "かわぞいをはしった" },
+        { type: "takoto", ru: "Доводилось бежать вдоль реки.", kanji: "川沿いを走ったことがあります", kana: "かわぞいをはしったことがあります" },
+        { type: "tari", ru: "То бежать вдоль реки, то...", kanji: "川沿いを走ったり", kana: "かわぞいをはしったり" },
+        { type: "tara", ru: "Если бежать вдоль реки, ...", kanji: "川沿いを走ったら", kana: "かわぞいをはしったら" }
+      ]},
+      { id: 93, nounK: "レストラン", nounR: "レストラン", nounT: "ресторан", verbK: "働く", verbR: "はたらく", verbT: "работать", forms: [
+        { type: "ta", ru: "Работал в ресторане.", kanji: "レストランで働いた", kana: "レストランではたらいた" },
+        { type: "takoto", ru: "Доводилось работать в ресторане.", kanji: "レストランで働いたことがあります", kana: "レストランではたらいたことがあります" },
+        { type: "tari", ru: "То работать в ресторане, то...", kanji: "レストランで働いたり", kana: "レストランではたらいたり" },
+        { type: "tara", ru: "Если работать в ресторане, ...", kanji: "レストランで働いたら", kana: "レストランではたらいたら" }
+      ]},
+      { id: 94, nounK: "英語", nounR: "えいご", nounT: "английский язык", verbK: "話す", verbR: "はなす", verbT: "говорить", forms: [
+        { type: "ta", ru: "Говорил по-английски.", kanji: "英語を話した", kana: "えいごをはなした" },
+        { type: "takoto", ru: "Доводилось говорить по-английски.", kanji: "英語を話したことがあります", kana: "えいごをはなしたことがあります" },
+        { type: "tari", ru: "То говорить по-английски, то...", kanji: "英語を話したり", kana: "えいごをはなしたり" },
+        { type: "tara", ru: "Если говорить по-английски, ...", kanji: "英語を話したら", kana: "えいごをはなしたら" }
+      ]},
+      { id: 95, nounK: "切手", nounR: "きって", nounT: "марка", verbK: "貼る", verbR: "はる", verbT: "наклеивать", forms: [
+        { type: "ta", ru: "Наклеил марку.", kanji: "切手を貼った", kana: "きってをはった" },
+        { type: "takoto", ru: "Доводилось наклеивать марку.", kanji: "切手を貼ったことがあります", kana: "きってをはったことがあります" },
+        { type: "tari", ru: "То наклеивать марку, то...", kanji: "切手を貼ったり", kana: "きってをはったり" },
+        { type: "tara", ru: "Если наклеивать марку, ...", kanji: "切手を貼ったら", kana: "きってをはったら" }
+      ]},
+      { id: 96, nounK: "天気", nounR: "てんき", nounT: "погода", verbK: "晴れる", verbR: "はれる", verbT: "проясняться", forms: [
+        { type: "ta", ru: "Погода прояснилась.", kanji: "天気が晴れた", kana: "てんきがはれた" },
+        { type: "takoto", ru: "Доводилось видеть, как проясняется погода.", kanji: "天気が晴れたことがあります", kana: "てんきがはれたことがあります" },
+        { type: "tari", ru: "То погода проясняется, то...", kanji: "天気が晴れたり", kana: "てんきがはれたり" },
+        { type: "tara", ru: "Если погода проясняется, ...", kanji: "天気が晴れたら", kana: "てんきがはれたら" }
+      ]},
+      { id: 97, nounK: "風邪", nounR: "かぜ", nounT: "простуда", verbK: "引く", verbR: "ひく", verbT: "простужаться", forms: [
+        { type: "ta", ru: "Простудился.", kanji: "風邪を引いた", kana: "かぜをひいた" },
+        { type: "takoto", ru: "Доводилось простужаться.", kanji: "風邪を引いたことがあります", kana: "かぜをひいたことがあります" },
+        { type: "tari", ru: "То простужаться, то...", kanji: "風邪を引いたり", kana: "かぜをひいたり" },
+        { type: "tara", ru: "Если простужаться, ...", kanji: "風邪を引いたら", kana: "かぜをひいたら" }
+      ]},
+      { id: 98, nounK: "ピアノ", nounR: "ピアノ", nounT: "пианино", verbK: "弾く", verbR: "ひく", verbT: "играть на инструменте", forms: [
+        { type: "ta", ru: "Играл на пианино.", kanji: "ピアノを弾いた", kana: "ピアノをひいた" },
+        { type: "takoto", ru: "Доводилось играть на пианино.", kanji: "ピアノを弾いたことがあります", kana: "ピアノをひいたことがあります" },
+        { type: "tari", ru: "То играть на пианино, то...", kanji: "ピアノを弾いたり", kana: "ピアノをひいたり" },
+        { type: "tara", ru: "Если играть на пианино, ...", kanji: "ピアノを弾いたら", kana: "ピアノをひいたら" }
+      ]},
+      { id: 99, nounK: "風", nounR: "かぜ", nounT: "ветер", verbK: "吹く", verbR: "ふく", verbT: "дуть", forms: [
+        { type: "ta", ru: "Ветер дул.", kanji: "風が吹いた", kana: "かぜがふいた" },
+        { type: "takoto", ru: "Доводилось чувствовать, как дует ветер.", kanji: "風が吹いたことがあります", kana: "かぜがふいたことがあります" },
+        { type: "tari", ru: "То ветер дует, то...", kanji: "風が吹いたり", kana: "かぜがふいたり" },
+        { type: "tara", ru: "Если ветер дует, ...", kanji: "風が吹いたら", kana: "かぜがふいたら" }
+      ]},
+      { id: 100, nounK: "雨", nounR: "あめ", nounT: "дождь", verbK: "降る", verbR: "ふる", verbT: "идти (об осадках)", forms: [
+        { type: "ta", ru: "Дождь пошёл.", kanji: "雨が降った", kana: "あめがふった" },
+        { type: "takoto", ru: "Доводилось видеть, как идёт дождь.", kanji: "雨が降ったことがあります", kana: "あめがふったことがあります" },
+        { type: "tari", ru: "То дождь идёт (об осадках), то...", kanji: "雨が降ったり", kana: "あめがふったり" },
+        { type: "tara", ru: "Если дождь идёт (об осадках), ...", kanji: "雨が降ったら", kana: "あめがふったら" }
+      ]},
+      { id: 101, nounK: "図書館", nounR: "としょかん", nounT: "библиотека", verbK: "勉強する", verbR: "べんきょうする", verbT: "учиться", forms: [
+        { type: "ta", ru: "Учился в библиотеке.", kanji: "図書館で勉強した", kana: "としょかんでべんきょうした" },
+        { type: "takoto", ru: "Доводилось учиться в библиотеке.", kanji: "図書館で勉強したことがあります", kana: "としょかんでべんきょうしたことがあります" },
+        { type: "tari", ru: "То учиться в библиотеке, то...", kanji: "図書館で勉強したり", kana: "としょかんでべんきょうしたり" },
+        { type: "tara", ru: "Если учиться в библиотеке, ...", kanji: "図書館で勉強したら", kana: "としょかんでべんきょうしたら" }
+      ]},
+      { id: 102, nounK: "角", nounR: "かど", nounT: "угол", verbK: "曲がる", verbR: "まがる", verbT: "поворачивать", forms: [
+        { type: "ta", ru: "Повернул на углу.", kanji: "角を曲がった", kana: "かどをまがった" },
+        { type: "takoto", ru: "Доводилось поворачивать на углу.", kanji: "角を曲がったことがあります", kana: "かどをまがったことがあります" },
+        { type: "tari", ru: "То поворачивать на углу, то...", kanji: "角を曲がったり", kana: "かどをまがったり" },
+        { type: "tara", ru: "Если поворачивать на углу, ...", kanji: "角を曲がったら", kana: "かどをまがったら" }
+      ]},
+      { id: 103, nounK: "タクシー", nounR: "タクシー", nounT: "такси", verbK: "待つ", verbR: "まつ", verbT: "ждать", forms: [
+        { type: "ta", ru: "Подождал такси.", kanji: "タクシーを待った", kana: "タクシーをまった" },
+        { type: "takoto", ru: "Доводилось ждать такси.", kanji: "タクシーを待ったことがあります", kana: "タクシーをまったことがあります" },
+        { type: "tari", ru: "То ждать такси, то...", kanji: "タクシーを待ったり", kana: "タクシーをまったり" },
+        { type: "tara", ru: "Если ждать такси, ...", kanji: "タクシーを待ったら", kana: "タクシーをまったら" }
+      ]},
+      { id: 104, nounK: "歯", nounR: "は", nounT: "зуб", verbK: "磨く", verbR: "みがく", verbT: "чистить", forms: [
+        { type: "ta", ru: "Почистил зубы.", kanji: "歯を磨いた", kana: "はをみがいた" },
+        { type: "takoto", ru: "Доводилось чистить зубы.", kanji: "歯を磨いたことがあります", kana: "はをみがいたことがあります" },
+        { type: "tari", ru: "То чистить зубы, то...", kanji: "歯を磨いたり", kana: "はをみがいたり" },
+        { type: "tara", ru: "Если чистить зубы, ...", kanji: "歯を磨いたら", kana: "はをみがいたら" }
+      ]},
+      { id: 105, nounK: "絵", nounR: "え", nounT: "картина", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "ta", ru: "Показал картину.", kanji: "絵を見せた", kana: "えをみせた" },
+        { type: "takoto", ru: "Доводилось показывать картину.", kanji: "絵を見せたことがあります", kana: "えをみせたことがあります" },
+        { type: "tari", ru: "То показывать картину, то...", kanji: "絵を見せたり", kana: "えをみせたり" },
+        { type: "tara", ru: "Если показывать картину, ...", kanji: "絵を見せたら", kana: "えをみせたら" }
+      ]},
+      { id: 106, nounK: "映画", nounR: "えいが", nounT: "фильм", verbK: "見る", verbR: "みる", verbT: "смотреть", forms: [
+        { type: "ta", ru: "Посмотрел фильм.", kanji: "映画を見た", kana: "えいがをみた" },
+        { type: "takoto", ru: "Доводилось смотреть фильм.", kanji: "映画を見たことがあります", kana: "えいがをみたことがあります" },
+        { type: "tari", ru: "То смотреть фильм, то...", kanji: "映画を見たり", kana: "えいがをみたり" },
+        { type: "tara", ru: "Если смотреть фильм, ...", kanji: "映画を見たら", kana: "えいがをみたら" }
+      ]},
+      { id: 107, nounK: "荷物", nounR: "にもつ", nounT: "багаж", verbK: "持つ", verbR: "もつ", verbT: "держать", forms: [
+        { type: "ta", ru: "Держал багаж.", kanji: "荷物を持った", kana: "にもつをもった" },
+        { type: "takoto", ru: "Доводилось держать багаж.", kanji: "荷物を持ったことがあります", kana: "にもつをもったことがあります" },
+        { type: "tari", ru: "То держать багаж, то...", kanji: "荷物を持ったり", kana: "にもつをもったり" },
+        { type: "tara", ru: "Если держать багаж, ...", kanji: "荷物を持ったら", kana: "にもつをもったら" }
+      ]},
+      { id: 108, nounK: "先輩", nounR: "せんぱい", nounT: "старший товарищ", verbK: "呼ぶ", verbR: "よぶ", verbT: "звать", forms: [
+        { type: "ta", ru: "Позвал старшего товарища.", kanji: "先輩を呼んだ", kana: "せんぱいをよんだ" },
+        { type: "takoto", ru: "Доводилось звать старшего товарища.", kanji: "先輩を呼んだことがあります", kana: "せんぱいをよんだことがあります" },
+        { type: "tari", ru: "То звать старшего товарища, то...", kanji: "先輩を呼んだり", kana: "せんぱいをよんだり" },
+        { type: "tara", ru: "Если звать старшего товарища, ...", kanji: "先輩を呼んだら", kana: "せんぱいをよんだら" }
+      ]},
+      { id: 109, nounK: "雑誌", nounR: "ざっし", nounT: "журнал", verbK: "読む", verbR: "よむ", verbT: "читать", forms: [
+        { type: "ta", ru: "Почитал журнал.", kanji: "雑誌を読んだ", kana: "ざっしをよんだ" },
+        { type: "takoto", ru: "Доводилось читать журнал.", kanji: "雑誌を読んだことがあります", kana: "ざっしをよんだことがあります" },
+        { type: "tari", ru: "То читать журнал, то...", kanji: "雑誌を読んだり", kana: "ざっしをよんだり" },
+        { type: "tara", ru: "Если читать журнал, ...", kanji: "雑誌を読んだら", kana: "ざっしをよんだら" }
+      ]},
+      { id: 110, nounK: "外国", nounR: "がいこく", nounT: "заграница", verbK: "旅行する", verbR: "りょこうする", verbT: "путешествовать", forms: [
+        { type: "ta", ru: "Путешествовал за границей.", kanji: "外国を旅行した", kana: "がいこくをりょこうした" },
+        { type: "takoto", ru: "Доводилось путешествовать за границей.", kanji: "外国を旅行したことがあります", kana: "がいこくをりょこうしたことがあります" },
+        { type: "tari", ru: "То путешествовать за границей, то...", kanji: "外国を旅行したり", kana: "がいこくをりょこうしたり" },
+        { type: "tara", ru: "Если путешествовать за границей, ...", kanji: "外国を旅行したら", kana: "がいこくをりょこうしたら" }
+      ]},
+      { id: 111, nounK: "スポーツ", nounR: "スポーツ", nounT: "спорт", verbK: "練習する", verbR: "れんしゅうする", verbT: "тренироваться", forms: [
+        { type: "ta", ru: "Тренировался в спорте.", kanji: "スポーツを練習した", kana: "スポーツをれんしゅうした" },
+        { type: "takoto", ru: "Доводилось тренироваться в спорте.", kanji: "スポーツを練習したことがあります", kana: "スポーツをれんしゅうしたことがあります" },
+        { type: "tari", ru: "То тренироваться в спорте, то...", kanji: "スポーツを練習したり", kana: "スポーツをれんしゅうしたり" },
+        { type: "tara", ru: "Если тренироваться в спорте, ...", kanji: "スポーツを練習したら", kana: "スポーツをれんしゅうしたら" }
+      ]},
+      { id: 112, nounK: "意味", nounR: "いみ", nounT: "смысл", verbK: "分かる", verbR: "わかる", verbT: "понимать", forms: [
+        { type: "ta", ru: "Понял смысл.", kanji: "意味が分かった", kana: "いみがわかった" },
+        { type: "takoto", ru: "Доводилось понимать смысл.", kanji: "意味が分かったことがあります", kana: "いみがわかったことがあります" },
+        { type: "tari", ru: "То понимать смысл, то...", kanji: "意味が分かったり", kana: "いみがわかったり" },
+        { type: "tara", ru: "Если понимать смысл, ...", kanji: "意味が分かったら", kana: "いみがわかったら" }
+      ]},
+      { id: 113, nounK: "約束", nounR: "やくそく", nounT: "обещание", verbK: "忘れる", verbR: "わすれる", verbT: "забывать", forms: [
+        { type: "ta", ru: "Забыл обещание.", kanji: "約束を忘れた", kana: "やくそくをわすれた" },
+        { type: "takoto", ru: "Доводилось забывать обещание.", kanji: "約束を忘れたことがあります", kana: "やくそくをわすれたことがあります" },
+        { type: "tari", ru: "То забывать обещание, то...", kanji: "約束を忘れたり", kana: "やくそくをわすれたり" },
+        { type: "tara", ru: "Если забывать обещание, ...", kanji: "約束を忘れたら", kana: "やくそくをわすれたら" }
+      ]},
+      { id: 114, nounK: "切符", nounR: "きっぷ", nounT: "билет", verbK: "渡す", verbR: "わたす", verbT: "передавать", forms: [
+        { type: "ta", ru: "Передал билет.", kanji: "切符を渡した", kana: "きっぷをわたした" },
+        { type: "takoto", ru: "Доводилось передавать билет.", kanji: "切符を渡したことがあります", kana: "きっぷをわたしたことがあります" },
+        { type: "tari", ru: "То передавать билет, то...", kanji: "切符を渡したり", kana: "きっぷをわたしたり" },
+        { type: "tara", ru: "Если передавать билет, ...", kanji: "切符を渡したら", kana: "きっぷをわたしたら" }
+      ]},
+      { id: 115, nounK: "橋", nounR: "はし", nounT: "мост", verbK: "渡る", verbR: "わたる", verbT: "переходить", forms: [
+        { type: "ta", ru: "Перешёл мост.", kanji: "橋を渡った", kana: "はしをわたった" },
+        { type: "takoto", ru: "Доводилось переходить мост.", kanji: "橋を渡ったことがあります", kana: "はしをわたったことがあります" },
+        { type: "tari", ru: "То переходить мост, то...", kanji: "橋を渡ったり", kana: "はしをわたったり" },
+        { type: "tara", ru: "Если переходить мост, ...", kanji: "橋を渡ったら", kana: "はしをわたったら" }
+      ]},
+      { id: 116, nounK: "子供", nounR: "こども", nounT: "ребёнок", verbK: "教える", verbR: "おしえる", verbT: "обучать", forms: [
+        { type: "ta", ru: "Обучил ребёнка.", kanji: "子供に教えた", kana: "こどもにおしえた" },
+        { type: "takoto", ru: "Доводилось обучать ребёнка.", kanji: "子供に教えたことがあります", kana: "こどもにおしえたことがあります" },
+        { type: "tari", ru: "То обучать ребёнка, то...", kanji: "子供に教えたり", kana: "こどもにおしえたり" },
+        { type: "tara", ru: "Если обучать ребёнка, ...", kanji: "子供に教えたら", kana: "こどもにおしえたら" }
+      ]},
+      { id: 117, nounK: "試験", nounR: "しけん", nounT: "экзамен", verbK: "始まる", verbR: "はじまる", verbT: "начинаться", forms: [
+        { type: "ta", ru: "Экзамен начался.", kanji: "試験が始まった", kana: "しけんがはじまった" },
+        { type: "takoto", ru: "Доводилось начинать экзамен.", kanji: "試験が始まったことがあります", kana: "しけんがはじまったことがあります" },
+        { type: "tari", ru: "То экзамен начинается, то...", kanji: "試験が始まったり", kana: "しけんがはじまったり" },
+        { type: "tara", ru: "Если экзамен начинается, ...", kanji: "試験が始まったら", kana: "しけんがはじまったら" }
+      ]},
+      { id: 118, nounK: "勉強", nounR: "べんきょう", nounT: "учёба", verbK: "始める", verbR: "はじめる", verbT: "начинать", forms: [
+        { type: "ta", ru: "Начал учёбу.", kanji: "勉強を始めた", kana: "べんきょうをはじめた" },
+        { type: "takoto", ru: "Доводилось начинать учёбу.", kanji: "勉強を始めたことがあります", kana: "べんきょうをはじめたことがあります" },
+        { type: "tari", ru: "То начинать учёбу, то...", kanji: "勉強を始めたり", kana: "べんきょうをはじめたり" },
+        { type: "tara", ru: "Если начинать учёбу, ...", kanji: "勉強を始めたら", kana: "べんきょうをはじめたら" }
+      ]},
+      { id: 119, nounK: "お土産", nounR: "おみやげ", nounT: "сувенир", verbK: "もらう", verbR: "もらう", verbT: "получать", forms: [
+        { type: "ta", ru: "Получил сувенир.", kanji: "お土産をもらった", kana: "おみやげをもらった" },
+        { type: "takoto", ru: "Доводилось получать сувенир.", kanji: "お土産をもらったことがあります", kana: "おみやげをもらったことがあります" },
+        { type: "tari", ru: "То получать сувенир, то...", kanji: "お土産をもらったり", kana: "おみやげをもらったり" },
+        { type: "tara", ru: "Если получать сувенир, ...", kanji: "お土産をもらったら", kana: "おみやげをもらったら" }
+      ]},
+      { id: 120, nounK: "お菓子", nounR: "おかし", nounT: "сладости", verbK: "くれる", verbR: "くれる", verbT: "давать (мне)", forms: [
+        { type: "ta", ru: "Угостил сладостями.", kanji: "お菓子をくれた", kana: "おかしをくれた" },
+        { type: "takoto", ru: "Доводилось угощать сладостями.", kanji: "お菓子をくれたことがあります", kana: "おかしをくれたことがあります" },
+        { type: "tari", ru: "То давать (мне) сладости, то...", kanji: "お菓子をくれたり", kana: "おかしをくれたり" },
+        { type: "tara", ru: "Если давать (мне) сладости, ...", kanji: "お菓子をくれたら", kana: "おかしをくれたら" }
+      ]},
+      { id: 121, nounK: "女の子", nounR: "おんなのこ", nounT: "девочка", verbK: "泣く", verbR: "なく", verbT: "плакать", forms: [
+        { type: "ta", ru: "Девочка плакала.", kanji: "女の子が泣いた", kana: "おんなのこがないた" },
+        { type: "takoto", ru: "Доводилось плакать девочке.", kanji: "女の子が泣いたことがあります", kana: "おんなのこがないたことがあります" },
+        { type: "tari", ru: "То девочка плачет, то...", kanji: "女の子が泣いたり", kana: "おんなのこがないたり" },
+        { type: "tara", ru: "Если девочка плачет, ...", kanji: "女の子が泣いたら", kana: "おんなのこがないたら" }
+      ]},
+      { id: 122, nounK: "地図", nounR: "ちず", nounT: "карта", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "ta", ru: "Показал карту.", kanji: "地図を見せた", kana: "ちずをみせた" },
+        { type: "takoto", ru: "Доводилось показывать карту.", kanji: "地図を見せたことがあります", kana: "ちずをみせたことがあります" },
+        { type: "tari", ru: "То показывать карту, то...", kanji: "地図を見せたり", kana: "ちずをみせたり" },
+        { type: "tara", ru: "Если показывать карту, ...", kanji: "地図を見せたら", kana: "ちずをみせたら" }
+      ]},
+      { id: 123, nounK: "学生", nounR: "がくせい", nounT: "студент", verbK: "テストする", verbR: "テストする", verbT: "тестировать", forms: [
+        { type: "ta", ru: "Протестировал студентов.", kanji: "学生をテストした", kana: "がくせいをテストした" },
+        { type: "takoto", ru: "Доводилось тестировать студентов.", kanji: "学生をテストしたことがあります", kana: "がくせいをテストしたことがあります" },
+        { type: "tari", ru: "То тестировать студентов, то...", kanji: "学生をテストしたり", kana: "がくせいをテストしたり" },
+        { type: "tara", ru: "Если тестировать студентов, ...", kanji: "学生をテストしたら", kana: "がくせいをテストしたら" }
+      ]},
+      { id: 124, nounK: "パーティー", nounR: "パーティー", nounT: "вечеринка", verbK: "する", verbR: "する", verbT: "устраивать", forms: [
+        { type: "ta", ru: "Устроил вечеринку.", kanji: "パーティーをした", kana: "パーティーをした" },
+        { type: "takoto", ru: "Доводилось устраивать вечеринку.", kanji: "パーティーをしたことがあります", kana: "パーティーをしたことがあります" },
+        { type: "tari", ru: "То устраивать вечеринку, то...", kanji: "パーティーをしたり", kana: "パーティーをしたり" },
+        { type: "tara", ru: "Если устраивать вечеринку, ...", kanji: "パーティーをしたら", kana: "パーティーをしたら" }
+      ]}
+    ];
+
+    /* ==========================================================================
+       ЛОГИКА СОСТОЯНИЯ
+       ========================================================================== */
+    const STORAGE_KEY = "jp_app_save_v7_level5";
+
+    let state = {
+      mode: "level",
+      currentLevel: 5,
+      wordIndex: 0,
+      formSubIndex: 0,
+      playlist: [],
+      currentFormOrder: [0, 1, 2, 3],
+      errors: []
+    };
+
+    let isAnswerChecked = false;
+    let lastSpokenKana = "";
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Storage error", e);
+      }
+      updateErrorsBadge();
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            state = Object.assign(state, parsed);
+          }
+        }
+      } catch (e) {
+        console.warn("Resetting corrupt storage");
+      }
+
+      if (!Array.isArray(state.playlist) || state.playlist.length !== RAW_LEVEL_5_DATA.length) {
+        resetLevelPlaylist();
+      }
+      if (state.wordIndex < 0 || state.wordIndex >= RAW_LEVEL_5_DATA.length) {
+        state.wordIndex = 0;
+      }
+      if (state.formSubIndex < 0 || state.formSubIndex > 3) {
+        state.formSubIndex = 0;
+      }
+      if (!Array.isArray(state.currentFormOrder) || state.currentFormOrder.length !== 4) {
+        state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+      }
+      if (!Array.isArray(state.errors)) {
+        state.errors = [];
+      }
+    }
+
+    function resetLevelPlaylist() {
+      const indices = RAW_LEVEL_5_DATA.map((_, i) => i);
+      state.playlist = shuffleArray(indices);
+      state.wordIndex = 0;
+      state.formSubIndex = 0;
+      state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+    }
+
+    function confirmReset() {
+      if (confirm("Перемешать и начать 5 уровень с первого слова?")) {
+        resetLevelPlaylist();
+        state.mode = "level";
+        state.currentLevel = 5;
+        saveState();
+        renderScreen();
+      }
+    }
+
+    /* ==========================================================================
+       ОЗВУЧКА WEB SPEECH API
+       ========================================================================== */
+    let jaVoice = null;
+    function initVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      jaVoice = voices.find(v => (v.lang === 'ja-JP' || v.lang === 'ja_JP') && v.name.includes('Kyoko')) 
+             || voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.startsWith('ja')) 
+             || null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      initVoices();
+    }
+
+    function playAudio(kanaText) {
+      if (!('speechSynthesis' in window) || !kanaText) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(kanaText);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.88;
+        if (jaVoice) utterance.voice = jaVoice;
+        window.speechSynthesis.speak(utterance);
+        lastSpokenKana = kanaText;
+      } catch(e) {
+        console.warn("Audio warning", e);
+      }
+    }
+
+    function replayAudio() {
+      if (lastSpokenKana) {
+        playAudio(lastSpokenKana);
+      }
+    }
+
+    /* ==========================================================================
+       РЕНДЕР ЭКРАНА
+       ========================================================================== */
+    function getCurrentTask() {
+      if (state.mode === "errors") {
+        if (!state.errors || state.errors.length === 0) return null;
+        return state.errors[0];
+      }
+
+      if (!state.playlist || state.wordIndex >= state.playlist.length) {
+        return null;
+      }
+
+      const itemIdx = state.playlist[state.wordIndex];
+      const wordObj = RAW_LEVEL_5_DATA[itemIdx];
+      if (!wordObj || !wordObj.forms) return null;
+
+      const formOrder = (state.currentFormOrder && state.currentFormOrder.length === 4) 
+        ? state.currentFormOrder 
+        : [0, 1, 2, 3];
+      const formIdx = formOrder[state.formSubIndex] !== undefined ? formOrder[state.formSubIndex] : 0;
+      const formObj = wordObj.forms[formIdx];
+      if (!formObj) return null;
+
+      return { wordObj, formObj };
+    }
+
+    function renderScreen() {
+      updateErrorsBadge();
+
+      document.querySelectorAll(".nav-pill").forEach(p => {
+        p.classList.remove("active");
+        if (state.mode === "level" && p.innerText.trim() === String(state.currentLevel)) {
+          p.classList.add("active");
+        }
+      });
+      if (state.mode === "errors") {
+        document.getElementById("errorsNavBtn").classList.add("active");
+      }
+
+      const gameCard = document.getElementById("gameCard");
+      const placeholder = document.getElementById("placeholderView");
+      const progressWrap = document.getElementById("progressWrap");
+      const theoryBanner = document.getElementById("theoryBanner");
+
+      if (state.mode === "level" && state.currentLevel !== 5) {
+        gameCard.style.display = "none";
+        progressWrap.style.display = "none";
+        theoryBanner.style.display = "none";
+        placeholder.classList.add("active");
+        document.getElementById("placeholderTitle").innerText = `Уровень ${state.currentLevel}`;
+        return;
+      } else {
+        gameCard.style.display = "flex";
+        progressWrap.style.display = "flex";
+        theoryBanner.style.display = "flex";
+        placeholder.classList.remove("active");
+      }
+
+      isAnswerChecked = false;
+      const input = document.getElementById("userInput");
+      const actionBtn = document.getElementById("actionBtn");
+      const feedback = document.getElementById("feedbackBox");
+      
+      input.value = "";
+      input.readOnly = false;
+      actionBtn.innerText = "Проверить";
+      feedback.className = "feedback-box";
+
+      const task = getCurrentTask();
+
+      if (!task) {
+        if (state.mode === "errors") {
+          alert("🎉 Все ошибки успешно исправлены!");
+          state.mode = "level";
+          saveState();
+          renderScreen();
+          return;
+        } else {
+          alert("🏆 Поздравляем! Все 124 слова 5 уровня пройдены!");
+          resetLevelPlaylist();
+          saveState();
+          renderScreen();
+          return;
+        }
+      }
+
+      // 1. Заполняем опорные слова
+      document.getElementById("refNounKanji").innerText = task.wordObj.nounK;
+      document.getElementById("refNounKana").innerText = "- " + task.wordObj.nounR;
+      document.getElementById("refNounTrans").innerText = "- " + task.wordObj.nounT;
+
+      document.getElementById("refVerbKanji").innerText = task.wordObj.verbK;
+      document.getElementById("refVerbKana").innerText = "- " + task.wordObj.verbR;
+      document.getElementById("refVerbTrans").innerText = "- " + task.wordObj.verbT;
+
+      // 2. Вопрос
+      document.getElementById("promptRu").innerText = task.formObj.ru;
+      document.getElementById("modeLabel").innerText = state.mode === "errors" ? "Исправление ошибки" : "Переведите фразу";
+
+      // 3. Прогресс
+      if (state.mode === "level") {
+        const total = RAW_LEVEL_5_DATA.length;
+        const currentNum = state.wordIndex + 1;
+        document.getElementById("progressWordLabel").innerText = `Слово ${currentNum} из ${total}`;
+        const pct = Math.round(((state.wordIndex * 4 + state.formSubIndex) / (total * 4)) * 100);
+        document.getElementById("progressPercentLabel").innerText = `${pct}%`;
+        document.getElementById("progressBarFill").style.width = `${pct}%`;
+
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`dot${i}`);
+          dot.className = "form-dot";
+          if (i < state.formSubIndex) dot.classList.add("done");
+          else if (i === state.formSubIndex) dot.classList.add("active");
+        }
+      } else {
+        document.getElementById("progressWordLabel").innerText = `Ошибок осталось: ${state.errors.length}`;
+        document.getElementById("progressPercentLabel").innerText = `Ошибки`;
+        document.getElementById("progressBarFill").style.width = `100%`;
+        for (let i = 0; i < 4; i++) {
+          document.getElementById(`dot${i}`).className = "form-dot";
+        }
+      }
+    }
+
+    /* ==========================================================================
+       ПРОВЕРКА ОТВЕТА (ТОЛЬКО КАНДЗИ И ХИРАГАНА / КАТАКАНА)
+       ========================================================================== */
+    function cleanText(str) {
+      return (str || '').replace(/[\s　。、.!,?…-]/g, '').trim();
+    }
+
+    function handleAction() {
+      if (!isAnswerChecked) {
+        checkAnswer();
+      } else {
+        nextQuestion();
+      }
+    }
+
+    function checkAnswer() {
+      const task = getCurrentTask();
+      if (!task) return;
+
+      const input = document.getElementById("userInput");
+      const userVal = cleanText(input.value);
+      if (!userVal) {
+        return;
+      }
+
+      const targetKanji = cleanText(task.formObj.kanji);
+      const targetKana = cleanText(task.formObj.kana);
+
+      // Строгое соответствие: только кандзи или хирагана
+      const isCorrect = (userVal === targetKanji || userVal === targetKana);
+
+      playAudio(task.formObj.kana);
+
+      const feedback = document.getElementById("feedbackBox");
+      const statusText = document.getElementById("feedbackStatus");
+      const fKanji = document.getElementById("feedbackKanji");
+      const fKana = document.getElementById("feedbackKana");
+
+      fKanji.innerText = task.formObj.kanji;
+      fKana.innerText = task.formObj.kana;
+
+      if (isCorrect) {
+        feedback.className = "feedback-box correct";
+        statusText.innerText = "✓ Правильно!";
+        if (state.mode === "errors") {
+          state.errors.shift();
+        }
+      } else {
+        feedback.className = "feedback-box incorrect";
+        statusText.innerText = "✕ Ошибка";
+        if (state.mode === "level") {
+          const alreadyExists = state.errors.some(e => e.formObj.kanji === task.formObj.kanji);
+          if (!alreadyExists) {
+            state.errors.push(task);
+          }
+        } else if (state.mode === "errors") {
+          state.errors.push(state.errors.shift());
+        }
+      }
+
+      input.readOnly = true;
+      isAnswerChecked = true;
+      document.getElementById("actionBtn").innerText = "Дальше ➔";
+      saveState();
+    }
+
+    function nextQuestion() {
+      if (state.mode === "level") {
+        state.formSubIndex++;
+        if (state.formSubIndex >= 4) {
+          state.formSubIndex = 0;
+          state.wordIndex++;
+          state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+        }
+      }
+      saveState();
+      renderScreen();
+    }
+
+    /* ==========================================================================
+       НАВИГАЦИЯ И СОБЫТИЯ
+       ========================================================================== */
+    function updateErrorsBadge() {
+      const btn = document.getElementById("errorsNavBtn");
+      if (!btn) return;
+      const count = (state.errors || []).length;
+      btn.innerText = `Ошибки (${count})`;
+      if (count > 0) btn.classList.add("has-errors");
+      else btn.classList.remove("has-errors");
+    }
+
+    function openErrorsTab() {
+      if (!state.errors || state.errors.length === 0) {
+        alert("У вас нет сохранённых ошибок! Отличный результат!");
+        return;
+      }
+      state.mode = "errors";
+      saveState();
+      renderScreen();
+    }
+
+    function switchLevel(lvl) {
+      const levelPages = {
+        1: '1ур.html',
+        2: '2ур.html',
+        3: '3ур.html',
+        4: '4ур.html',
+        5: '5ур.html',
+        6: '6ур.html',
+        7: '7ур.html'
+      };
+
+      if (lvl !== state.currentLevel && levelPages[lvl]) {
+        window.location.href = levelPages[lvl];
+        return;
+      }
+
+      state.mode = "level";
+      state.currentLevel = lvl;
+      saveState();
+      renderScreen();
+    }
+
+    function openTheoryModal() {
+      document.getElementById("theoryModal").classList.add("open");
+    }
+    function closeTheoryModal() {
+      document.getElementById("theoryModal").classList.remove("open");
+    }
+
+    // Инициализация при старте
+    loadState();
+    renderScreen();
+
+    // Горячие клавиши: Alt + Enter, Cmd + Enter, Ctrl + Enter
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && (e.altKey || e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleAction();
+      }
+    });
+  </script>
+</body>
+</html>

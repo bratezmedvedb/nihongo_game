@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Японский тренажёр — 7 Уровень</title>
+  <style>
+    /* ==========================================================================
+       1. ЦВЕТОВАЯ ПАЛИТРА И СТИЛЬ (WARM PAPER MINIMALIST)
+       ========================================================================== */
+    :root {
+      --bg-page: #f4f1ea;
+      --bg-card: #ffffff;
+      --text-main: #2c2c2a;
+      --text-muted: #6b6a63;
+      --text-sub: #9a988f;
+      --border-color: #d3d1c7;
+      --border-light: #e5e2d8;
+      
+      --accent: #d97757;
+      --accent-hover: #c46445;
+
+      --selected-bg: #eeecf0;
+      --selected-border: #7f77dd;
+      --selected-text: #3c3489;
+
+      --success-bg: #eaf3de;
+      --success-border: #97c459;
+      --success-text: #386014;
+
+      --error-bg: #fdf0ee;
+      --error-border: #a32d2d;
+      --error-text: #a32d2d;
+
+      --radius-card: 14px;
+      --radius-pill: 20px;
+      --radius-btn: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px 12px 32px 12px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       2. ВЕРХНЯЯ НАВИГАЦИЯ
+       ========================================================================== */
+    .nav-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+      align-items: center;
+    }
+    .nav-bar::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      min-width: 38px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+
+    .nav-pill.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
+    .nav-pill.errors-pill {
+      margin-left: auto;
+      min-width: auto;
+      padding: 0 14px;
+      border-color: var(--border-color);
+    }
+    .nav-pill.errors-pill.has-errors {
+      color: var(--error-border);
+      border-color: var(--error-border);
+      background: #fff6f5;
+    }
+    .nav-pill.errors-pill.active {
+      background: var(--error-border);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       3. ПАНЕЛЬ ТЕОРИИ И ПРОГРЕСС-БАР
+       ========================================================================== */
+    .theory-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ==========================================================================
+       4. КАРТОЧКА ТРЕНАЖЁРА
+       ========================================================================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .target-ref-box {
+      background: var(--bg-page);
+      border-radius: var(--radius-btn);
+      padding: 16px 20px;
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ref-line {
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ref-kanji {
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .ref-kana {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+    .ref-trans {
+      color: var(--selected-text);
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .form-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .form-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-light);
+    }
+    .form-dot.done { background: var(--success-border); }
+    .form-dot.active { background: var(--accent); }
+
+    .prompt-box {
+      text-align: center;
+      padding: 4px 0;
+    }
+    .prompt-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .prompt-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: #faf9f6;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 0 14px;
+      font-size: 16px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      background: #ffffff;
+    }
+    .input-field[readonly] {
+      background: #f0eee6;
+      color: var(--text-muted);
+    }
+
+    .btn-main {
+      height: 46px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-main:active { background: var(--accent-hover); }
+
+    .feedback-box {
+      display: none;
+      border-radius: var(--radius-btn);
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feedback-box.correct {
+      display: flex !important;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+    .feedback-box.incorrect {
+      display: flex !important;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+    }
+
+    .feedback-status {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .feedback-box.correct .feedback-status { color: var(--success-text); }
+    .feedback-box.incorrect .feedback-status { color: var(--error-text); }
+
+    .feedback-sentence-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .feedback-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .feedback-text-kanji {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+    .feedback-text-kana {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .btn-audio-right {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.1s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-audio-right:active { transform: scale(0.90); }
+
+    .placeholder-view {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 40px 20px;
+      text-align: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .placeholder-view.active { display: flex; }
+
+    .reset-link {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-sub);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 8px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 44, 42, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-color);
+      max-width: 440px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-body { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+    .modal-body strong { color: var(--text-main); }
+    .modal-close-btn {
+      align-self: flex-end;
+      padding: 8px 16px;
+      background: var(--text-main);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      font-size: 13px;
+      touch-action: manipulation;
+    }
+  
+  /* Кнопка возврата в главное меню */
+  .back-to-menu {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+    text-decoration: none;
+    color: #6b6a63;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    background: #fff;
+    border: 1px solid #d3d1c7;
+    border-radius: 20px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+  }
+  .back-to-menu:hover, .back-to-menu:active {
+    background: #2c2c2a;
+    color: #fff;
+    border-color: #2c2c2a;
+  }
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <a href="index.html" class="back-to-menu">← Меню</a>
+    <div class="nav-bar">
+      <button type="button" class="nav-pill" onclick="switchLevel(1)">1</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(2)">2</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(3)">3</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(4)">4</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(5)">5</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(6)">6</button>
+      <button type="button" class="nav-pill active" onclick="switchLevel(7)">7</button>
+      <button type="button" class="nav-pill errors-pill" id="errorsNavBtn" onclick="openErrorsTab()">Ошибки (0)</button>
+    </div>
+
+    <div class="theory-banner" id="theoryBanner" onclick="openTheoryModal()">
+      <span id="theoryBannerText">📖 Теория 7 уровня (〜てあげます / もらいます / くれます)</span>
+      <span>➔</span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-labels">
+        <span id="progressWordLabel">Слово 1 из 124</span>
+        <span id="progressPercentLabel">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="card" id="gameCard">
+      <div class="target-ref-box">
+        <div class="ref-line">
+          <span class="ref-kanji" id="refNounKanji">友達</span>
+          <span class="ref-kana" id="refNounKana">- ともだち</span>
+          <span class="ref-trans" id="refNounTrans">- друг</span>
+        </div>
+        <div class="ref-line">
+          <span class="ref-kanji" id="refVerbKanji">会う</span>
+          <span class="ref-kana" id="refVerbKana">- あう</span>
+          <span class="ref-trans" id="refVerbTrans">- встречаться</span>
+        </div>
+      </div>
+
+      <div class="form-dots">
+        <div class="form-dot" id="dot0"></div>
+        <div class="form-dot" id="dot1"></div>
+        <div class="form-dot" id="dot2"></div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label" id="modeLabel">Переведите фразу</div>
+        <div class="prompt-text" id="promptRu">Я встречаюсь с другом для него.</div>
+      </div>
+
+      <div class="input-wrap">
+        <input 
+          type="text" 
+          id="userInput" 
+          class="input-field" 
+          placeholder="Введите кандзи или хираганой..." 
+          autocomplete="off" 
+          autocorrect="off" 
+          autocapitalize="off" 
+          spellcheck="false"
+        />
+        <button type="button" class="btn-main" id="actionBtn" onclick="handleAction()">Проверить</button>
+      </div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-status" id="feedbackStatus">✓ Правильно!</div>
+        <div class="feedback-sentence-row">
+          <div class="feedback-texts">
+            <div class="feedback-text-kanji" id="feedbackKanji">友達に会ってあげます</div>
+            <div class="feedback-text-kana" id="feedbackKana">ともだちにあってあげます</div>
+          </div>
+          <button type="button" class="btn-audio-right" title="Послушать ещё раз" onclick="replayAudio()">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="placeholder-view" id="placeholderView">
+      <h3 id="placeholderTitle" style="font-size: 18px; color: var(--text-main);">Уровень 1</h3>
+      <p style="font-size: 14px; color: var(--text-muted);">Переход на другой уровень...</p>
+      <button type="button" class="btn-main" style="margin-top: 10px;" onclick="switchLevel(7)">Вернуться к Уровню 7</button>
+    </div>
+
+    <div class="reset-link" onclick="confirmReset()">Начать 7 уровень заново (перемешать)</div>
+  </div>
+
+  <div class="modal-overlay" id="theoryModal" onclick="closeTheoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title">Грамматика 7 Уровня: Конструкции благодеяния</div>
+      <div class="modal-body">
+        <p><strong>3 базовые конструкции (Глагол в て-форме + вспомогательный глагол):</strong></p>
+        <p>1. <strong>〜てあげます</strong> — Сделать действие ради кого-то <em>(Я делаю одолжение другому)</em></p>
+        <p>2. <strong>〜てもらいます</strong> — Попросить/получить действие от кого-то <em>(Я прошу кого-то / Мне делают)</em></p>
+        <p>3. <strong>〜てくれます</strong> — Кто-то делает действие для меня/в мою пользу <em>(Доброта по отношению ко мне)</em></p>
+        <br>
+        <p><strong>Правила образования て-формы:</strong></p>
+        <p style="margin-bottom: 6px;"><strong>• 1 спр.:</strong></p>
+        <p style="padding-left: 12px; margin-top: 0; margin-bottom: 8px;">
+          — <code>〜う</code>, <code>〜つ</code>, <code>〜る</code> → меняются на <code>〜って</code><br>
+          — <code>〜ぶ</code>, <code>〜む</code>, <code>〜ぬ</code> → меняются на <code>〜んで</code><br>
+          — <code>〜く</code> → меняется на <code>〜いて</code> <em>(Искл.: <code>行く</code> → <code>行って</code>)</em><br>
+          — <code>〜ぐ</code> → меняется на <code>〜いで</code><br>
+          — <code>〜す</code> → меняется на <code>〜して</code>
+        </p>
+
+        <p style="margin-bottom: 8px;">
+          <strong>• 2 спр. (-iru / -eru):</strong> Отбросьте финальный слог «る» → добавьте <code>〜て</code>
+        </p>
+
+        <p style="margin-bottom: 4px;">
+          <strong>• 3 спр. (исключения):</strong> Изменяется корень:
+        </p>
+        <p style="padding-left: 12px; margin-top: 0;">
+          — <code>する</code> → <code>して</code><br>
+          — <code>来る (くる)</code> → <code>きて</code>
+        </p>
+      </div>
+      <button type="button" class="modal-close-btn" onclick="closeTheoryModal()">Понятно</button>
+    </div>
+  </div>
+  <script>
+    /* ==========================================================================
+       БАЗА ДАННЫХ 7-ГО УРОВНЯ (124 ГЛАГОЛА ПО 3 ФОРМЫ БЛАГОДЕЯНИЯ)
+       ========================================================================== */
+    const RAW_LEVEL_7_DATA = [
+      { id: 1, nounK: "友達", nounR: "ともだち", nounT: "друг", verbK: "会う", verbR: "あう", verbT: "встречаться", forms: [
+        { type: "te_agemasu", ru: "Я встречаюсь с другом для него.", kanji: "友達に会ってあげます", kana: "ともだちにあってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то встретиться с другом.", kanji: "友達に会ってもらいます", kana: "ともだちにあってもらいます" },
+        { type: "te_kuremasu", ru: "Кто-то встречается с другом для меня.", kanji: "友達に会ってくれます", kana: "ともだちにあってくれます" }
+      ]},
+      { id: 2, nounK: "ドア", nounR: "ドア", nounT: "дверь", verbK: "開く", verbR: "あく", verbT: "открываться", forms: [
+        { type: "te_agemasu", ru: "Я открываю дверь для него.", kanji: "ドアが開いてあげます", kana: "ドアがあいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы дверь открылась.", kanji: "ドアが開いてもらいます", kana: "ドアがあいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то открывает дверь.", kanji: "ドアが開いてくれます", kana: "ドアがあいてくれます" }
+      ]},
+      { id: 3, nounK: "窓", nounR: "まど", nounT: "окно", verbK: "開ける", verbR: "あける", verbT: "открывать", forms: [
+        { type: "te_agemasu", ru: "Я открываю окно для него.", kanji: "窓を開けてあげます", kana: "まどをあけてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то открыть окно.", kanji: "窓を開けてもらいます", kana: "まどをあけてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то открывает окно.", kanji: "窓を開けてくれます", kana: "まどをあけてくれます" }
+      ]},
+      { id: 4, nounK: "プレゼント", nounR: "プレゼント", nounT: "подарок", verbK: "あげる", verbR: "あげる", verbT: "дарить", forms: [
+        { type: "te_agemasu", ru: "Я дарю подарок для него.", kanji: "プレゼントをあげてあげます", kana: "プレゼントをあげてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то подарить подарок.", kanji: "プレゼントをあげてもらいます", kana: "プレゼントをあげてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то дарит подарок.", kanji: "プレゼントをあげてくれます", kana: "プレゼントをあげてくれます" }
+      ]},
+      { id: 5, nounK: "公園", nounR: "こうえん", nounT: "парк", verbK: "遊ぶ", verbR: "あそぶ", verbT: "играть", forms: [
+        { type: "te_agemasu", ru: "Я играю в парке для него.", kanji: "公園で遊んであげます", kana: "こうえんであそんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то поиграть в парке.", kanji: "公園で遊んでもらいます", kana: "こうえんであそんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то играет в парке.", kanji: "公園で遊んでくれます", kana: "こうえんであそんでくれます" }
+      ]},
+      { id: 6, nounK: "シャワー", nounR: "シャワー", nounT: "душ", verbK: "浴びる", verbR: "あびる", verbT: "принимать", forms: [
+        { type: "te_agemasu", ru: "Я принимаю душ для него.", kanji: "シャワーを浴びてあげます", kana: "シャワーをあびてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то принять душ.", kanji: "シャワーを浴びてもらいます", kana: "シャワーをあびてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то принимает душ.", kanji: "シャワーを浴びてくれます", kana: "シャワーをあびてくれます" }
+      ]},
+      { id: 7, nounK: "手", nounR: "て", nounT: "рука", verbK: "洗う", verbR: "あらう", verbT: "мыть", forms: [
+        { type: "te_agemasu", ru: "Я мою руки для него.", kanji: "手を洗ってあげます", kana: "てをあらってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то помыть руки.", kanji: "手を洗ってもらいます", kana: "てをあらってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то моет руки.", kanji: "手を洗ってくれます", kana: "てをあらってくれます" }
+      ]},
+      { id: 8, nounK: "新聞", nounR: "しんぶん", nounT: "газета", verbK: "ある", verbR: "ある", verbT: "иметься", forms: [
+        { type: "te_agemasu", ru: "Я имею газету для него.", kanji: "新聞があってあげます", kana: "しんぶんがあってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы газета была.", kanji: "新聞があってもらいます", kana: "しんぶんがあってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то имеет газету.", kanji: "新聞があってくれます", kana: "しんぶんがあってくれます" }
+      ]},
+      { id: 9, nounK: "道", nounR: "みち", nounT: "дорога", verbK: "歩く", verbR: "あるく", verbT: "идти пешком", forms: [
+        { type: "te_agemasu", ru: "Я иду пешком по дороге для него.", kanji: "道を歩いてあげます", kana: "みちをあるいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то пройти пешком по дороге.", kanji: "道を歩いてもらいます", kana: "みちをあるいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то идёт пешком по дороге.", kanji: "道を歩いてくれます", kana: "みちをあるいてくれます" }
+      ]},
+      { id: 10, nounK: "名前", nounR: "なまえ", nounT: "имя", verbK: "言う", verbR: "いう", verbT: "говорить", forms: [
+        { type: "te_agemasu", ru: "Я называю имя для него.", kanji: "名前を言ってあげます", kana: "なまえをいってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то назвать имя.", kanji: "名前を言ってもらいます", kana: "なまえをいってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то называет имя.", kanji: "名前を言ってくれます", kana: "なまえをいってくれます" }
+      ]},
+      { id: 11, nounK: "学校", nounR: "がっこう", nounT: "школа", verbK: "行く", verbR: "いく", verbT: "идти, ехать", forms: [
+        { type: "te_agemasu", ru: "Я иду в школу для него.", kanji: "学校に行ってあげます", kana: "がっこうにいってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то сходить в школу.", kanji: "学校に行ってもらいます", kana: "がっこうにいってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то идёт в школу.", kanji: "学校に行ってくれます", kana: "がっこうにいってくれます" }
+      ]},
+      { id: 12, nounK: "猫", nounR: "ねこ", nounT: "кот", verbK: "いる", verbR: "いる", verbT: "находиться", forms: [
+        { type: "te_agemasu", ru: "Я держу кота для него.", kanji: "猫がいてあげます", kana: "ねこがいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы кот был.", kanji: "猫がいてもらいます", kana: "ねこがいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то держит кота.", kanji: "猫がいてくれます", kana: "ねこがいてくれます" }
+      ]},
+      { id: 13, nounK: "お金", nounR: "おかね", nounT: "деньги", verbK: "要る", verbR: "いる", verbT: "требоваться", forms: [
+        { type: "te_agemasu", ru: "У меня есть деньги для него.", kanji: "お金が要ってあげます", kana: "おかねがいってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы деньги были нужны.", kanji: "お金が要ってもらいます", kana: "おかねがいってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кому-то нужны деньги.", kanji: "お金が要ってくれます", kana: "おかねがいってくれます" }
+      ]},
+      { id: 14, nounK: "かばん", nounR: "かばん", nounT: "сумка", verbK: "入れる", verbR: "いれる", verbT: "класть внутрь", forms: [
+        { type: "te_agemasu", ru: "Я кладу в сумку для него.", kanji: "かばんに入れてあげます", kana: "かばんにいれてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то положить в сумку.", kanji: "かばんに入れてもらいます", kana: "かばんにいれてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то кладёт в сумку.", kanji: "かばんに入れてくれます", kana: "かばんにいれてくれます" }
+      ]},
+      { id: 15, nounK: "歌", nounR: "うた", nounT: "песня", verbK: "歌う", verbR: "うたう", verbT: "петь", forms: [
+        { type: "te_agemasu", ru: "Я пою песню для него.", kanji: "歌を歌ってあげます", kana: "うたをうたってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то спеть песню.", kanji: "歌を歌ってもらいます", kana: "うたをうたってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то поёт песню.", kanji: "歌を歌ってくれます", kana: "うたをうたってくれます" }
+      ]},
+      { id: 16, nounK: "赤ちゃん", nounR: "あかちゃん", nounT: "ребёнок", verbK: "生まれる", verbR: "うまれる", verbT: "рождаться", forms: [
+        { type: "te_agemasu", ru: "У меня рождается ребёнок для него.", kanji: "赤ちゃんが生まれてあげます", kana: "あかちゃんがうまれてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы родился ребёнок.", kanji: "赤ちゃんが生まれてもらいます", kana: "あかちゃんがうまれてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то рождается ребёнок.", kanji: "赤ちゃんが生まれてくれます", kana: "あかちゃんがうまれてくれます" }
+      ]},
+      { id: 17, nounK: "りんご", nounR: "りんご", nounT: "яблоко", verbK: "売る", verbR: "うる", verbT: "продавать", forms: [
+        { type: "te_agemasu", ru: "Я продаю яблоки для него.", kanji: "りんごを売ってあげます", kana: "りんごをうってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то продать яблоки.", kanji: "りんごを売ってもらいます", kana: "りんごをうってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то продаёт яблоки.", kanji: "りんごを売ってくれます", kana: "りんごをうってくれます" }
+      ]},
+      { id: 18, nounK: "朝", nounR: "あさ", nounT: "утро", verbK: "起きる", verbR: "おきる", verbT: "просыпаться", forms: [
+        { type: "te_agemasu", ru: "Я просыпаюсь рано утром для него.", kanji: "朝早く起きてあげます", kana: "あさはやくおきてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то проснуться рано утром.", kanji: "朝早く起きてもらいます", kana: "あさはやくおきてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то просыпается рано утром.", kanji: "朝早く起きてくれます", kana: "あさはやくおきてくれます" }
+      ]},
+      { id: 19, nounK: "机", nounR: "つくえ", nounT: "стол", verbK: "置く", verbR: "おく", verbT: "ставить, класть", forms: [
+        { type: "te_agemasu", ru: "Я ставлю на стол для него.", kanji: "机の上に置いてあげます", kana: "つくえのうえにおいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то поставить на стол.", kanji: "机の上に置いてもらいます", kana: "つくえのうえにおいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то ставит на стол.", kanji: "机の上に置いてくれます", kana: "つくえのうえにおいてくれます" }
+      ]},
+      { id: 20, nounK: "手紙", nounR: "てがみ", nounT: "письмо", verbK: "送る", verbR: "おくる", verbT: "отправлять", forms: [
+        { type: "te_agemasu", ru: "Я отправляю письмо для него.", kanji: "手紙を送ってあげます", kana: "てがみをおくってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то отправить письмо.", kanji: "手紙を送ってもらいます", kana: "てがみをおくってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то отправляет письмо.", kanji: "手紙を送ってくれます", kana: "てがみをおくってくれます" }
+      ]},
+      { id: 21, nounK: "ボタン", nounR: "ボタン", nounT: "кнопка", verbK: "押す", verbR: "おす", verbT: "нажимать", forms: [
+        { type: "te_agemasu", ru: "Я нажимаю кнопку для него.", kanji: "ボタンを押してあげます", kana: "ボタンをおしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то нажать кнопку.", kanji: "ボタンを押してもらいます", kana: "ボタンをおしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то нажимает кнопку.", kanji: "ボタンを押してくれます", kana: "ボタンをおしてくれます" }
+      ]},
+      { id: 22, nounK: "単語", nounR: "たんご", nounT: "слово", verbK: "覚える", verbR: "おぼえる", verbT: "запоминать", forms: [
+        { type: "te_agemasu", ru: "Я запоминаю слова для него.", kanji: "単語を覚えてあげます", kana: "たんごをおぼえてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то запомнить слова.", kanji: "単語を覚えてもらいます", kana: "たんごをおぼえてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то запоминает слова.", kanji: "単語を覚えてくれます", kana: "たんごをおぼえてくれます" }
+      ]},
+      { id: 23, nounK: "海", nounR: "うみ", nounT: "море", verbK: "泳ぐ", verbR: "およぐ", verbT: "плавать", forms: [
+        { type: "te_agemasu", ru: "Я плаваю в море для него.", kanji: "海で泳いであげます", kana: "うみでおよいであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то поплавать в море.", kanji: "海で泳いでもらいます", kana: "うみでおよいでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то плавает в море.", kanji: "海で泳いでくれます", kana: "うみでおよいでくれます" }
+      ]},
+      { id: 24, nounK: "バス", nounR: "バス", nounT: "автобус", verbK: "降りる", verbR: "おりる", verbT: "выходить из транспорта", forms: [
+        { type: "te_agemasu", ru: "Я выхожу из автобуса для него.", kanji: "バスを降りてあげます", kana: "バスをおりてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то выйти из автобуса.", kanji: "バスを降りてもらいます", kana: "バスをおりてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то выходит из автобуса.", kanji: "バスを降りてくれます", kana: "バスをおりてくれます" }
+      ]},
+      { id: 25, nounK: "授業", nounR: "じゅぎょう", nounT: "урок", verbK: "終わる", verbR: "おわる", verbT: "заканчиваться", forms: [
+        { type: "te_agemasu", ru: "Я заканчиваю урок для него.", kanji: "授業が終わってあげます", kana: "じゅぎょうがおわってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы урок закончился.", kanji: "授業が終わってもらいます", kana: "じゅぎょうがおわってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то заканчивает урок.", kanji: "授業が終わってくれます", kana: "じゅぎょうがおわってくれます" }
+      ]},
+      { id: 26, nounK: "スーパー", nounR: "スーパー", nounT: "супермаркет", verbK: "買い物する", verbR: "かいものする", verbT: "делать покупки", forms: [
+        { type: "te_agemasu", ru: "Я делаю покупки в супермаркете для него.", kanji: "スーパーで買い物をしてあげます", kana: "スーパーでかいものをしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то сделать покупки в супермаркете.", kanji: "スーパーで買い物をしてもらいます", kana: "スーパーでかいものをしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то делает покупки в супермаркете.", kanji: "スーパーで買い物をしてくれます", kana: "スーパーでかいものをしてくれます" }
+      ]},
+      { id: 27, nounK: "服", nounR: "ふく", nounT: "одежда", verbK: "買う", verbR: "かう", verbT: "покупать", forms: [
+        { type: "te_agemasu", ru: "Я покупаю одежду для него.", kanji: "服を買ってあげます", kana: "ふくをかってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то купить одежду.", kanji: "服を買ってもらいます", kana: "ふくをかってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то покупает одежду.", kanji: "服を買ってくれます", kana: "ふくをかってくれます" }
+      ]},
+      { id: 28, nounK: "本", nounR: "ほん", nounT: "книга", verbK: "返す", verbR: "かえす", verbT: "возвращать", forms: [
+        { type: "te_agemasu", ru: "Я возвращаю книгу для него.", kanji: "本を返してあげます", kana: "ほんをかえしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то вернуть книгу.", kanji: "本を返してもらいます", kana: "ほんをかえしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то возвращает книгу.", kanji: "本を返してくれます", kana: "ほんをかえしてくれます" }
+      ]},
+      { id: 29, nounK: "家", nounR: "いえ", nounT: "дом", verbK: "帰る", verbR: "かえる", verbT: "возвращаться домой", forms: [
+        { type: "te_agemasu", ru: "Я возвращаюсь домой для него.", kanji: "家に帰ってあげます", kana: "いえにかえってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то вернуться домой.", kanji: "家に帰ってもらいます", kana: "いえにかえってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то возвращается домой.", kanji: "家に帰ってくれます", kana: "いえにかえってくれます" }
+      ]},
+      { id: 30, nounK: "時間", nounR: "じかん", nounT: "время", verbK: "かかる", verbR: "かかる", verbT: "требоваться (о времени)", forms: [
+        { type: "te_agemasu", ru: "Я трачу время для него.", kanji: "時間がかかってあげます", kana: "じかんがかかってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы время было потрачено.", kanji: "時間がかかってもらいます", kana: "じかんがかかってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то тратит время.", kanji: "時間がかかってくれます", kana: "じかんがかかってくれます" }
+      ]},
+      { id: 31, nounK: "漢字", nounR: "かんじ", nounT: "иероглиф", verbK: "書く", verbR: "かく", verbT: "писать", forms: [
+        { type: "te_agemasu", ru: "Я пишу иероглиф для него.", kanji: "漢字を書いてあげます", kana: "かんじをかいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то написать иероглиф.", kanji: "漢字を書いてもらいます", kana: "かんじをかいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то пишет иероглиф.", kanji: "漢字を書いてくれます", kana: "かんじをかいてくれます" }
+      ]},
+      { id: 32, nounK: "電話", nounR: "でんわ", nounT: "телефон", verbK: "かける", verbR: "かける", verbT: "звонить", forms: [
+        { type: "te_agemasu", ru: "Я звоню по телефону для него.", kanji: "電話をかけてあげます", kana: "でんわをかけてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то позвонить по телефону.", kanji: "電話をかけてもらいます", kana: "でんわをかけてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то звонит по телефону.", kanji: "電話をかけてくれます", kana: "でんわをかけてくれます" }
+      ]},
+      { id: 33, nounK: "ペン", nounR: "ペン", nounT: "ручка", verbK: "貸す", verbR: "かす", verbT: "одалживать", forms: [
+        { type: "te_agemasu", ru: "Я одалживаю ручку для него.", kanji: "ペンを貸してあげます", kana: "ペンをかしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то одолжить ручку.", kanji: "ペンを貸してもらいます", kana: "ペンをかしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то одалживает ручку.", kanji: "ペンを貸してくれます", kana: "ペンをかしてくれます" }
+      ]},
+      { id: 34, nounK: "帽子", nounR: "ぼうし", nounT: "шляпа", verbK: "かぶる", verbR: "かぶる", verbT: "надевать на голову", forms: [
+        { type: "te_agemasu", ru: "Я надеваю шляпу для него.", kanji: "帽子をかぶってあげます", kana: "ぼうしをかぶってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то надеть шляпу.", kanji: "帽子をかぶってもらいます", kana: "ぼうしをかぶってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то надевает шляпу.", kanji: "帽子をかぶってくれます", kana: "ぼうしをかぶってくれます" }
+      ]},
+      { id: 35, nounK: "辞書", nounR: "じしょ", nounT: "словарь", verbK: "借りる", verbR: "かりる", verbT: "брать взаймы", forms: [
+        { type: "te_agemasu", ru: "Я беру взаймы словарь для него.", kanji: "辞書を借りてあげます", kana: "じしょをかりてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то взять взаймы словарь.", kanji: "辞書を借りてもらいます", kana: "じしょをかりてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то берёт взаймы словарь.", kanji: "辞書を借りてくれます", kana: "じしょをかりてくれます" }
+      ]},
+      { id: 36, nounK: "電気", nounR: "でんき", nounT: "свет", verbK: "消える", verbR: "きえる", verbT: "гаснуть", forms: [
+        { type: "te_agemasu", ru: "Я гашу свет для него.", kanji: "電気が消えてあげます", kana: "でんきがきえてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы свет погас.", kanji: "電気が消えてもらいます", kana: "でんきがきえてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то гасит свет.", kanji: "電気が消えてくれます", kana: "でんきがきえてくれます" }
+      ]},
+      { id: 37, nounK: "音楽", nounR: "おんがく", nounT: "музыка", verbK: "聞く", verbR: "きく", verbT: "слушать", forms: [
+        { type: "te_agemasu", ru: "Я слушаю музыку для него.", kanji: "音楽を聞いてあげます", kana: "おんがくをきいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то послушать музыку.", kanji: "音楽を聞いてもらいます", kana: "おんがくをきいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то слушает музыку.", kanji: "音楽を聞いてくれます", kana: "おんがくをきいてくれます" }
+      ]},
+      { id: 38, nounK: "紙", nounR: "かみ", nounT: "бумага", verbK: "切る", verbR: "きる", verbT: "резать", forms: [
+        { type: "te_agemasu", ru: "Я режу бумагу для него.", kanji: "紙を切ってあげます", kana: "かみをきってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то разрезать бумагу.", kanji: "紙を切ってもらいます", kana: "かみをきってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то режет бумагу.", kanji: "紙を切ってくれます", kana: "かみをきってくれます" }
+      ]},
+      { id: 39, nounK: "シャツ", nounR: "シャツ", nounT: "рубашка", verbK: "着る", verbR: "きる", verbT: "надевать на тело", forms: [
+        { type: "te_agemasu", ru: "Я надеваю рубашку для него.", kanji: "シャツを着てあげます", kana: "シャツをきてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то надеть рубашку.", kanji: "シャツを着てもらいます", kana: "シャツをきてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то надевает рубашку.", kanji: "シャツを着てくれます", kana: "シャツをきてくれます" }
+      ]},
+      { id: 40, nounK: "先生", nounR: "せんせい", nounT: "учитель", verbK: "来る", verbR: "くる", verbT: "приходить", forms: [
+        { type: "te_agemasu", ru: "Я прихожу (как учитель) для него.", kanji: "先生が来てあげます", kana: "せんせいがきてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы учитель пришёл.", kanji: "先生が来てもらいます", kana: "せんせいがきてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то приходит (учитель).", kanji: "先生が来てくれます", kana: "せんせいがきてくれます" }
+      ]},
+      { id: 41, nounK: "女の人", nounR: "おんなのひと", nounT: "женщина", verbK: "結婚する", verbR: "けっこんする", verbT: "жениться", forms: [
+        { type: "te_agemasu", ru: "Я женюсь на этой женщине для него.", kanji: "女の人と結婚してあげます", kana: "おんなのひととけっこんしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то жениться на этой женщине.", kanji: "女の人と結婚してもらいます", kana: "おんなのひととけっこんしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то женится на этой женщине.", kanji: "女の人と結婚してくれます", kana: "おんなのひととけっこんしてくれます" }
+      ]},
+      { id: 42, nounK: "テレビ", nounR: "テレビ", nounT: "телевизор", verbK: "消す", verbR: "けす", verbT: "выключать", forms: [
+        { type: "te_agemasu", ru: "Я выключаю телевизор для него.", kanji: "テレビを消してあげます", kana: "テレビをけしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то выключить телевизор.", kanji: "テレビを消してもらいます", kana: "テレビをけしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то выключает телевизор.", kanji: "テレビを消してくれます", kana: "テレビをけしてくれます" }
+      ]},
+      { id: 43, nounK: "質問", nounR: "しつもん", nounT: "вопрос", verbK: "答える", verbR: "こたえる", verbT: "отвечать", forms: [
+        { type: "te_agemasu", ru: "Я отвечаю на вопрос для него.", kanji: "質問に答えてあげます", kana: "しつもんにこたえてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то ответить на вопрос.", kanji: "質問に答えてもらいます", kana: "しつもんにこたえてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то отвечает на вопрос.", kanji: "質問に答えてくれます", kana: "しつもんにこたえてくれます" }
+      ]},
+      { id: 44, nounK: "ノート", nounR: "ノート", nounT: "тетрадь", verbK: "コピーする", verbR: "コピーする", verbT: "копировать", forms: [
+        { type: "te_agemasu", ru: "Я копирую тетрадь для него.", kanji: "ノートをコピーしてあげます", kana: "ノートをコピーしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то скопировать тетрадь.", kanji: "ノートをコピーしてもらいます", kana: "ノートをコピーしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то копирует тетрадь.", kanji: "ノートをコピーしてくれます", kana: "ノートをコピーしてくれます" }
+      ]},
+      { id: 45, nounK: "仕事", nounR: "しごと", nounT: "работа", verbK: "困る", verbR: "こまる", verbT: "испытывать затруднения", forms: [
+        { type: "te_agemasu", ru: "Я испытываю трудности на работе для него.", kanji: "仕事で困ってあげます", kana: "しごとでこまってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы возникли трудности на работе.", kanji: "仕事で困ってもらいます", kana: "しごとでこまってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то испытывает трудности на работе.", kanji: "仕事で困ってくれます", kana: "しごとでこまってくれます" }
+      ]},
+      { id: 46, nounK: "花", nounR: "はな", nounT: "цветок", verbK: "咲く", verbR: "さく", verbT: "цвести", forms: [
+        { type: "te_agemasu", ru: "У меня цветёт цветок для него.", kanji: "花が咲いてあげます", kana: "はながさいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы цветок зацвёл.", kanji: "花が咲いてもらいます", kana: "はながさいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то цветёт цветок.", kanji: "花が咲いてくれます", kana: "はながさいてくれます" }
+      ]},
+      { id: 47, nounK: "傘", nounR: "かさ", nounT: "зонт", verbK: "差す", verbR: "さす", verbT: "раскрывать", forms: [
+        { type: "te_agemasu", ru: "Я раскрываю зонт для него.", kanji: "傘を差してあげます", kana: "かさをさしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то раскрыть зонт.", kanji: "傘を差してもらいます", kana: "かさをさしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то раскрывает зонт.", kanji: "傘を差してくれます", kana: "かさをさしてくれます" }
+      ]},
+      { id: 48, nounK: "犬", nounR: "いぬ", nounT: "собака", verbK: "散歩する", verbR: "さんぽする", verbT: "гулять", forms: [
+        { type: "te_agemasu", ru: "Я гуляю с собакой для него.", kanji: "犬と散歩してあげます", kana: "いぬとさんぽしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то погулять с собакой.", kanji: "犬と散歩してもらいます", kana: "いぬとさんぽしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то гуляет с собакой.", kanji: "犬と散歩してくれます", kana: "いぬとさんぽしてくれます" }
+      ]},
+      { id: 49, nounK: "魚", nounR: "さかな", nounT: "рыба", verbK: "死ぬ", verbR: "しぬ", verbT: "умирать", forms: [
+        { type: "te_agemasu", ru: "У меня умирает рыба для него.", kanji: "魚が死んであげます", kana: "さかながしんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы рыба умерла.", kanji: "魚が死んでもらいます", kana: "さかながしんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то умирает рыба.", kanji: "魚が死んでくれます", kana: "さかながしんでくれます" }
+      ]},
+      { id: 50, nounK: "店", nounR: "みせ", nounT: "магазин", verbK: "閉まる", verbR: "しまる", verbT: "закрываться", forms: [
+        { type: "te_agemasu", ru: "Я закрываю магазин для него.", kanji: "店が閉まってあげます", kana: "みせがしまってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы магазин закрылся.", kanji: "店が閉まってもらいます", kana: "みせがしまってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то закрывает магазин.", kanji: "店が閉まってくれます", kana: "みせがしまってくれます" }
+      ]},
+      { id: 51, nounK: "箱", nounR: "はこ", nounT: "коробка", verbK: "閉める", verbR: "しめる", verbT: "закрывать", forms: [
+        { type: "te_agemasu", ru: "Я закрываю коробку для него.", kanji: "箱を閉めてあげます", kana: "はこをしめてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то закрыть коробку.", kanji: "箱を閉めてもらいます", kana: "はこをしめてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то закрывает коробку.", kanji: "箱を閉めてくれます", kana: "はこをしめてくれます" }
+      ]},
+      { id: 52, nounK: "ネクタイ", nounR: "ネクタイ", nounT: "галстук", verbK: "締める", verbR: "しめる", verbT: "завязывать", forms: [
+        { type: "te_agemasu", ru: "Я завязываю галстук для него.", kanji: "ネクタイを締めてあげます", kana: "ネクタイをしめてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то завязать галстук.", kanji: "ネクタイを締めてもらいます", kana: "ネクタイをしめてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то завязывает галстук.", kanji: "ネクタイを締めてくれます", kana: "ネクタイをしめてくれます" }
+      ]},
+      { id: 53, nounK: "写真", nounR: "しゃしん", nounT: "фотография", verbK: "撮る", verbR: "とる", verbT: "фотографировать", forms: [
+        { type: "te_agemasu", ru: "Я фотографирую для него.", kanji: "写真を撮ってあげます", kana: "しゃしんをとってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то сфотографировать.", kanji: "写真を撮ってもらいます", kana: "しゃしんをとってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то фотографирует.", kanji: "写真を撮ってくれます", kana: "しゃしんをとってくれます" }
+      ]},
+      { id: 54, nounK: "医者", nounR: "いしゃ", nounT: "врач", verbK: "質問する", verbR: "しつもんする", verbT: "спрашивать", forms: [
+        { type: "te_agemasu", ru: "Я спрашиваю врача для него.", kanji: "医者に質問してあげます", kana: "いしゃにしつもんしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то спросить у врача.", kanji: "医者に質問してもらいます", kana: "いしゃにしつもんしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то спрашивает врача.", kanji: "医者に質問してくれます", kana: "いしゃにしつもんしてくれます" }
+      ]},
+      { id: 55, nounK: "ニュース", nounR: "ニュース", nounT: "новость", verbK: "知る", verbR: "しる", verbT: "узнавать", forms: [
+        { type: "te_agemasu", ru: "Я узнаю новости для него.", kanji: "ニュースを知ってあげます", kana: "ニュースをしってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то узнать новости.", kanji: "ニュースを知ってもらいます", kana: "ニュースをしってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то узнаёт новости.", kanji: "ニュースを知ってくれます", kana: "ニュースをしってくれます" }
+      ]},
+      { id: 56, nounK: "たばこ", nounR: "たばこ", nounT: "сигарета", verbK: "吸う", verbR: "すう", verbT: "курить", forms: [
+        { type: "te_agemasu", ru: "Я курю сигарету для него.", kanji: "たばこを吸ってあげます", kana: "たばこをすってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то покурить сигарету.", kanji: "たばこを吸ってもらいます", kana: "たばこをすってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то курит сигарету.", kanji: "たばこを吸ってくれます", kana: "たばこをすってくれます" }
+      ]},
+      { id: 57, nounK: "町", nounR: "まち", nounT: "город", verbK: "住む", verbR: "すむ", verbT: "жить", forms: [
+        { type: "te_agemasu", ru: "Я живу в городе для него.", kanji: "町に住んであげます", kana: "まちにすんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то пожить в городе.", kanji: "町に住んでもらいます", kana: "まちにすんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то живёт в городе.", kanji: "町に住んでくれます", kana: "まちにすんでくれます" }
+      ]},
+      { id: 58, nounK: "宿題", nounR: "しゅくだい", nounT: "домашнее задание", verbK: "する", verbR: "する", verbT: "делать", forms: [
+        { type: "te_agemasu", ru: "Я делаю домашнее задание для него.", kanji: "宿題をしてあげます", kana: "しゅくだいをしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то сделать домашнее задание.", kanji: "宿題をしてもらいます", kana: "しゅくだいをしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то делает домашнее задание.", kanji: "宿題をしてくれます", kana: "しゅくだいをしてくれます" }
+      ]},
+      { id: 59, nounK: "椅子", nounR: "いす", nounT: "стул", verbK: "座る", verbR: "すわる", verbT: "садиться", forms: [
+        { type: "te_agemasu", ru: "Я сажусь на стул для него.", kanji: "椅子に座ってあげます", kana: "いすにすわってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то сесть на стул.", kanji: "椅子に座ってもらいます", kana: "いすにすわってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то садится на стул.", kanji: "椅子に座ってくれます", kana: "いすにすわってくれます" }
+      ]},
+      { id: 60, nounK: "ズボン", nounR: "ズボン", nounT: "брюки", verbK: "洗濯する", verbR: "せんたくする", verbT: "стирать", forms: [
+        { type: "te_agemasu", ru: "Я стираю брюки для него.", kanji: "ズボンを洗濯してあげます", kana: "ズボンをせんたくしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то постирать брюки.", kanji: "ズボンを洗濯してもらいます", kana: "ズボンをせんたくしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то стирает брюки.", kanji: "ズボンを洗濯してくれます", kana: "ズボンをせんたくしてくれます" }
+      ]},
+      { id: 61, nounK: "部屋", nounR: "へや", nounT: "комната", verbK: "掃除する", verbR: "そうじする", verbT: "убираться", forms: [
+        { type: "te_agemasu", ru: "Я убираю комнату для него.", kanji: "部屋を掃除してあげます", kana: "へやをそうじしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то убрать комнату.", kanji: "部屋を掃除してもらいます", kana: "へやをそうじしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то убирает комнату.", kanji: "部屋を掃除してくれます", kana: "へやをそうじしてくれます" }
+      ]},
+      { id: 62, nounK: "ごみ", nounR: "ごみ", nounT: "мусор", verbK: "出す", verbR: "だす", verbT: "выносить", forms: [
+        { type: "te_agemasu", ru: "Я выношу мусор для него.", kanji: "ごみを出してあげます", kana: "ごみをだしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то вынести мусор.", kanji: "ごみを出してもらいます", kana: "ごみをだしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то выносит мусор.", kanji: "ごみを出してくれます", kana: "ごみをだしてくれます" }
+      ]},
+      { id: 63, nounK: "駅", nounR: "えき", nounT: "вокзал", verbK: "立つ", verbR: "たつ", verbT: "стоять, вставать", forms: [
+        { type: "te_agemasu", ru: "Я стою перед вокзалом для него.", kanji: "駅の前に立ってあげます", kana: "えきのまえにたってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то постоять перед вокзалом.", kanji: "駅の前に立ってもらいます", kana: "えきのまえにたってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то стоит перед вокзалом.", kanji: "駅の前に立ってくれます", kana: "えきのまえにたってくれます" }
+      ]},
+      { id: 64, nounK: "コーヒー", nounR: "コーヒー", nounT: "кофе", verbK: "頼む", verbR: "たのむ", verbT: "заказывать", forms: [
+        { type: "te_agemasu", ru: "Я заказываю кофе для него.", kanji: "コーヒーを頼んであげます", kana: "コーヒーをたのんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то заказать кофе.", kanji: "コーヒーを頼んでもらいます", kana: "コーヒーをたのんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то заказывает кофе.", kanji: "コーヒーを頼んでくれます", kana: "コーヒーをたのんでくれます" }
+      ]},
+      { id: 65, nounK: "ご飯", nounR: "ごはん", nounT: "еда", verbK: "食べる", verbR: "たべる", verbT: "есть", forms: [
+        { type: "te_agemasu", ru: "Я ем для него.", kanji: "ご飯を食べてあげます", kana: "ごはんをたべてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то поесть.", kanji: "ご飯を食べてもらいます", kana: "ごはんをたべてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то даёт поесть.", kanji: "ご飯を食べてくれます", kana: "ごはんをたべてくれます" }
+      ]},
+      { id: 66, nounK: "色", nounR: "いろ", nounT: "цвет", verbK: "違う", verbR: "ちがう", verbT: "отличаться", forms: [
+        { type: "te_agemasu", ru: "У меня цвет отличается для него.", kanji: "色が違ってあげます", kana: "いろがちがってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы цвет отличался.", kanji: "色が違ってもらいます", kana: "いろがちがってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то отличается цветом.", kanji: "色が違ってくれます", kana: "いろがちがってくれます" }
+      ]},
+      { id: 67, nounK: "パソコン", nounR: "パソコン", nounT: "компьютер", verbK: "使う", verbR: "つかう", verbT: "использовать", forms: [
+        { type: "te_agemasu", ru: "Я использую компьютер для него.", kanji: "パソコンを使ってあげます", kana: "パソコンをつかってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то использовать компьютер.", kanji: "パソコンを使ってもらいます", kana: "パソコンをつかってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то использует компьютер.", kanji: "パソコンを使ってくれます", kana: "パソコンをつかってくれます" }
+      ]},
+      { id: 68, nounK: "旅行", nounR: "りょこう", nounT: "путешествие", verbK: "疲れる", verbR: "つかれる", verbT: "уставать", forms: [
+        { type: "te_agemasu", ru: "Я устаю от путешествия для него.", kanji: "旅行で疲れてあげます", kana: "りょこうでつかれてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы устали от путешествия.", kanji: "旅行で疲れてもらいます", kana: "りょこうでつかれてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то устаёт от путешествия.", kanji: "旅行で疲れてくれます", kana: "りょこうでつかれてくれます" }
+      ]},
+      { id: 69, nounK: "空港", nounR: "くうこう", nounT: "аэропорт", verbK: "着く", verbR: "つく", verbT: "прибывать", forms: [
+        { type: "te_agemasu", ru: "Я прибываю в аэропорт для него.", kanji: "空港に着いてあげます", kana: "くうこうについてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то прибыть в аэропорт.", kanji: "空港に着いてもらいます", kana: "くうこうについてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то прибывает в аэропорт.", kanji: "空港に着いてくれます", kana: "くうこうについてくれます" }
+      ]},
+      { id: 70, nounK: "料理", nounR: "りょうり", nounT: "еда (блюдо)", verbK: "作る", verbR: "つくる", verbT: "готовить", forms: [
+        { type: "te_agemasu", ru: "Я готовлю еду для него.", kanji: "料理を作ってあげます", kana: "りょうりをつくってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то приготовить еду.", kanji: "料理を作ってもらいます", kana: "りょうりをつくってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то готовит еду.", kanji: "料理を作ってくれます", kana: "りょうりをつくってくれます" }
+      ]},
+      { id: 71, nounK: "ラジオ", nounR: "ラジオ", nounT: "радио", verbK: "点ける", verbR: "つける", verbT: "включать", forms: [
+        { type: "te_agemasu", ru: "Я включаю радио для него.", kanji: "ラジオを点けてあげます", kana: "ラジオをつけてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то включить радио.", kanji: "ラジオを点けてもらいます", kana: "ラジオをつけてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то включает радио.", kanji: "ラジオを点けてくれます", kana: "ラジオをつけてくれます" }
+      ]},
+      { id: 72, nounK: "会社", nounR: "かいしゃ", nounT: "компания", verbK: "勤める", verbR: "つとめる", verbT: "служить", forms: [
+        { type: "te_agemasu", ru: "Я служу в компании для него.", kanji: "会社に勤めてあげます", kana: "かいしゃにつとめてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то послужить в компании.", kanji: "会社に勤めてもらいます", kana: "かいしゃにつとめてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то служит в компании.", kanji: "会社に勤めてくれます", kana: "かいしゃにつとめてくれます" }
+      ]},
+      { id: 73, nounK: "散歩", nounR: "さんぽ", nounT: "прогулка", verbK: "出かける", verbR: "でかける", verbT: "выходить из дома", forms: [
+        { type: "te_agemasu", ru: "Я выхожу на прогулку для него.", kanji: "散歩に出かけてあげます", kana: "さんぽにでかけてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то выйти на прогулку.", kanji: "散歩に出かけてもらいます", kana: "さんぽにでかけてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то выходит на прогулку.", kanji: "散歩に出かけてくれます", kana: "さんぽにでかけてくれます" }
+      ]},
+      { id: 74, nounK: "日本語", nounR: "にほんご", nounT: "японский язык", verbK: "できる", verbR: "できる", verbT: "мочь", forms: [
+        { type: "te_agemasu", ru: "Я умею говорить по-японски для него.", kanji: "日本語ができてあげます", kana: "にほんごができてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы кто-то умел говорить по-японски.", kanji: "日本語ができてもらいます", kana: "にほんごができてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то умеет говорить по-японски.", kanji: "日本語ができてくれます", kana: "にほんごができてくれます" }
+      ]},
+      { id: 75, nounK: "大学", nounR: "だいがく", nounT: "университет", verbK: "出る", verbR: "でる", verbT: "выходить, оканчивать", forms: [
+        { type: "te_agemasu", ru: "Я оканчиваю университет для него.", kanji: "大学を出てあげます", kana: "だいがくをでてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то окончить университет.", kanji: "大学を出てもらいます", kana: "だいがくをでてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то оканчивает университет.", kanji: "大学を出てくれます", kana: "だいがくをでてくれます" }
+      ]},
+      { id: 76, nounK: "病院", nounR: "びょういん", nounT: "больница", verbK: "電話する", verbR: "でんわする", verbT: "звонить по телефону", forms: [
+        { type: "te_agemasu", ru: "Я звоню в больницу для него.", kanji: "病院に電話してあげます", kana: "びょういんにでんわしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то позвонить в больницу.", kanji: "病院に電話してもらいます", kana: "びょういんにでんわしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то звонит в больницу.", kanji: "病院に電話してくれます", kana: "びょういんにでんわしてくれます" }
+      ]},
+      { id: 77, nounK: "飛行機", nounR: "ひこうき", nounT: "самолёт", verbK: "飛ぶ", verbR: "とぶ", verbT: "летать", forms: [
+        { type: "te_agemasu", ru: "У меня летает самолёт для него.", kanji: "飛行機が飛んであげます", kana: "ひこうきがとんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы самолёт летел.", kanji: "飛行機が飛んでもらいます", kana: "ひこうきがとんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то летает самолёт.", kanji: "飛行機が飛んでくれます", kana: "ひこうきがとんでくれます" }
+      ]},
+      { id: 78, nounK: "車", nounR: "くるま", nounT: "машина", verbK: "止まる", verbR: "とまる", verbT: "останавливаться", forms: [
+        { type: "te_agemasu", ru: "Я останавливаю машину для него.", kanji: "車が止まってあげます", kana: "くるまがとまってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы машина остановилась.", kanji: "車が止まってもらいます", kana: "くるまがとまってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то останавливает машину.", kanji: "車が止まってくれます", kana: "くるまがとまってくれます" }
+      ]},
+      { id: 79, nounK: "休み", nounR: "やすみ", nounT: "выходной", verbK: "取る", verbR: "とる", verbT: "брать", forms: [
+        { type: "te_agemasu", ru: "Я беру выходной для него.", kanji: "休みを取ってあげます", kana: "やすみをとってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то взять выходной.", kanji: "休みを取ってもらいます", kana: "やすみをとってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то берёт выходной.", kanji: "休みを取ってくれます", kana: "やすみをとってくれます" }
+      ]},
+      { id: 80, nounK: "カメラ", nounR: "カメラ", nounT: "камера", verbK: "撮る", verbR: "とる", verbT: "снимать (фото)", forms: [
+        { type: "te_agemasu", ru: "Я снимаю камерой для него.", kanji: "カメラで撮ってあげます", kana: "カメラでとってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то снять камерой.", kanji: "カメラで撮ってもらいます", kana: "カメラでとってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то снимает камерой.", kanji: "カメラで撮ってくれます", kana: "カメラでとってくれます" }
+      ]},
+      { id: 81, nounK: "鳥", nounR: "とり", nounT: "птица", verbK: "鳴く", verbR: "なく", verbT: "петь (о птице)", forms: [
+        { type: "te_agemasu", ru: "У меня поёт птица для него.", kanji: "鳥が鳴いてあげます", kana: "とりがないてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы птица пела.", kanji: "鳥が鳴いてもらいます", kana: "とりがないてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то поёт птица.", kanji: "鳥が鳴いてくれます", kana: "とりがないてくれます" }
+      ]},
+      { id: 82, nounK: "銀行", nounR: "ぎんこう", nounT: "банк", verbK: "並ぶ", verbR: "ならぶ", verbT: "стоять в очереди", forms: [
+        { type: "te_agemasu", ru: "Я стою в очереди в банке для него.", kanji: "銀行で並んであげます", kana: "ぎんこうでならんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то постоять в очереди в банке.", kanji: "銀行で並んでもらいます", kana: "ぎんこうでならんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то стоит в очереди в банке.", kanji: "銀行で並んでくれます", kana: "ぎんこうでならんでくれます" }
+      ]},
+      { id: 83, nounK: "お皿", nounR: "おさら", nounT: "тарелка", verbK: "並べる", verbR: "ならべる", verbT: "расставлять", forms: [
+        { type: "te_agemasu", ru: "Я расставляю тарелки для него.", kanji: "お皿を並べてあげます", kana: "おさらをならべてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то расставить тарелки.", kanji: "お皿を並べてもらいます", kana: "おさらをならべてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то расставляет тарелки.", kanji: "お皿を並べてくれます", kana: "おさらをならべてくれます" }
+      ]},
+      { id: 84, nounK: "大人", nounR: "おとな", nounT: "взрослый", verbK: "なる", verbR: "なる", verbT: "становиться", forms: [
+        { type: "te_agemasu", ru: "Я становлюсь взрослым для него.", kanji: "大人になってあげます", kana: "おとなになってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то стать взрослым.", kanji: "大人になってもらいます", kana: "おとなになってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то становится взрослым.", kanji: "大人になってくれます", kana: "おとなになってくれます" }
+      ]},
+      { id: 85, nounK: "靴", nounR: "くつ", nounT: "обувь", verbK: "脱ぐ", verbR: "ぬぐ", verbT: "снимать одежду", forms: [
+        { type: "te_agemasu", ru: "Я снимаю обувь для него.", kanji: "靴を脱いであげます", kana: "くつをぬいであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то снять обувь.", kanji: "靴を脱いでもらいます", kana: "くつをぬいでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то снимает обувь.", kanji: "靴を脱いでくれます", kana: "くつをぬいでくれます" }
+      ]},
+      { id: 86, nounK: "ベッド", nounR: "ベッド", nounT: "кровать", verbK: "寝る", verbR: "ねる", verbT: "спать", forms: [
+        { type: "te_agemasu", ru: "Я сплю в кровати для него.", kanji: "ベッドで寝てあげます", kana: "ベッドでねてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то поспать в кровати.", kanji: "ベッドで寝てもらいます", kana: "ベッドでねてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то спит в кровати.", kanji: "ベッドで寝てくれます", kana: "ベッドでねてくれます" }
+      ]},
+      { id: 87, nounK: "山", nounR: "やま", nounT: "гора", verbK: "登る", verbR: "のぼる", verbT: "подниматься", forms: [
+        { type: "te_agemasu", ru: "Я поднимаюсь на гору для него.", kanji: "山に登ってあげます", kana: "やまにのぼってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то подняться на гору.", kanji: "山に登ってもらいます", kana: "やまにのぼってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то поднимается на гору.", kanji: "山に登ってくれます", kana: "やまにのぼってくれます" }
+      ]},
+      { id: 88, nounK: "お茶", nounR: "おちゃ", nounT: "чай", verbK: "飲む", verbR: "のむ", verbT: "пить", forms: [
+        { type: "te_agemasu", ru: "Я пью чай для него.", kanji: "お茶を飲んであげます", kana: "おちゃをのんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то выпить чай.", kanji: "お茶を飲んでもらいます", kana: "おちゃをのんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то пьёт чай.", kanji: "お茶を飲んでくれます", kana: "おちゃをのんでくれます" }
+      ]},
+      { id: 89, nounK: "電車", nounR: "でんしゃ", nounT: "поезд", verbK: "乗る", verbR: "のる", verbT: "садиться в транспорт", forms: [
+        { type: "te_agemasu", ru: "Я сажусь на поезд для него.", kanji: "電車に乗ってあげます", kana: "でんしゃにのってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то сесть на поезд.", kanji: "電車に乗ってもらいます", kana: "でんしゃにのってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то садится на поезд.", kanji: "電車に乗ってくれます", kana: "でんしゃにのってくれます" }
+      ]},
+      { id: 90, nounK: "教室", nounR: "きょうしつ", nounT: "класс", verbK: "入る", verbR: "はいる", verbT: "входить", forms: [
+        { type: "te_agemasu", ru: "Я вхожу в класс для него.", kanji: "教室に入ってあげます", kana: "きょうしつにはいってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то войти в класс.", kanji: "教室に入ってもらいます", kana: "きょうしつにはいってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то входит в класс.", kanji: "教室に入ってくれます", kana: "きょうしつにはいってくれます" }
+      ]},
+      { id: 91, nounK: "靴下", nounR: "くつした", nounT: "носок", verbK: "履く", verbR: "はく", verbT: "надевать обувь", forms: [
+        { type: "te_agemasu", ru: "Я надеваю носки для него.", kanji: "靴下を履いてあげます", kana: "くつしたをはいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то надеть носки.", kanji: "靴下を履いてもらいます", kana: "くつしたをはいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то надевает носки.", kanji: "靴下を履いてくれます", kana: "くつしたをはいてくれます" }
+      ]},
+      { id: 92, nounK: "川沿い", nounR: "かわぞい", nounT: "река", verbK: "走る", verbR: "はしる", verbT: "бежать", forms: [
+        { type: "te_agemasu", ru: "Я бегу вдоль реки для него.", kanji: "川沿いを走ってあげます", kana: "かわぞいをはしってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то побежать вдоль реки.", kanji: "川沿いを走ってもらいます", kana: "かわぞいをはしってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то бежит вдоль реки.", kanji: "川沿いを走ってくれます", kana: "かわぞいをはしってくれます" }
+      ]},
+      { id: 93, nounK: "レストラン", nounR: "レストラン", nounT: "ресторан", verbK: "働く", verbR: "はたらく", verbT: "работать", forms: [
+        { type: "te_agemasu", ru: "Я работаю в ресторане для него.", kanji: "レストランで働いてあげます", kana: "レストランではたらいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то поработать в ресторане.", kanji: "レストランで働いてもらいます", kana: "レストランではたらいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то работает в ресторане.", kanji: "レストランで働いてくれます", kana: "レストランではたらいてくれます" }
+      ]},
+      { id: 94, nounK: "英語", nounR: "えいご", nounT: "английский язык", verbK: "話す", verbR: "はなす", verbT: "говорить", forms: [
+        { type: "te_agemasu", ru: "Я говорю по-английски для него.", kanji: "英語を話してあげます", kana: "えいごをはなしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то заговорить по-английски.", kanji: "英語を話してもらいます", kana: "えいごをはなしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то говорит по-английски.", kanji: "英語を話してくれます", kana: "えいごをはなしてくれます" }
+      ]},
+      { id: 95, nounK: "切手", nounR: "きって", nounT: "марка", verbK: "貼る", verbR: "はる", verbT: "наклеивать", forms: [
+        { type: "te_agemasu", ru: "Я наклеиваю марку для него.", kanji: "切手を貼ってあげます", kana: "きってをはってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то наклеить марку.", kanji: "切手を貼ってもらいます", kana: "きってをはってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то наклеивает марку.", kanji: "切手を貼ってくれます", kana: "きってをはってくれます" }
+      ]},
+      { id: 96, nounK: "天気", nounR: "てんき", nounT: "погода", verbK: "晴れる", verbR: "はれる", verbT: "проясняться", forms: [
+        { type: "te_agemasu", ru: "У меня проясняется погода для него.", kanji: "天気が晴れてあげます", kana: "てんきがはれてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы погода прояснилась.", kanji: "天気が晴れてもらいます", kana: "てんきがはれてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то проясняется погода.", kanji: "天気が晴れてくれます", kana: "てんきがはれてくれます" }
+      ]},
+      { id: 97, nounK: "風邪", nounR: "かぜ", nounT: "простуда", verbK: "引く", verbR: "ひく", verbT: "простужаться", forms: [
+        { type: "te_agemasu", ru: "Я простужаюсь для него.", kanji: "風邪を引いてあげます", kana: "かぜをひいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы кто-то простудился.", kanji: "風邪を引いてもらいます", kana: "かぜをひいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то простужается.", kanji: "風邪を引いてくれます", kana: "かぜをひいてくれます" }
+      ]},
+      { id: 98, nounK: "ピアノ", nounR: "ピアノ", nounT: "пианино", verbK: "弾く", verbR: "ひく", verbT: "играть на инструменте", forms: [
+        { type: "te_agemasu", ru: "Я играю на пианино для него.", kanji: "ピアノを弾いてあげます", kana: "ピアノをひいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то поиграть на пианино.", kanji: "ピアノを弾いてもらいます", kana: "ピアノをひいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то играет на пианино.", kanji: "ピアノを弾いてくれます", kana: "ピアノをひいてくれます" }
+      ]},
+      { id: 99, nounK: "風", nounR: "かぜ", nounT: "ветер", verbK: "吹く", verbR: "ふく", verbT: "дуть", forms: [
+        { type: "te_agemasu", ru: "У меня дует ветер для него.", kanji: "風が吹いてあげます", kana: "かぜがふいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы подул ветер.", kanji: "風が吹いてもらいます", kana: "かぜがふいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то дует ветер.", kanji: "風が吹いてくれます", kana: "かぜがふいてくれます" }
+      ]},
+      { id: 100, nounK: "雨", nounR: "あめ", nounT: "дождь", verbK: "降る", verbR: "ふる", verbT: "идти (об осадках)", forms: [
+        { type: "te_agemasu", ru: "У меня идёт дождь для него.", kanji: "雨が降ってあげます", kana: "あめがふってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы пошёл дождь.", kanji: "雨が降ってもらいます", kana: "あめがふってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то идёт дождь.", kanji: "雨が降ってくれます", kana: "あめがふってくれます" }
+      ]},
+      { id: 101, nounK: "図書館", nounR: "としょかん", nounT: "библиотека", verbK: "勉強する", verbR: "べんきょうする", verbT: "учиться", forms: [
+        { type: "te_agemasu", ru: "Я учусь в библиотеке для него.", kanji: "図書館で勉強してあげます", kana: "としょかんでべんきょうしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то позаниматься в библиотеке.", kanji: "図書館で勉強してもらいます", kana: "としょかんでべんきょうしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то учится в библиотеке.", kanji: "図書館で勉強してくれます", kana: "としょかんでべんきょうしてくれます" }
+      ]},
+      { id: 102, nounK: "角", nounR: "かど", nounT: "угол", verbK: "曲がる", verbR: "まがる", verbT: "поворачивать", forms: [
+        { type: "te_agemasu", ru: "Я поворачиваю на углу для него.", kanji: "角を曲がってあげます", kana: "かどをまがってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то повернуть на углу.", kanji: "角を曲がってもらいます", kana: "かどをまがってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то поворачивает на углу.", kanji: "角を曲がってくれます", kana: "かどをまがってくれます" }
+      ]},
+      { id: 103, nounK: "タクシー", nounR: "タクシー", nounT: "такси", verbK: "待つ", verbR: "まつ", verbT: "ждать", forms: [
+        { type: "te_agemasu", ru: "Я жду такси для него.", kanji: "タクシーを待ってあげます", kana: "タクシーをまってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то подождать такси.", kanji: "タクシーを待ってもらいます", kana: "タクシーをまってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то ждёт такси.", kanji: "タクシーを待ってくれます", kana: "タクシーをまってくれます" }
+      ]},
+      { id: 104, nounK: "歯", nounR: "は", nounT: "зуб", verbK: "磨く", verbR: "みがく", verbT: "чистить", forms: [
+        { type: "te_agemasu", ru: "Я чищу зубы для него.", kanji: "歯を磨いてあげます", kana: "はをみがいてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то почистить зубы.", kanji: "歯を磨いてもらいます", kana: "はをみがいてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то чистит зубы.", kanji: "歯を磨いてくれます", kana: "はをみがいてくれます" }
+      ]},
+      { id: 105, nounK: "絵", nounR: "え", nounT: "картина", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "te_agemasu", ru: "Я показываю картину для него.", kanji: "絵を見せてあげます", kana: "えをみせてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то показать картину.", kanji: "絵を見せてもらいます", kana: "えをみせてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то показывает картину.", kanji: "絵を見せてくれます", kana: "えをみせてくれます" }
+      ]},
+      { id: 106, nounK: "映画", nounR: "えいが", nounT: "фильм", verbK: "見る", verbR: "みる", verbT: "смотреть", forms: [
+        { type: "te_agemasu", ru: "Я смотрю фильм для него.", kanji: "映画を見てあげます", kana: "えいがをみてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то посмотреть фильм.", kanji: "映画を見てもらいます", kana: "えいがをみてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то смотрит фильм.", kanji: "映画を見てくれます", kana: "えいがをみてくれます" }
+      ]},
+      { id: 107, nounK: "荷物", nounR: "にもつ", nounT: "багаж", verbK: "持つ", verbR: "もつ", verbT: "держать", forms: [
+        { type: "te_agemasu", ru: "Я держу багаж для него.", kanji: "荷物を持ってあげます", kana: "にもつをもってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то подержать багаж.", kanji: "荷物を持ってもらいます", kana: "にもつをもってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то держит багаж.", kanji: "荷物を持ってくれます", kana: "にもつをもってくれます" }
+      ]},
+      { id: 108, nounK: "先輩", nounR: "せんぱい", nounT: "старший товарищ", verbK: "呼ぶ", verbR: "よぶ", verbT: "звать", forms: [
+        { type: "te_agemasu", ru: "Я зову старшего товарища для него.", kanji: "先輩を呼んであげます", kana: "せんぱいをよんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то позвать старшего товарища.", kanji: "先輩を呼んでもらいます", kana: "せんぱいをよんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то зовёт старшего товарища.", kanji: "先輩を呼んでくれます", kana: "せんぱいをよんでくれます" }
+      ]},
+      { id: 109, nounK: "雑誌", nounR: "ざっし", nounT: "журнал", verbK: "読む", verbR: "よむ", verbT: "читать", forms: [
+        { type: "te_agemasu", ru: "Я читаю журнал для него.", kanji: "雑誌を読んであげます", kana: "ざっしをよんであげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то почитать журнал.", kanji: "雑誌を読んでもらいます", kana: "ざっしをよんでもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то читает журнал.", kanji: "雑誌を読んでくれます", kana: "ざっしをよんでくれます" }
+      ]},
+      { id: 110, nounK: "外国", nounR: "がいこく", nounT: "заграница", verbK: "旅行する", verbR: "りょこうする", verbT: "путешествовать", forms: [
+        { type: "te_agemasu", ru: "Я путешествую за границей для него.", kanji: "外国を旅行してあげます", kana: "がいこくをりょこうしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то съездить за границу.", kanji: "外国を旅行してもらいます", kana: "がいこくをりょこうしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то путешествует за границей.", kanji: "外国を旅行してくれます", kana: "がいこくをりょこうしてくれます" }
+      ]},
+      { id: 111, nounK: "スポーツ", nounR: "スポーツ", nounT: "спорт", verbK: "練習する", verbR: "れんしゅうする", verbT: "тренироваться", forms: [
+        { type: "te_agemasu", ru: "Я тренируюсь в спорте для него.", kanji: "スポーツを練習してあげます", kana: "スポーツをれんしゅうしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то потренироваться в спорте.", kanji: "スポーツを練習してもらいます", kana: "スポーツをれんしゅうしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то тренируется в спорте.", kanji: "スポーツを練習してくれます", kana: "スポーツをれんしゅうしてくれます" }
+      ]},
+      { id: 112, nounK: "意味", nounR: "いみ", nounT: "смысл", verbK: "分かる", verbR: "わかる", verbT: "понимать", forms: [
+        { type: "te_agemasu", ru: "Я понимаю смысл для него.", kanji: "意味が分かってあげます", kana: "いみがわかってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то понять смысл.", kanji: "意味が分かってもらいます", kana: "いみがわかってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то понимает смысл.", kanji: "意味が分かってくれます", kana: "いみがわかってくれます" }
+      ]},
+      { id: 113, nounK: "約束", nounR: "やくそく", nounT: "обещание", verbK: "忘れる", verbR: "わすれる", verbT: "забывать", forms: [
+        { type: "te_agemasu", ru: "Я забываю обещание для него.", kanji: "約束を忘れてあげます", kana: "やくそくをわすれてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то забыть обещание.", kanji: "約束を忘れてもらいます", kana: "やくそくをわすれてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то забывает обещание.", kanji: "約束を忘れてくれます", kana: "やくそくをわすれてくれます" }
+      ]},
+      { id: 114, nounK: "切符", nounR: "きっぷ", nounT: "билет", verbK: "渡す", verbR: "わたす", verbT: "передавать", forms: [
+        { type: "te_agemasu", ru: "Я передаю билет для него.", kanji: "切符を渡してあげます", kana: "きっぷをわたしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то передать билет.", kanji: "切符を渡してもらいます", kana: "きっぷをわたしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то передаёт билет.", kanji: "切符を渡してくれます", kana: "きっぷをわたしてくれます" }
+      ]},
+      { id: 115, nounK: "橋", nounR: "はし", nounT: "мост", verbK: "渡る", verbR: "わたる", verbT: "переходить", forms: [
+        { type: "te_agemasu", ru: "Я перехожу мост для него.", kanji: "橋を渡ってあげます", kana: "はしをわたってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то перейти мост.", kanji: "橋を渡ってもらいます", kana: "はしをわたってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то переходит мост.", kanji: "橋を渡ってくれます", kana: "はしをわたってくれます" }
+      ]},
+      { id: 116, nounK: "子供", nounR: "こども", nounT: "ребёнок", verbK: "教える", verbR: "おしえる", verbT: "обучать", forms: [
+        { type: "te_agemasu", ru: "Я обучаю ребёнка для него.", kanji: "子供に教えてあげます", kana: "こどもにおしえてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то обучить ребёнка.", kanji: "子供に教えてもらいます", kana: "こどもにおしえてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то обучает ребёнка.", kanji: "子供に教えてくれます", kana: "こどもにおしえてくれます" }
+      ]},
+      { id: 117, nounK: "試験", nounR: "しけん", nounT: "экзамен", verbK: "始まる", verbR: "はじまる", verbT: "начинаться", forms: [
+        { type: "te_agemasu", ru: "У меня начинается экзамен для него.", kanji: "試験が始まってあげます", kana: "しけんがはじまってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы экзамен начался.", kanji: "試験が始まってもらいます", kana: "しけんがはじまってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то начинается экзамен.", kanji: "試験が始まってくれます", kana: "しけんがはじまってくれます" }
+      ]},
+      { id: 118, nounK: "勉強", nounR: "べんきょう", nounT: "учёба", verbK: "始める", verbR: "はじめる", verbT: "начинать", forms: [
+        { type: "te_agemasu", ru: "Я начинаю учёбу для него.", kanji: "勉強を始めてあげます", kana: "べんきょうをはじめてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то начать учёбу.", kanji: "勉強を始めてもらいます", kana: "べんきょうをはじめてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то начинает учёбу.", kanji: "勉強を始めてくれます", kana: "べんきょうをはじめてくれます" }
+      ]},
+      { id: 119, nounK: "お土産", nounR: "おみやげ", nounT: "сувенир", verbK: "もらう", verbR: "もらう", verbT: "получать", forms: [
+        { type: "te_agemasu", ru: "Я получаю сувенир для него.", kanji: "お土産をもらってあげます", kana: "おみやげをもらってあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то получить сувенир.", kanji: "お土産をもらってもらいます", kana: "おみやげをもらってもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то получает сувенир.", kanji: "お土産をもらってくれます", kana: "おみやげをもらってくれます" }
+      ]},
+      { id: 120, nounK: "お菓子", nounR: "おかし", nounT: "сладости", verbK: "くれる", verbR: "くれる", verbT: "давать (мне)", forms: [
+        { type: "te_agemasu", ru: "Я даю сладости для него.", kanji: "お菓子をくれてあげます", kana: "おかしをくれてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то угостить сладостями.", kanji: "お菓子をくれてもらいます", kana: "おかしをくれてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то даёт сладости.", kanji: "お菓子をくれてくれます", kana: "おかしをくれてくれます" }
+      ]},
+      { id: 121, nounK: "女の子", nounR: "おんなのこ", nounT: "девочка", verbK: "泣く", verbR: "なく", verbT: "плакать", forms: [
+        { type: "te_agemasu", ru: "У меня плачет девочка для него.", kanji: "女の子が泣いてあげます", kana: "おんなのこがないてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу, чтобы девочка поплакала.", kanji: "女の子が泣いてもらいます", kana: "おんなのこがないてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня у кого-то плачет девочка.", kanji: "女の子が泣いてくれます", kana: "おんなのこがないてくれます" }
+      ]},
+      { id: 122, nounK: "地図", nounR: "ちず", nounT: "карта", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "te_agemasu", ru: "Я показываю карту для него.", kanji: "地図を見せてあげます", kana: "ちずをみせてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то показать карту.", kanji: "地図を見せてもらいます", kana: "ちずをみせてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то показывает карту.", kanji: "地図を見せてくれます", kana: "ちずをみせてくれます" }
+      ]},
+      { id: 123, nounK: "学生", nounR: "がくせい", nounT: "студент", verbK: "テストする", verbR: "テストする", verbT: "тестировать", forms: [
+        { type: "te_agemasu", ru: "Я тестирую студентов для него.", kanji: "学生をテストしてあげます", kana: "がくせいをテストしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то протестировать студентов.", kanji: "学生をテストしてもらいます", kana: "がくせいをテストしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то тестирует студентов.", kanji: "学生をテストしてくれます", kana: "がくせいをテストしてくれます" }
+      ]},
+      { id: 124, nounK: "パーティー", nounR: "パーティー", nounT: "вечеринка", verbK: "する", verbR: "する", verbT: "устраивать", forms: [
+        { type: "te_agemasu", ru: "Я устраиваю вечеринку для него.", kanji: "パーティーをしてあげます", kana: "パーティーをしてあげます" },
+        { type: "te_moraimasu", ru: "Я прошу кого-то устроить вечеринку.", kanji: "パーティーをしてもらいます", kana: "パーティーをしてもらいます" },
+        { type: "te_kuremasu", ru: "Для меня кто-то устраивает вечеринку.", kanji: "パーティーをしてくれます", kana: "パーティーをしてくれます" }
+      ]}
+    ];
+
+    /* ==========================================================================
+       ЛОГИКА СОСТОЯНИЯ (3 ФОРМЫ НА СЛОВО)
+       ========================================================================== */
+    const STORAGE_KEY = "jp_app_save_v7_level7_pure";
+
+    let state = {
+      mode: "level",
+      currentLevel: 7,
+      wordIndex: 0,
+      formSubIndex: 0,
+      playlist: [],
+      currentFormOrder: [0, 1, 2],
+      errors: []
+    };
+
+    let isAnswerChecked = false;
+    let lastSpokenKana = "";
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Storage error", e);
+      }
+      updateErrorsBadge();
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            state = Object.assign(state, parsed);
+          }
+        }
+      } catch (e) {
+        console.warn("Resetting corrupt storage");
+      }
+
+      if (!Array.isArray(state.playlist) || state.playlist.length !== RAW_LEVEL_7_DATA.length) {
+        resetLevelPlaylist();
+      }
+      if (state.wordIndex < 0 || state.wordIndex >= RAW_LEVEL_7_DATA.length) {
+        state.wordIndex = 0;
+      }
+      if (state.formSubIndex < 0 || state.formSubIndex > 2) {
+        state.formSubIndex = 0;
+      }
+      if (!Array.isArray(state.currentFormOrder) || state.currentFormOrder.length !== 3) {
+        state.currentFormOrder = shuffleArray([0, 1, 2]);
+      }
+      if (!Array.isArray(state.errors)) {
+        state.errors = [];
+      }
+    }
+
+    function resetLevelPlaylist() {
+      const indices = RAW_LEVEL_7_DATA.map((_, i) => i);
+      state.playlist = shuffleArray(indices);
+      state.wordIndex = 0;
+      state.formSubIndex = 0;
+      state.currentFormOrder = shuffleArray([0, 1, 2]);
+    }
+
+    function confirmReset() {
+      if (confirm("Перемешать и начать 7 уровень с первого слова?")) {
+        resetLevelPlaylist();
+        state.mode = "level";
+        state.currentLevel = 7;
+        saveState();
+        renderScreen();
+      }
+    }
+
+    /* ==========================================================================
+       ОЗВУЧКА WEB SPEECH API
+       ========================================================================== */
+    let jaVoice = null;
+    function initVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      jaVoice = voices.find(v => (v.lang === 'ja-JP' || v.lang === 'ja_JP') && v.name.includes('Kyoko')) 
+             || voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.startsWith('ja')) 
+             || null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      initVoices();
+    }
+
+    function playAudio(kanaText) {
+      if (!('speechSynthesis' in window) || !kanaText) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(kanaText);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.88;
+        if (jaVoice) utterance.voice = jaVoice;
+        window.speechSynthesis.speak(utterance);
+        lastSpokenKana = kanaText;
+      } catch(e) {
+        console.warn("Audio warning", e);
+      }
+    }
+
+    function replayAudio() {
+      if (lastSpokenKana) {
+        playAudio(lastSpokenKana);
+      }
+    }
+
+    /* ==========================================================================
+       РЕНДЕР ЭКРАНА
+       ========================================================================== */
+    function getCurrentTask() {
+      if (state.mode === "errors") {
+        if (!state.errors || state.errors.length === 0) return null;
+        return state.errors[0];
+      }
+
+      if (!state.playlist || state.wordIndex >= state.playlist.length) {
+        return null;
+      }
+
+      const itemIdx = state.playlist[state.wordIndex];
+      const wordObj = RAW_LEVEL_7_DATA[itemIdx];
+      if (!wordObj || !wordObj.forms) return null;
+
+      const formOrder = (state.currentFormOrder && state.currentFormOrder.length === 3) 
+        ? state.currentFormOrder 
+        : [0, 1, 2];
+      const formIdx = formOrder[state.formSubIndex] !== undefined ? formOrder[state.formSubIndex] : 0;
+      const formObj = wordObj.forms[formIdx];
+      if (!formObj) return null;
+
+      return { wordObj, formObj };
+    }
+
+    function renderScreen() {
+      updateErrorsBadge();
+
+      document.querySelectorAll(".nav-pill").forEach(p => {
+        p.classList.remove("active");
+        if (state.mode === "level" && p.innerText.trim() === String(state.currentLevel)) {
+          p.classList.add("active");
+        }
+      });
+      if (state.mode === "errors") {
+        document.getElementById("errorsNavBtn").classList.add("active");
+      }
+
+      const gameCard = document.getElementById("gameCard");
+      const placeholder = document.getElementById("placeholderView");
+      const progressWrap = document.getElementById("progressWrap");
+      const theoryBanner = document.getElementById("theoryBanner");
+
+      if (state.mode === "level" && state.currentLevel !== 7) {
+        gameCard.style.display = "none";
+        progressWrap.style.display = "none";
+        theoryBanner.style.display = "none";
+        placeholder.classList.add("active");
+        document.getElementById("placeholderTitle").innerText = `Уровень ${state.currentLevel}`;
+        return;
+      } else {
+        gameCard.style.display = "flex";
+        progressWrap.style.display = "flex";
+        theoryBanner.style.display = "flex";
+        placeholder.classList.remove("active");
+      }
+
+      isAnswerChecked = false;
+      const input = document.getElementById("userInput");
+      const actionBtn = document.getElementById("actionBtn");
+      const feedback = document.getElementById("feedbackBox");
+      
+      input.value = "";
+      input.readOnly = false;
+      actionBtn.innerText = "Проверить";
+      feedback.className = "feedback-box";
+
+      const task = getCurrentTask();
+
+      if (!task) {
+        if (state.mode === "errors") {
+          alert("🎉 Все ошибки успешно исправлены!");
+          state.mode = "level";
+          saveState();
+          renderScreen();
+          return;
+        } else {
+          alert("🏆 Поздравляем! Все 124 слова 7 уровня пройдены!");
+          resetLevelPlaylist();
+          saveState();
+          renderScreen();
+          return;
+        }
+      }
+
+      // 1. Заполняем опорные слова
+      document.getElementById("refNounKanji").innerText = task.wordObj.nounK;
+      document.getElementById("refNounKana").innerText = "- " + task.wordObj.nounR;
+      document.getElementById("refNounTrans").innerText = "- " + task.wordObj.nounT;
+
+      document.getElementById("refVerbKanji").innerText = task.wordObj.verbK;
+      document.getElementById("refVerbKana").innerText = "- " + task.wordObj.verbR;
+      document.getElementById("refVerbTrans").innerText = "- " + task.wordObj.verbT;
+
+      // 2. Вопрос
+      document.getElementById("promptRu").innerText = task.formObj.ru;
+      document.getElementById("modeLabel").innerText = state.mode === "errors" ? "Исправление ошибки" : "Переведите фразу";
+
+      // 3. Прогресс (для 3 форм)
+      if (state.mode === "level") {
+        const total = RAW_LEVEL_7_DATA.length;
+        const currentNum = state.wordIndex + 1;
+        document.getElementById("progressWordLabel").innerText = `Слово ${currentNum} из ${total}`;
+        const pct = Math.round(((state.wordIndex * 3 + state.formSubIndex) / (total * 3)) * 100);
+        document.getElementById("progressPercentLabel").innerText = `${pct}%`;
+        document.getElementById("progressBarFill").style.width = `${pct}%`;
+
+        for (let i = 0; i < 3; i++) {
+          const dot = document.getElementById(`dot${i}`);
+          dot.className = "form-dot";
+          if (i < state.formSubIndex) dot.classList.add("done");
+          else if (i === state.formSubIndex) dot.classList.add("active");
+        }
+      } else {
+        document.getElementById("progressWordLabel").innerText = `Ошибок осталось: ${state.errors.length}`;
+        document.getElementById("progressPercentLabel").innerText = `Ошибки`;
+        document.getElementById("progressBarFill").style.width = `100%`;
+        for (let i = 0; i < 3; i++) {
+          document.getElementById(`dot${i}`).className = "form-dot";
+        }
+      }
+    }
+
+    /* ==========================================================================
+       ПРОВЕРКА ОТВЕТА (ТОЛЬКО КАНДЗИ И ХИРАГАНА / КАТАКАНА)
+       ========================================================================== */
+    function cleanText(str) {
+      return (str || '').replace(/[\s　。、.!,?]/g, '').trim();
+    }
+
+    function handleAction() {
+      if (!isAnswerChecked) {
+        checkAnswer();
+      } else {
+        nextQuestion();
+      }
+    }
+
+    function checkAnswer() {
+      const task = getCurrentTask();
+      if (!task) return;
+
+      const input = document.getElementById("userInput");
+      const userVal = cleanText(input.value);
+      if (!userVal) {
+        return;
+      }
+
+      const targetKanji = cleanText(task.formObj.kanji);
+      const targetKana = cleanText(task.formObj.kana);
+
+      // Строгое соответствие: только кандзи или хирагана
+      const isCorrect = (userVal === targetKanji || userVal === targetKana);
+
+      playAudio(task.formObj.kana);
+
+      const feedback = document.getElementById("feedbackBox");
+      const statusText = document.getElementById("feedbackStatus");
+      const fKanji = document.getElementById("feedbackKanji");
+      const fKana = document.getElementById("feedbackKana");
+
+      fKanji.innerText = task.formObj.kanji;
+      fKana.innerText = task.formObj.kana;
+
+      if (isCorrect) {
+        feedback.className = "feedback-box correct";
+        statusText.innerText = "✓ Правильно!";
+        if (state.mode === "errors") {
+          state.errors.shift();
+        }
+      } else {
+        feedback.className = "feedback-box incorrect";
+        statusText.innerText = "✕ Ошибка";
+        if (state.mode === "level") {
+          const alreadyExists = state.errors.some(e => e.formObj.kanji === task.formObj.kanji);
+          if (!alreadyExists) {
+            state.errors.push(task);
+          }
+        } else if (state.mode === "errors") {
+          state.errors.push(state.errors.shift());
+        }
+      }
+
+      input.readOnly = true;
+      isAnswerChecked = true;
+      document.getElementById("actionBtn").innerText = "Дальше ➔";
+      saveState();
+    }
+
+    function nextQuestion() {
+      if (state.mode === "level") {
+        state.formSubIndex++;
+        if (state.formSubIndex >= 3) {
+          state.formSubIndex = 0;
+          state.wordIndex++;
+          state.currentFormOrder = shuffleArray([0, 1, 2]);
+        }
+      }
+      saveState();
+      renderScreen();
+    }
+
+    /* ==========================================================================
+       НАВИГАЦИЯ И СОБЫТИЯ
+       ========================================================================== */
+    function updateErrorsBadge() {
+      const btn = document.getElementById("errorsNavBtn");
+      if (!btn) return;
+      const count = (state.errors || []).length;
+      btn.innerText = `Ошибки (${count})`;
+      if (count > 0) btn.classList.add("has-errors");
+      else btn.classList.remove("has-errors");
+    }
+
+    function openErrorsTab() {
+      if (!state.errors || state.errors.length === 0) {
+        alert("У вас нет сохранённых ошибок! Отличный результат!");
+        return;
+      }
+      state.mode = "errors";
+      saveState();
+      renderScreen();
+    }
+
+    function switchLevel(lvl) {
+      const levelPages = {
+        1: '1ур.html',
+        2: '2ур.html',
+        3: '3ур.html',
+        4: '4ур.html',
+        5: '5ур.html',
+        6: '6ур.html',
+        7: '7ур.html'
+      };
+
+      if (lvl !== state.currentLevel && levelPages[lvl]) {
+        window.location.href = levelPages[lvl];
+        return;
+      }
+
+      state.mode = "level";
+      state.currentLevel = lvl;
+      saveState();
+      renderScreen();
+    }
+
+    function openTheoryModal() {
+      document.getElementById("theoryModal").classList.add("open");
+    }
+    function closeTheoryModal() {
+      document.getElementById("theoryModal").classList.remove("open");
+    }
+
+    // Инициализация при старте
+    loadState();
+    renderScreen();
+
+    // Горячие клавиши: Alt + Enter, Cmd + Enter, Ctrl + Enter
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && (e.altKey || e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleAction();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Антонимы — японский</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: #f4f1ea;
+    color: #2c2c2a;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 12px 14px 16px;
+  }
+  .wrap {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Верхняя панель: Меню и Заголовок на одном уровне */
+  .top-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    margin-bottom: 10px;
+  }
+
+  .back-to-menu {
+    position: absolute;
+    left: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+    color: #6b6a63;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    background: #fff;
+    border: 1px solid #d3d1c7;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+  }
+  .back-to-menu:hover, .back-to-menu:active {
+    background: #2c2c2a;
+    color: #fff;
+    border-color: #2c2c2a;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .filter-btn {
+    border: 1px solid #d3d1c7;
+    background: #fff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #2c2c2a;
+    transition: all 0.15s ease;
+  }
+  .filter-btn.active {
+    background: #2c2c2a;
+    color: #fff;
+    border-color: #2c2c2a;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #6b6a63;
+  }
+  .status-bar b { color: #2c2c2a; }
+
+  .progress-track {
+    height: 6px;
+    background: #e5e2d8;
+    border-radius: 3px;
+    margin-bottom: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #97c459;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  .record-row {
+    text-align: center;
+    font-size: 13px;
+    color: #854f0b;
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  /* Основная сетка карточек */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .tile-outer { min-height: 96px; }
+  .tile {
+    width: 100%;
+    height: 100%;
+    min-height: 96px;
+    border-radius: 14px;
+    border: 1px solid #d3d1c7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    text-align: center;
+    background: #fff;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .tile .jp { font-size: 26px; margin-bottom: 4px; line-height: 1.2; font-weight: 600; }
+  .tile .kana { font-size: 12px; color: #6b6a63; }
+  .tile .ru { font-size: 13px; font-weight: 500; color: #3c3489; margin-top: 4px; }
+  .tile.selected { background: #eeecf0; border-color: #7f77dd; }
+  .tile.matched { background: #eaf3de; border-color: #97c459; }
+
+  /* Блок сообщений не занимает пустое место, когда скрыт */
+  .msg {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .msg:not(:empty) {
+    display: flex;
+  }
+  .msg.ok { color: #3b6d11; }
+  .msg.bad { color: #a32d2d; }
+  .msg.retry { color: #a32d2d; }
+
+  .action-btn {
+    background: #d97757;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Кнопка сброса сразу под карточками */
+  .restart-row {
+    text-align: center;
+    margin-top: 6px;
+  }
+  .restart-link {
+    font-size: 12px;
+    color: #9a988f;
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 2px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  
+  <div class="top-header">
+    <a href="index.html" class="back-to-menu">← Меню</a>
+    <h1>Антонимы 日本語</h1>
+  </div>
+
+  <div class="controls">
+    <button class="filter-btn active" data-cat="all">Все</button>
+    <button class="filter-btn" data-cat="verbs">Глаголы</button>
+    <button class="filter-btn" data-cat="adj">Прилагательные</button>
+  </div>
+
+  <div class="status-bar">
+    <span>Уровень <b id="levelNum">1</b> из <b id="levelTotal">1</b></span>
+    <span>Пар: <b id="score">0</b> / <b id="pairsTotal">6</b></span>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="record-row">🏆 Рекорд: пройдено уровней подряд без ошибок — <span id="record">0</span></div>
+
+  <div class="grid" id="grid"></div>
+  <div class="msg" id="msg"></div>
+
+  <div class="restart-row">
+    <button class="restart-link" id="restartBtn">Начать заново с 1 уровня</button>
+  </div>
+</div>
+
+<script>
+const VERB_PAIRS = [
+  {a:{ru:'вставать',jp:'起きる',kana:'おきる'}, b:{ru:'ложиться спать',jp:'寝る',kana:'ねる'}},
+  {a:{ru:'садиться',jp:'座る',kana:'すわる'}, b:{ru:'стоять',jp:'立つ',kana:'たつ'}},
+  {a:{ru:'покупать',jp:'買う',kana:'かう'}, b:{ru:'продавать',jp:'売る',kana:'うる'}},
+  {a:{ru:'начинать',jp:'始める',kana:'はじめる'}, b:{ru:'заканчивать',jp:'終わる',kana:'おわる'}},
+  {a:{ru:'открывать',jp:'開ける',kana:'あける'}, b:{ru:'закрывать',jp:'閉める',kana:'しめる'}},
+  {a:{ru:'входить',jp:'入る',kana:'はいる'}, b:{ru:'выходить',jp:'出る',kana:'でる'}},
+  {a:{ru:'подниматься',jp:'上がる',kana:'あがる'}, b:{ru:'спускаться',jp:'下りる',kana:'おりる'}},
+  {a:{ru:'брать',jp:'取る',kana:'とる'}, b:{ru:'давать',jp:'渡す',kana:'わたす'}},
+  {a:{ru:'идти',jp:'行く',kana:'いく'}, b:{ru:'возвращаться',jp:'帰る',kana:'かえる'}},
+  {a:{ru:'надевать',jp:'着る',kana:'きる'}, b:{ru:'снимать',jp:'脱ぐ',kana:'ぬぐ'}},
+  {a:{ru:'забывать',jp:'忘れる',kana:'わすれる'}, b:{ru:'запоминать',jp:'覚える',kana:'おぼえる'}},
+  {a:{ru:'находить',jp:'見つける',kana:'みつける'}, b:{ru:'терять',jp:'なくす',kana:'なくす'}},
+  {a:{ru:'выигрывать',jp:'勝つ',kana:'かつ'}, b:{ru:'проигрывать',jp:'負ける',kana:'まける'}},
+  {a:{ru:'толкать',jp:'押す',kana:'おす'}, b:{ru:'тянуть',jp:'引く',kana:'ひく'}},
+  {a:{ru:'одалживать (давать)',jp:'貸す',kana:'かす'}, b:{ru:'занимать (брать)',jp:'借りる',kana:'かりる'}},
+  {a:{ru:'плакать',jp:'泣く',kana:'なく'}, b:{ru:'смеяться',jp:'笑う',kana:'わらう'}},
+  {a:{ru:'родиться',jp:'生まれる',kana:'うまれる'}, b:{ru:'умереть',jp:'死ぬ',kana:'しぬ'}}
+];
+
+/* Грамотно разнесённый список: все пары с одинаковыми кандзи/чтениями разнесены по разным уровням */
+const ADJ_PAIRS = [
+  // Блок 1 (0..5):
+  {a:{ru:'большой',jp:'大きい',kana:'おおきい'}, b:{ru:'маленький',jp:'小さい',kana:'ちいさい'}},
+  {a:{ru:'высокий',jp:'高い',kana:'たかい'}, b:{ru:'низкий',jp:'低い',kana:'ひくい'}},
+  {a:{ru:'длинный',jp:'長い',kana:'ながい'}, b:{ru:'короткий',jp:'短い',kana:'みじかい'}},
+  {a:{ru:'жаркий (погода)',jp:'暑い',kana:'あつい'}, b:{ru:'холодный (погода)',jp:'寒い',kana:'さむい'}},
+  {a:{ru:'быстрый',jp:'速い',kana:'はやい'}, b:{ru:'медленный',jp:'遅い',kana:'おそい'}},
+  {a:{ru:'светлый',jp:'明るい',kana:'あかるい'}, b:{ru:'тёмный',jp:'暗い',kana:'くらい'}},
+
+  // Блок 2 (6..11):
+  {a:{ru:'дорогой',jp:'高い',kana:'たかい'}, b:{ru:'дешёвый',jp:'安い',kana:'やすい'}},
+  {a:{ru:'горячий (предмет)',jp:'熱い',kana:'あつい'}, b:{ru:'холодный (предмет)',jp:'冷たい',kana:'つめたい'}},
+  {a:{ru:'лёгкий (вес)',jp:'軽い',kana:'かるい'}, b:{ru:'тяжёлый',jp:'重い',kana:'おもい'}},
+  {a:{ru:'новый',jp:'新しい',kana:'あたらしい'}, b:{ru:'старый (о вещи)',jp:'古い',kana:'ふるい'}},
+  {a:{ru:'близкий',jp:'近い',kana:'ちかい'}, b:{ru:'далёкий',jp:'遠い',kana:'とおい'}},
+  {a:{ru:'широкий',jp:'広い',kana:'ひろい'}, b:{ru:'узкий, тесный',jp:'狭い',kana:'せまい'}},
+
+  // Блок 3 (12..17):
+  {a:{ru:'ранний',jp:'早い',kana:'はやい'}, b:{ru:'поздний',jp:'遅い',kana:'おそい'}},
+  {a:{ru:'тёплый',jp:'暖かい',kana:'あたたかい'}, b:{ru:'холодный (погода)',jp:'寒い',kana:'さむい'}},
+  {a:{ru:'хороший',jp:'いい',kana:'いい'}, b:{ru:'плохой',jp:'悪い',kana:'わるい'}},
+  {a:{ru:'интересный',jp:'面白い',kana:'おもしろい'}, b:{ru:'скучный',jp:'つまらない',kana:'つまらない'}},
+  {a:{ru:'весёлый',jp:'楽しい',kana:'たのしい'}, b:{ru:'грустный',jp:'悲しい',kana:'かなしい'}},
+  {a:{ru:'красивый',jp:'美しい',kana:'うつくしい'}, b:{ru:'некрасивый',jp:'醜い',kana:'みにくい'}},
+
+  // Блок 4 (18..23):
+  {a:{ru:'многочисленный',jp:'多い',kana:'おおい'}, b:{ru:'малочисленный',jp:'少ない',kana:'すくない'}},
+  {a:{ru:'сильный',jp:'強い',kana:'つよい'}, b:{ru:'слабый',jp:'弱い',kana:'よわい'}},
+  {a:{ru:'умелый, искусный',jp:'上手',kana:'じょうず'}, b:{ru:'неумелый',jp:'下手',kana:'へた'}},
+  {a:{ru:'нравится',jp:'好き',kana:'すき'}, b:{ru:'не нравится',jp:'嫌い',kana:'きらい'}},
+  {a:{ru:'тихий, спокойный',jp:'静か',kana:'しずか'}, b:{ru:'шумный, оживлённый',jp:'にぎやか',kana:'にぎやか'}},
+  {a:{ru:'простой, лёгкий',jp:'簡単',kana:'かんたん'}, b:{ru:'сложный, трудный',jp:'難しい',kana:'むずかしい'}},
+
+  // Блок 5 (24):
+  {a:{ru:'свободный (о времени)',jp:'暇',kana:'ひま'}, b:{ru:'занятой, занят',jp:'忙しい',kana:'いそがしい'}}
+];
+
+const PAIRS_PER_LEVEL = 6;
+
+let currentCategory = 'all';
+let levels = [];
+let currentLevelIndex = 0;
+let mistakesThisLevel = 0;
+let tiles = [];
+let selected = [];
+let matchedCount = 0;
+
+let memoryStore = {};
+let storageWorks = true;
+try {
+  const testKey = '__mnn_test__';
+  localStorage.setItem(testKey, '1');
+  localStorage.removeItem(testKey);
+} catch(e) {
+  storageWorks = false;
+}
+
+function getRecordKey(){ return 'mnn_antonimy_record_' + currentCategory; }
+function getRecord(){
+  const key = getRecordKey();
+  try {
+    if(storageWorks) return parseInt(localStorage.getItem(key) || '0', 10);
+  } catch(e) {}
+  return parseInt(memoryStore[key] || '0', 10);
+}
+function setRecord(v){
+  const key = getRecordKey();
+  try {
+    if(storageWorks) { localStorage.setItem(key, String(v)); return; }
+  } catch(e) {}
+  memoryStore[key] = String(v);
+}
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+/* Автоматический выбор диктора Kyoko */
+let kyokoVoice = null;
+function initVoices() {
+  if (!('speechSynthesis' in window)) return;
+  const update = () => {
+    try {
+      const voices = window.speechSynthesis.getVoices();
+      kyokoVoice = voices.find(v => v.name.toLowerCase().includes('kyoko')) ||
+                   voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP') ||
+                   voices.find(v => v.lang.startsWith('ja')) || null;
+    } catch(e) {}
+  };
+  update();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = update;
+  }
+}
+initVoices();
+
+function speak(text){
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = 0.88;
+    if (kyokoVoice) u.voice = kyokoVoice;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function buildLevels(){
+  let pool;
+  if(currentCategory==='verbs') pool = VERB_PAIRS;
+  else if(currentCategory==='adj') pool = ADJ_PAIRS;
+  else pool = VERB_PAIRS.concat(ADJ_PAIRS);
+
+  levels = [];
+  for(let i=0;i<pool.length;i+=PAIRS_PER_LEVEL){
+    levels.push(pool.slice(i, i+PAIRS_PER_LEVEL));
+  }
+  document.getElementById('levelTotal').textContent = levels.length;
+  document.getElementById('record').textContent = getRecord();
+}
+
+function loadLevel(index){
+  const levelPairs = levels[index];
+  tiles = [];
+  levelPairs.forEach((p, idx)=>{
+    tiles.push({id: idx+'a', pairId: idx, jp: p.a.jp, kana: p.a.kana, ru: p.a.ru});
+    tiles.push({id: idx+'b', pairId: idx, jp: p.b.jp, kana: p.b.kana, ru: p.b.ru});
+  });
+  tiles = shuffle(tiles);
+  selected = [];
+  matchedCount = 0;
+  mistakesThisLevel = 0;
+  document.getElementById('levelNum').textContent = index+1;
+  document.getElementById('score').textContent = '0';
+  document.getElementById('pairsTotal').textContent = levelPairs.length;
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('msg').innerHTML = '';
+  document.getElementById('msg').className = 'msg';
+  render();
+}
+
+function render(){
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  tiles.forEach(t=>{
+    const outer = document.createElement('div');
+    outer.className = 'tile-outer';
+
+    const tileEl = document.createElement('div');
+    const isRevealed = t.matched || selected.includes(t.id);
+    tileEl.className = 'tile' + (t.matched ? ' matched' : (selected.includes(t.id) ? ' selected' : ''));
+    tileEl.innerHTML = '<div class="jp">'+t.jp+'</div><div class="kana">'+t.kana+'</div>' + (isRevealed ? '<div class="ru">'+t.ru+'</div>' : '');
+    if(!t.matched){
+      tileEl.addEventListener('click', ()=> onTileClick(t.id));
+    }
+
+    outer.appendChild(tileEl);
+    grid.appendChild(outer);
+  });
+}
+
+function onTileClick(id){
+  const tile = tiles.find(t=>t.id===id);
+  if(!tile || tile.matched) return;
+  speak(tile.kana);
+  if(selected.includes(id)) return;
+  if(selected.length===2) return;
+  selected.push(id);
+  render();
+  if(selected.length===2){
+    const t1 = tiles.find(t=>t.id===selected[0]);
+    const t2 = tiles.find(t=>t.id===selected[1]);
+    const msgEl = document.getElementById('msg');
+    if(t1.pairId===t2.pairId){
+      setTimeout(()=>{
+        t1.matched = true;
+        t2.matched = true;
+        matchedCount++;
+        document.getElementById('score').textContent = String(matchedCount);
+        document.getElementById('progressFill').style.width = Math.round(matchedCount / levels[currentLevelIndex].length * 100) + '%';
+        selected = [];
+        msgEl.textContent = 'Верно!';
+        msgEl.className = 'msg ok';
+        render();
+        if(matchedCount === levels[currentLevelIndex].length){
+          onLevelFinished();
+        }
+      }, 350);
+    } else {
+      mistakesThisLevel++;
+      msgEl.textContent = 'Не пара, попробуй ещё раз';
+      msgEl.className = 'msg bad';
+      setTimeout(()=>{
+        selected = [];
+        render();
+      }, 650);
+    }
+  }
+}
+
+function onLevelFinished(){
+  const msgEl = document.getElementById('msg');
+  const clean = mistakesThisLevel === 0;
+  if(clean){
+    const streak = currentLevelIndex + 1;
+    if(streak > getRecord()) setRecord(streak);
+    document.getElementById('record').textContent = getRecord();
+
+    if(currentLevelIndex + 1 < levels.length){
+      msgEl.innerHTML = 'Уровень пройден без ошибок! 🎉';
+      msgEl.className = 'msg ok';
+      const btn = document.createElement('button');
+      btn.className = 'action-btn';
+      btn.textContent = 'Следующий уровень';
+      btn.addEventListener('click', ()=>{
+        currentLevelIndex++;
+        loadLevel(currentLevelIndex);
+      });
+      msgEl.appendChild(btn);
+    } else {
+      msgEl.innerHTML = 'Все уровни пройдены без ошибок! 🏆';
+      msgEl.className = 'msg ok';
+    }
+  } else {
+    msgEl.innerHTML = 'Уровень пройден, но были ошибки — повторим этот уровень ещё раз, чтобы точно запомнить.';
+    msgEl.className = 'msg retry';
+    const btn = document.createElement('button');
+    btn.className = 'action-btn';
+    btn.textContent = 'Повторить уровень';
+    btn.addEventListener('click', ()=> loadLevel(currentLevelIndex));
+    msgEl.appendChild(btn);
+  }
+}
+
+function startGame(){
+  buildLevels();
+  currentLevelIndex = 0;
+  loadLevel(0);
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCategory = btn.dataset.cat;
+    startGame();
+  });
+});
+
+document.getElementById('restartBtn').addEventListener('click', startGame);
+
+window.addEventListener('error', function(e){
+  const grid = document.getElementById('grid');
+  if(grid && !grid.children.length){
+    grid.innerHTML = '<div style="grid-column: 1 / -1; text-align:center; color:#a32d2d; font-size:13px; padding:12px;">Ошибка загрузки игры: ' + (e.message || 'неизвестная ошибка') + '</div>';
+  }
+});
+
+try {
+  startGame();
+} catch(e) {
+  document.getElementById('grid').innerHTML = '<div style="grid-column: 1 / -1; text-align:center; color:#a32d2d; font-size:13px; padding:12px;">Ошибка загрузки игры: ' + e.message + '</div>';
+}
+</script>
+</body>
+</html>

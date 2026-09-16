@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Японский тренажёр — 4 Уровень (Конструкции ない)</title>
+  <style>
+    /* ==========================================================================
+       1. ЦВЕТОВАЯ ПАЛИТРА И СТИЛЬ (WARM PAPER MINIMALIST)
+       ========================================================================== */
+    :root {
+      --bg-page: #f4f1ea;
+      --bg-card: #ffffff;
+      --text-main: #2c2c2a;
+      --text-muted: #6b6a63;
+      --text-sub: #9a988f;
+      --border-color: #d3d1c7;
+      --border-light: #e5e2d8;
+      
+      --accent: #d97757;
+      --accent-hover: #c46445;
+
+      --selected-bg: #eeecf0;
+      --selected-border: #7f77dd;
+      --selected-text: #3c3489;
+
+      --success-bg: #eaf3de;
+      --success-border: #97c459;
+      --success-text: #386014;
+
+      --error-bg: #fdf0ee;
+      --error-border: #a32d2d;
+      --error-text: #a32d2d;
+
+      --radius-card: 14px;
+      --radius-pill: 20px;
+      --radius-btn: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px 12px 32px 12px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       2. ВЕРХНЯЯ НАВИГАЦИЯ
+       ========================================================================== */
+    .nav-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+      align-items: center;
+    }
+    .nav-bar::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      min-width: 38px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+
+    .nav-pill.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
+    .nav-pill.errors-pill {
+      margin-left: auto;
+      min-width: auto;
+      padding: 0 14px;
+      border-color: var(--border-color);
+    }
+    .nav-pill.errors-pill.has-errors {
+      color: var(--error-border);
+      border-color: var(--error-border);
+      background: #fff6f5;
+    }
+    .nav-pill.errors-pill.active {
+      background: var(--error-border);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       3. ПАНЕЛЬ ТЕОРИИ И ПРОГРЕСС-БАР
+       ========================================================================== */
+    .theory-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ==========================================================================
+       4. КАРТОЧКА ТРЕНАЖЁРА (УВЕЛИЧЕННЫЙ БЛОК)
+       ========================================================================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .target-ref-box {
+      background: var(--bg-page);
+      border-radius: var(--radius-btn);
+      padding: 16px 20px;
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ref-line {
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ref-kanji {
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .ref-kana {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+    .ref-trans {
+      color: var(--selected-text);
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .form-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .form-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-light);
+    }
+    .form-dot.done { background: var(--success-border); }
+    .form-dot.active { background: var(--accent); }
+
+    .prompt-box {
+      text-align: center;
+      padding: 4px 0;
+    }
+    .prompt-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .prompt-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: #faf9f6;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 0 14px;
+      font-size: 16px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      background: #ffffff;
+    }
+    .input-field[readonly] {
+      background: #f0eee6;
+      color: var(--text-muted);
+    }
+
+    .btn-main {
+      height: 46px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-main:active { background: var(--accent-hover); }
+
+    .feedback-box {
+      display: none;
+      border-radius: var(--radius-btn);
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feedback-box.correct {
+      display: flex !important;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+    .feedback-box.incorrect {
+      display: flex !important;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+    }
+
+    .feedback-status {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .feedback-box.correct .feedback-status { color: var(--success-text); }
+    .feedback-box.incorrect .feedback-status { color: var(--error-text); }
+
+    .feedback-sentence-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .feedback-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .feedback-text-kanji {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+    .feedback-text-kana {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .btn-audio-right {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.1s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-audio-right:active { transform: scale(0.90); }
+
+    .placeholder-view {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 40px 20px;
+      text-align: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .placeholder-view.active { display: flex; }
+
+    .reset-link {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-sub);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 8px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 44, 42, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-color);
+      max-width: 440px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-body { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+    .modal-body strong { color: var(--text-main); }
+    .modal-close-btn {
+      align-self: flex-end;
+      padding: 8px 16px;
+      background: var(--text-main);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      font-size: 13px;
+      touch-action: manipulation;
+    }
+  
+  /* Кнопка возврата в главное меню */
+  .back-to-menu {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+    text-decoration: none;
+    color: #6b6a63;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    background: #fff;
+    border: 1px solid #d3d1c7;
+    border-radius: 20px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+  }
+  .back-to-menu:hover, .back-to-menu:active {
+    background: #2c2c2a;
+    color: #fff;
+    border-color: #2c2c2a;
+  }
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <a href="index.html" class="back-to-menu">← Меню</a>
+    <div class="nav-bar">
+      <button type="button" class="nav-pill" onclick="switchLevel(1)">1</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(2)">2</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(3)">3</button>
+      <button type="button" class="nav-pill active" onclick="switchLevel(4)">4</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(5)">5</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(6)">6</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(7)">7</button>
+      <button type="button" class="nav-pill errors-pill" id="errorsNavBtn" onclick="openErrorsTab()">Ошибки (0)</button>
+    </div>
+
+    <div class="theory-banner" id="theoryBanner" onclick="openTheoryModal()">
+      <span id="theoryBannerText">📖 Теория 4 уровня (Конструкции ない)</span>
+      <span>➔</span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-labels">
+        <span id="progressWordLabel">Слово 1 из 124</span>
+        <span id="progressPercentLabel">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="card" id="gameCard">
+      <div class="target-ref-box">
+        <div class="ref-line">
+          <span class="ref-kanji" id="refNounKanji">友達</span>
+          <span class="ref-kana" id="refNounKana">- ともだち</span>
+          <span class="ref-trans" id="refNounTrans">- друг</span>
+        </div>
+        <div class="ref-line">
+          <span class="ref-kanji" id="refVerbKanji">会う</span>
+          <span class="ref-kana" id="refVerbKana">- あう</span>
+          <span class="ref-trans" id="refVerbTrans">- встречаться</span>
+        </div>
+      </div>
+
+      <!-- 4 точки для 4 форм 4 уровня -->
+      <div class="form-dots">
+        <div class="form-dot" id="dot0"></div>
+        <div class="form-dot" id="dot1"></div>
+        <div class="form-dot" id="dot2"></div>
+        <div class="form-dot" id="dot3"></div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label" id="modeLabel">Переведите фразу</div>
+        <div class="prompt-text" id="promptRu">Не встречаться с другом.</div>
+      </div>
+
+      <div class="input-wrap">
+        <input 
+          type="text" 
+          id="userInput" 
+          class="input-field" 
+          placeholder="Введите кандзи или хираганой..." 
+          autocomplete="off" 
+          autocorrect="off" 
+          autocapitalize="off" 
+          spellcheck="false"
+        />
+        <button type="button" class="btn-main" id="actionBtn" onclick="handleAction()">Проверить</button>
+      </div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-status" id="feedbackStatus">✓ Правильно!</div>
+        <div class="feedback-sentence-row">
+          <div class="feedback-texts">
+            <div class="feedback-text-kanji" id="feedbackKanji">友達に会わない</div>
+            <div class="feedback-text-kana" id="feedbackKana">ともだちにあわない</div>
+          </div>
+          <button type="button" class="btn-audio-right" title="Послушать ещё раз" onclick="replayAudio()">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="placeholder-view" id="placeholderView">
+      <h3 id="placeholderTitle" style="font-size: 18px; color: var(--text-main);">Уровень 5</h3>
+      <p style="font-size: 14px; color: var(--text-muted);">Этот уровень находится в разработке. Вернитесь к Уровню 1, 2, 3 или 4.</p>
+      <button type="button" class="btn-main" style="margin-top: 10px;" onclick="switchLevel(4)">Вернуться к Уровню 4</button>
+    </div>
+
+    <div class="reset-link" onclick="confirmReset()">Начать 4 уровень заново (перемешать)</div>
+  </div>
+
+  <div class="modal-overlay" id="theoryModal" onclick="closeTheoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title">Грамматика 4 Уровня: Конструкции формы ない</div>
+      <div class="modal-body">
+        <p><strong>4 ключевые конструкции:</strong></p>
+        <p>1. <strong>〜ない</strong> — Простое отрицание <em>(Не делаю)</em></p>
+        <p>2. <strong>〜ないでください</strong> — Просьба не делать <em>(Не делайте, пожалуйста)</em></p>
+        <p>3. <strong>〜なければなりません</strong> — Обязательство <em>(Нужно обязательно сделать)</em></p>
+        <p>4. <strong>〜なくてもいいです</strong> — Разрешение не делать <em>(Можно не делать)</em></p>
+        <br>
+        <p><strong>Правила образования ない-формы (3 спр.):</strong></p>
+        <p>• <strong>1 спр.:</strong> Замените финальную «у» на «а» + форма (〜ない).<br>
+          <em style="padding-left: 12px; font-size: 12px;">Искл.: глаголы на <code>〜う</code> меняются на <code>〜わ</code> (会う → 会わない).</em>
+        </p>
+        <p style="margin-top: 6px;">• <strong>2 спр. (-iru / -eru):</strong> Отбросьте слог «る» + форма (〜ない).</p>
+        <p style="margin-top: 6px;">• <strong>3 спр. (исключения):</strong></p>
+        <p style="padding-left: 12px; margin-top: 2px;">
+          — <code>する</code> → <strong>しない</strong><br>
+          — <code>来る</code> (くる) → <strong>こない</strong><br>
+          — <code>ある</code> (иметься) → <strong>ない</strong>
+        </p>
+      </div>
+      <button type="button" class="modal-close-btn" onclick="closeTheoryModal()">Понятно</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       БАЗА ДАННЫХ 4 УРОВНЯ (124 ГЛАГОЛА ПО 4 ФОРМЫ)
+       ========================================================================== */
+    const RAW_LEVEL_4_DATA = [
+      { id: 1, nounK: "友達", nounR: "ともだち", nounT: "друг", verbK: "会う", verbR: "あう", verbT: "встречаться", forms: [
+        { type: "nai", ru: "Не встречаться с другом.", kanji: "友達に会わない", kana: "ともだちにあわない" },
+        { type: "naide_kudasai", ru: "Не надо встречаться с другом, пожалуйста.", kanji: "友達に会わないでください", kana: "ともだちにあわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно встретиться с другом.", kanji: "友達に会わなければなりません", kana: "ともだちにあわなければなりません" },
+        { type: "nakutemo", ru: "Можно не встречаться с другом.", kanji: "友達に会わなくてもいいです", kana: "ともだちにあわなくてもいいです" }
+      ]},
+      { id: 2, nounK: "ドア", nounR: "ドア", nounT: "дверь", verbK: "開く", verbR: "あく", verbT: "открываться", forms: [
+        { type: "nai", ru: "Дверь не открывается.", kanji: "ドアが開かない", kana: "ドアがあかない" },
+        { type: "naide_kudasai", ru: "Не надо открывать дверь, пожалуйста.", kanji: "ドアが開かないでください", kana: "ドアがあかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно открыть дверь.", kanji: "ドアが開かなければなりません", kana: "ドアがあかなければなりません" },
+        { type: "nakutemo", ru: "Можно не открывать дверь.", kanji: "ドアが開かなくてもいいです", kana: "ドアがあかなくてもいいです" }
+      ]},
+      { id: 3, nounK: "窓", nounR: "まど", nounT: "окно", verbK: "開ける", verbR: "あける", verbT: "открывать", forms: [
+        { type: "nai", ru: "Не открывать окно.", kanji: "窓を開けない", kana: "まどをあけない" },
+        { type: "naide_kudasai", ru: "Не надо открывать окно, пожалуйста.", kanji: "窓を開けないでください", kana: "まどをあけないでください" },
+        { type: "nakereba", ru: "Нужно обязательно открыть окно.", kanji: "窓を開けなければなりません", kana: "まどをあけなければなりません" },
+        { type: "nakutemo", ru: "Можно не открывать окно.", kanji: "窓を開けなくてもいいです", kana: "まどをあけなくてもいいです" }
+      ]},
+      { id: 4, nounK: "プレゼント", nounR: "プレゼント", nounT: "подарок", verbK: "あげる", verbR: "あげる", verbT: "дарить", forms: [
+        { type: "nai", ru: "Не дарить подарок.", kanji: "プレゼントをあげない", kana: "プレゼントをあげない" },
+        { type: "naide_kudasai", ru: "Не надо дарить подарок, пожалуйста.", kanji: "プレゼントをあげないでください", kana: "プレゼントをあげないでください" },
+        { type: "nakereba", ru: "Нужно обязательно подарить подарок.", kanji: "プレゼントをあげなければなりません", kana: "プレゼントをあげなければなりません" },
+        { type: "nakutemo", ru: "Можно не дарить подарок.", kanji: "プレゼントをあげなくてもいいです", kana: "プレゼントをあげなくてもいいです" }
+      ]},
+      { id: 5, nounK: "公園", nounR: "こうえん", nounT: "парк", verbK: "遊ぶ", verbR: "あそぶ", verbT: "играть", forms: [
+        { type: "nai", ru: "Не играть в парке.", kanji: "公園で遊ばない", kana: "こうえんであそばない" },
+        { type: "naide_kudasai", ru: "Не надо играть в парке, пожалуйста.", kanji: "公園で遊ばないでください", kana: "こうえんであそばないでください" },
+        { type: "nakereba", ru: "Нужно обязательно играть в парке.", kanji: "公園で遊ばなければなりません", kana: "こうえんであそばなければなりません" },
+        { type: "nakutemo", ru: "Можно не играть в парке.", kanji: "公園で遊ばなくてもいいです", kana: "こうえんであそばなくてもいいです" }
+      ]},
+      { id: 6, nounK: "シャワー", nounR: "シャワー", nounT: "душ", verbK: "浴びる", verbR: "あびる", verbT: "принимать", forms: [
+        { type: "nai", ru: "Не принимать душ.", kanji: "シャワーを浴びない", kana: "シャワーをあびない" },
+        { type: "naide_kudasai", ru: "Не надо принимать душ, пожалуйста.", kanji: "シャワーを浴びないでください", kana: "シャワーをあびないでください" },
+        { type: "nakereba", ru: "Нужно обязательно принять душ.", kanji: "シャワーを浴びなければなりません", kana: "シャワーをあびなければなりません" },
+        { type: "nakutemo", ru: "Можно не принимать душ.", kanji: "シャワーを浴びなくてもいいです", kana: "シャワーをあびなくてもいいです" }
+      ]},
+      { id: 7, nounK: "手", nounR: "て", nounT: "рука", verbK: "洗う", verbR: "あらう", verbT: "мыть", forms: [
+        { type: "nai", ru: "Не мыть руки.", kanji: "手を洗わない", kana: "てをあらわない" },
+        { type: "naide_kudasai", ru: "Не надо мыть руки, пожалуйста.", kanji: "手を洗わないでください", kana: "てをあらわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно помыть руки.", kanji: "手を洗わなければなりません", kana: "てをあらわなければなりません" },
+        { type: "nakutemo", ru: "Можно не мыть руки.", kanji: "手を洗わなくてもいいです", kana: "てをあらわなくてもいいです" }
+      ]},
+      { id: 8, nounK: "新聞", nounR: "しんぶん", nounT: "газета", verbK: "ある", verbR: "ある", verbT: "иметься", forms: [
+        { type: "nai", ru: "Газета не имеется.", kanji: "新聞がない", kana: "しんぶんがない" },
+        { type: "naide_kudasai", ru: "Не надо иметь газету, пожалуйста.", kanji: "新聞がないでください", kana: "しんぶんがないでください" },
+        { type: "nakereba", ru: "Нужно обязательно иметь газету.", kanji: "新聞がなければなりません", kana: "しんぶんがなければなりません" },
+        { type: "nakutemo", ru: "Можно не иметь газету.", kanji: "新聞がなくてもいいです", kana: "しんぶんがなくてもいいです" }
+      ]},
+      { id: 9, nounK: "道", nounR: "みち", nounT: "дорога", verbK: "歩く", verbR: "あるく", verbT: "идти пешком", forms: [
+        { type: "nai", ru: "Не идти пешком по дороге.", kanji: "道を歩かない", kana: "みちをあるかない" },
+        { type: "naide_kudasai", ru: "Не надо идти пешком по дороге, пожалуйста.", kanji: "道を歩かないでください", kana: "みちをあるかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно идти пешком по дороге.", kanji: "道を歩かなければなりません", kana: "みちをあるかなければなりません" },
+        { type: "nakutemo", ru: "Можно не идти пешком по дороге.", kanji: "道を歩かなくてもいいです", kana: "みちをあるかなくてもいいです" }
+      ]},
+      { id: 10, nounK: "名前", nounR: "なまえ", nounT: "имя", verbK: "言う", verbR: "いう", verbT: "говорить", forms: [
+        { type: "nai", ru: "Не говорить имя.", kanji: "名前を言わない", kana: "なまえをいわない" },
+        { type: "naide_kudasai", ru: "Не надо называть имя, пожалуйста.", kanji: "名前を言わないでください", kana: "なまえをいわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно назвать имя.", kanji: "名前を言わなければなりません", kana: "なまえをいわなければなりません" },
+        { type: "nakutemo", ru: "Можно не называть имя.", kanji: "名前を言わなくてもいいです", kana: "なまえをいわなくてもいいです" }
+      ]},
+      { id: 11, nounK: "学校", nounR: "がっこう", nounT: "школа", verbK: "行く", verbR: "いく", verbT: "идти, ехать", forms: [
+        { type: "nai", ru: "Не идти, ехать в школу.", kanji: "学校に行かない", kana: "がっこうにいかない" },
+        { type: "naide_kudasai", ru: "Не надо ходить в школу, пожалуйста.", kanji: "学校に行かないでください", kana: "がっこうにいかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно пойти в школу.", kanji: "学校に行かなければなりません", kana: "がっこうにいかなければなりません" },
+        { type: "nakutemo", ru: "Можно не ходить в школу.", kanji: "学校に行かなくてもいいです", kana: "がっこうにいかなくてもいいです" }
+      ]},
+      { id: 12, nounK: "猫", nounR: "ねこ", nounT: "кот", verbK: "いる", verbR: "いる", verbT: "находиться", forms: [
+        { type: "nai", ru: "Кот не находится.", kanji: "猫がいない", kana: "ねこがいない" },
+        { type: "naide_kudasai", ru: "Не надо держать кота, пожалуйста.", kanji: "猫がいないでください", kana: "ねこがいないでください" },
+        { type: "nakereba", ru: "Нужно обязательно держать кота.", kanji: "猫がいなければなりません", kana: "ねこがいなければなりません" },
+        { type: "nakutemo", ru: "Можно не держать кота.", kanji: "猫がいなくてもいいです", kana: "ねこがいなくてもいいです" }
+      ]},
+      { id: 13, nounK: "お金", nounR: "おかね", nounT: "деньги", verbK: "要る", verbR: "いる", verbT: "требоваться", forms: [
+        { type: "nai", ru: "Деньги не требуются.", kanji: "お金が要らない", kana: "おかねがいらない" },
+        { type: "naide_kudasai", ru: "Не надо иметь деньги, пожалуйста.", kanji: "お金が要らないでください", kana: "おかねがいらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно иметь деньги.", kanji: "お金が要らなければなりません", kana: "おかねがいらなければなりません" },
+        { type: "nakutemo", ru: "Можно не нуждаться в деньгах.", kanji: "お金が要らなくてもいいです", kana: "おかねがいらなくてもいいです" }
+      ]},
+      { id: 14, nounK: "かばん", nounR: "かばん", nounT: "сумка", verbK: "入れる", verbR: "いれる", verbT: "класть внутрь", forms: [
+        { type: "nai", ru: "Не класть в сумку.", kanji: "かばんに入れない", kana: "かばんにいれない" },
+        { type: "naide_kudasai", ru: "Не надо класть в сумку, пожалуйста.", kanji: "かばんに入れないでください", kana: "かばんにいれないでください" },
+        { type: "nakereba", ru: "Нужно обязательно положить в сумку.", kanji: "かばんに入れなければなりません", kana: "かばんにいれなければなりません" },
+        { type: "nakutemo", ru: "Можно не класть в сумку.", kanji: "かばんに入れなくてもいいです", kana: "かばんにいれなくてもいいです" }
+      ]},
+      { id: 15, nounK: "歌", nounR: "うた", nounT: "песня", verbK: "歌う", verbR: "うたう", verbT: "петь", forms: [
+        { type: "nai", ru: "Не петь песню.", kanji: "歌を歌わない", kana: "うたをうたわない" },
+        { type: "naide_kudasai", ru: "Не надо петь песню, пожалуйста.", kanji: "歌を歌わないでください", kana: "うたをうたわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно спеть песню.", kanji: "歌を歌わなければなりません", kana: "うたをうたわなければなりません" },
+        { type: "nakutemo", ru: "Можно не петь песню.", kanji: "歌を歌わなくてもいいです", kana: "うたをうたわなくてもいいです" }
+      ]},
+      { id: 16, nounK: "赤ちゃん", nounR: "あかちゃん", nounT: "ребёнок", verbK: "生まれる", verbR: "うまれる", verbT: "рождаться", forms: [
+        { type: "nai", ru: "Ребёнок не рождается.", kanji: "赤ちゃんが生まれない", kana: "あかちゃんがうまれない" },
+        { type: "naide_kudasai", ru: "Не надо рожать ребёнка, пожалуйста.", kanji: "赤ちゃんが生まれないでください", kana: "あかちゃんがうまれないでください" },
+        { type: "nakereba", ru: "Нужно обязательно родить ребёнка.", kanji: "赤ちゃんが生まれなければなりません", kana: "あかちゃんがうまれなければなりません" },
+        { type: "nakutemo", ru: "Можно не рожать ребёнка.", kanji: "赤ちゃんが生まれなくてもいいです", kana: "あかちゃんがうまれなくてもいいです" }
+      ]},
+      { id: 17, nounK: "りんご", nounR: "りんご", nounT: "яблоко", verbK: "売る", verbR: "うる", verbT: "продавать", forms: [
+        { type: "nai", ru: "Не продавать яблоки.", kanji: "りんごを売らない", kana: "りんごをうらない" },
+        { type: "naide_kudasai", ru: "Не надо продавать яблоки, пожалуйста.", kanji: "りんごを売らないでください", kana: "りんごをうらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно продать яблоки.", kanji: "りんごを売らなければなりません", kana: "りんごをうらなければなりません" },
+        { type: "nakutemo", ru: "Можно не продавать яблоки.", kanji: "りんごを売らなくてもいいです", kana: "りんごをうらなくてもいいです" }
+      ]},
+      { id: 18, nounK: "朝", nounR: "あさ", nounT: "утро", verbK: "起きる", verbR: "おきる", verbT: "просыпаться", forms: [
+        { type: "nai", ru: "Не просыпаться рано утром.", kanji: "朝早く起きない", kana: "あさはやくおきない" },
+        { type: "naide_kudasai", ru: "Не надо просыпаться рано утром, пожалуйста.", kanji: "朝早く起きないでください", kana: "あさはやくおきないでください" },
+        { type: "nakereba", ru: "Нужно обязательно проснуться рано утром.", kanji: "朝早く起きなければなりません", kana: "あさはやくおきなければなりません" },
+        { type: "nakutemo", ru: "Можно не просыпаться рано утром.", kanji: "朝早く起きなくてもいいです", kana: "あさはやくおきなくてもいいです" }
+      ]},
+      { id: 19, nounK: "机", nounR: "つくえ", nounT: "стол", verbK: "置く", verbR: "おく", verbT: "ставить, класть", forms: [
+        { type: "nai", ru: "Не ставить, класть на стол.", kanji: "机の上に置かない", kana: "つくえのうえにおかない" },
+        { type: "naide_kudasai", ru: "Не надо ставить на стол, пожалуйста.", kanji: "机の上に置かないでください", kana: "つくえのうえにおかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно поставить на стол.", kanji: "机の上に置かなければなりません", kana: "つくえのうえにおかなければなりません" },
+        { type: "nakutemo", ru: "Можно не ставить на стол.", kanji: "机の上に置かなくてもいいです", kana: "つくえのうえにおかなくてもいいです" }
+      ]},
+      { id: 20, nounK: "手紙", nounR: "てがみ", nounT: "письмо", verbK: "送る", verbR: "おくる", verbT: "отправлять", forms: [
+        { type: "nai", ru: "Не отправлять письмо.", kanji: "手紙を送らない", kana: "てがみをおくらない" },
+        { type: "naide_kudasai", ru: "Не надо отправлять письмо, пожалуйста.", kanji: "手紙を送らないでください", kana: "てがみをおくらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно отправить письмо.", kanji: "手紙を送らなければなりません", kana: "てがみをおくらなければなりません" },
+        { type: "nakutemo", ru: "Можно не отправлять письмо.", kanji: "手紙を送らなくてもいいです", kana: "てがみをおくらなくてもいいです" }
+      ]},
+      { id: 21, nounK: "ボタン", nounR: "ボタン", nounT: "кнопка", verbK: "押す", verbR: "おす", verbT: "нажимать", forms: [
+        { type: "nai", ru: "Не нажимать кнопку.", kanji: "ボタンを押さない", kana: "ボタンをおさない" },
+        { type: "naide_kudasai", ru: "Не надо нажимать кнопку, пожалуйста.", kanji: "ボタンを押さないでください", kana: "ボタンをおさないでください" },
+        { type: "nakereba", ru: "Нужно обязательно нажать кнопку.", kanji: "ボタンを押さなければなりません", kana: "ボタンをおさなければなりません" },
+        { type: "nakutemo", ru: "Можно не нажимать кнопку.", kanji: "ボタンを押さなくてもいいです", kana: "ボタンをおさなくてもいいです" }
+      ]},
+      { id: 22, nounK: "単語", nounR: "たんご", nounT: "слово", verbK: "覚える", verbR: "おぼえる", verbT: "запоминать", forms: [
+        { type: "nai", ru: "Не запоминать слова.", kanji: "単語を覚えない", kana: "たんごをおぼえない" },
+        { type: "naide_kudasai", ru: "Не надо запоминать слова, пожалуйста.", kanji: "単語を覚えないでください", kana: "たんごをおぼえないでください" },
+        { type: "nakereba", ru: "Нужно обязательно запомнить слова.", kanji: "単語を覚えなければなりません", kana: "たんごをおぼえなければなりません" },
+        { type: "nakutemo", ru: "Можно не запоминать слова.", kanji: "単語を覚えなくてもいいです", kana: "たんごをおぼえなくてもいいです" }
+      ]},
+      { id: 23, nounK: "海", nounR: "うみ", nounT: "море", verbK: "泳ぐ", verbR: "およぐ", verbT: "плавать", forms: [
+        { type: "nai", ru: "Не плавать в море.", kanji: "海で泳がない", kana: "うみでおよがない" },
+        { type: "naide_kudasai", ru: "Не надо плавать в море, пожалуйста.", kanji: "海で泳がないでください", kana: "うみでおよがないでください" },
+        { type: "nakereba", ru: "Нужно обязательно поплавать в море.", kanji: "海で泳がなければなりません", kana: "うみでおよがなければなりません" },
+        { type: "nakutemo", ru: "Можно не плавать в море.", kanji: "海で泳がなくてもいいです", kana: "うみでおよがなくてもいいです" }
+      ]},
+      { id: 24, nounK: "バス", nounR: "バス", nounT: "автобус", verbK: "降りる", verbR: "おりる", verbT: "выходить из транспорта", forms: [
+        { type: "nai", ru: "Не выходить из автобуса.", kanji: "バスを降りない", kana: "バスをおりない" },
+        { type: "naide_kudasai", ru: "Не надо выходить из автобуса, пожалуйста.", kanji: "バスを降りないでください", kana: "バスをおりないでください" },
+        { type: "nakereba", ru: "Нужно обязательно выйти из автобуса.", kanji: "バスを降りなければなりません", kana: "バスをおりなければなりません" },
+        { type: "nakutemo", ru: "Можно не выходить из автобуса.", kanji: "バスを降りなくてもいいです", kana: "バスをおりなくてもいいです" }
+      ]},
+      { id: 25, nounK: "授業", nounR: "じゅぎょう", nounT: "урок", verbK: "終わる", verbR: "おわる", verbT: "заканчиваться", forms: [
+        { type: "nai", ru: "Урок не заканчивается.", kanji: "授業が終わらない", kana: "じゅぎょうがおわらない" },
+        { type: "naide_kudasai", ru: "Не надо заканчивать урок, пожалуйста.", kanji: "授業が終わらないでください", kana: "じゅぎょうがおわらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно закончить урок.", kanji: "授業が終わらなければなりません", kana: "じゅぎょうがおわらなければなりません" },
+        { type: "nakutemo", ru: "Можно не заканчивать урок.", kanji: "授業が終わらなくてもいいです", kana: "じゅぎょうがおわらなくてもいいです" }
+      ]},
+      { id: 26, nounK: "スーパー", nounR: "スーパー", nounT: "супермаркет", verbK: "買い物する", verbR: "かいものする", verbT: "делать покупки", forms: [
+        { type: "nai", ru: "Не делать покупки в супермаркете.", kanji: "スーパーで買い物をしない", kana: "スーパーでかいものをしない" },
+        { type: "naide_kudasai", ru: "Не надо делать покупки в супермаркете, пожалуйста.", kanji: "スーパーで買い物をしないでください", kana: "スーパーでかいものをしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно сделать покупки в супермаркете.", kanji: "スーパーで買い物をしなければなりません", kana: "スーパーでかいものをしなければなりません" },
+        { type: "nakutemo", ru: "Можно не делать покупки в супермаркете.", kanji: "スーパーで買い物をしなくてもいいです", kana: "スーパーでかいものをしなくてもいいです" }
+      ]},
+      { id: 27, nounK: "服", nounR: "ふく", nounT: "одежда", verbK: "買う", verbR: "かう", verbT: "покупать", forms: [
+        { type: "nai", ru: "Не покупать одежду.", kanji: "服を買わない", kana: "ふくをかわない" },
+        { type: "naide_kudasai", ru: "Не надо покупать одежду, пожалуйста.", kanji: "服を買わないでください", kana: "ふくをかわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно купить одежду.", kanji: "服を買わなければなりません", kana: "ふくをかわなければなりません" },
+        { type: "nakutemo", ru: "Можно не покупать одежду.", kanji: "服を買わなくてもいいです", kana: "ふくをかわなくてもいいです" }
+      ]},
+      { id: 28, nounK: "本", nounR: "ほん", nounT: "книга", verbK: "返す", verbR: "かえす", verbT: "возвращать", forms: [
+        { type: "nai", ru: "Не возвращать книгу.", kanji: "本を返さない", kana: "ほんをかえさない" },
+        { type: "naide_kudasai", ru: "Не надо возвращать книгу, пожалуйста.", kanji: "本を返さないでください", kana: "ほんをかえさないでください" },
+        { type: "nakereba", ru: "Нужно обязательно вернуть книгу.", kanji: "本を返さなければなりません", kana: "ほんをかえさなければなりません" },
+        { type: "nakutemo", ru: "Можно не возвращать книгу.", kanji: "本を返さなくてもいいです", kana: "ほんをかえさなくてもいいです" }
+      ]},
+      { id: 29, nounK: "家", nounR: "いえ", nounT: "дом", verbK: "帰る", verbR: "かえる", verbT: "возвращаться домой", forms: [
+        { type: "nai", ru: "Не возвращаться домой.", kanji: "家に帰らない", kana: "いえにかえらない" },
+        { type: "naide_kudasai", ru: "Не надо возвращаться домой, пожалуйста.", kanji: "家に帰らないでください", kana: "いえにかえらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно вернуться домой.", kanji: "家に帰らなければなりません", kana: "いえにかえらなければなりません" },
+        { type: "nakutemo", ru: "Можно не возвращаться домой.", kanji: "家に帰らなくてもいいです", kana: "いえにかえらなくてもいいです" }
+      ]},
+      { id: 30, nounK: "時間", nounR: "じかん", nounT: "время", verbK: "かかる", verbR: "かかる", verbT: "требоваться (о времени)", forms: [
+        { type: "nai", ru: "Время не требуется (о времени).", kanji: "時間がかからない", kana: "じかんがかからない" },
+        { type: "naide_kudasai", ru: "Не надо тратить время, пожалуйста.", kanji: "時間がかからないでください", kana: "じかんがかからないでください" },
+        { type: "nakereba", ru: "Нужно обязательно потратить время.", kanji: "時間がかからなければなりません", kana: "じかんがかからなければなりません" },
+        { type: "nakutemo", ru: "Можно не тратить время.", kanji: "時間がかからなくてもいいです", kana: "じかんがかからなくてもいいです" }
+      ]},
+      { id: 31, nounK: "漢字", nounR: "かんじ", nounT: "иероглиф", verbK: "書く", verbR: "かく", verbT: "писать", forms: [
+        { type: "nai", ru: "Не писать иероглиф.", kanji: "漢字を書かない", kana: "かんじをかかない" },
+        { type: "naide_kudasai", ru: "Не надо писать иероглиф, пожалуйста.", kanji: "漢字を書かないでください", kana: "かんじをかかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно написать иероглиф.", kanji: "漢字を書かなければなりません", kana: "かんじをかかなければなりません" },
+        { type: "nakutemo", ru: "Можно не писать иероглиф.", kanji: "漢字を書かなくてもいいです", kana: "かんじをかかなくてもいいです" }
+      ]},
+      { id: 32, nounK: "電話", nounR: "でんわ", nounT: "телефон", verbK: "かける", verbR: "かける", verbT: "звонить", forms: [
+        { type: "nai", ru: "Не звонить по телефону.", kanji: "電話をかけない", kana: "でんわをかけない" },
+        { type: "naide_kudasai", ru: "Не надо звонить по телефону, пожалуйста.", kanji: "電話をかけないでください", kana: "でんわをかけないでください" },
+        { type: "nakereba", ru: "Нужно обязательно позвонить по телефону.", kanji: "電話をかけなければなりません", kana: "でんわをかけなければなりません" },
+        { type: "nakutemo", ru: "Можно не звонить по телефону.", kanji: "電話をかけなくてもいいです", kana: "でんわをかけなくてもいいです" }
+      ]},
+      { id: 33, nounK: "ペン", nounR: "ペン", nounT: "ручка", verbK: "貸す", verbR: "かす", verbT: "одалживать", forms: [
+        { type: "nai", ru: "Не одалживать ручку.", kanji: "ペンを貸さない", kana: "ペンをかさない" },
+        { type: "naide_kudasai", ru: "Не надо одалживать ручку, пожалуйста.", kanji: "ペンを貸さないでください", kana: "ペンをかさないでください" },
+        { type: "nakereba", ru: "Нужно обязательно одолжить ручку.", kanji: "ペンを貸さなければなりません", kana: "ペンをかさなければなりません" },
+        { type: "nakutemo", ru: "Можно не одалживать ручку.", kanji: "ペンを貸さなくてもいいです", kana: "ペンをかさなくてもいいです" }
+      ]},
+      { id: 34, nounK: "帽子", nounR: "ぼうし", nounT: "шляпа", verbK: "かぶる", verbR: "かぶる", verbT: "надевать на голову", forms: [
+        { type: "nai", ru: "Не надевать на голову шляпу.", kanji: "帽子をかぶらない", kana: "ぼうしをかぶらない" },
+        { type: "naide_kudasai", ru: "Не надо надевать шляпу, пожалуйста.", kanji: "帽子をかぶらないでください", kana: "ぼうしをかぶらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно надеть шляпу.", kanji: "帽子をかぶらなければなりません", kana: "ぼうしをかぶらなければなりません" },
+        { type: "nakutemo", ru: "Можно не надевать шляпу.", kanji: "帽子をかぶらなくてもいいです", kana: "ぼうしをかぶらなくてもいいです" }
+      ]},
+      { id: 35, nounK: "辞書", nounR: "じしょ", nounT: "словарь", verbK: "借りる", verbR: "かりる", verbT: "брать взаймы", forms: [
+        { type: "nai", ru: "Не брать взаймы словарь.", kanji: "辞書を借りない", kana: "じしょをかりない" },
+        { type: "naide_kudasai", ru: "Не надо брать взаймы словарь, пожалуйста.", kanji: "辞書を借りないでください", kana: "じしょをかりないでください" },
+        { type: "nakereba", ru: "Нужно обязательно взять взаймы словарь.", kanji: "辞書を借りなければなりません", kana: "じしょをかりなければなりません" },
+        { type: "nakutemo", ru: "Можно не брать взаймы словарь.", kanji: "辞書を借りなくてもいいです", kana: "じしょをかりなくてもいいです" }
+      ]},
+      { id: 36, nounK: "電気", nounR: "でんき", nounT: "свет", verbK: "消える", verbR: "きえる", verbT: "гаснуть", forms: [
+        { type: "nai", ru: "Свет не гаснет.", kanji: "電気が消えない", kana: "でんきがきえない" },
+        { type: "naide_kudasai", ru: "Не надо гасить свет, пожалуйста.", kanji: "電気が消えないでください", kana: "でんきがきえないでください" },
+        { type: "nakereba", ru: "Нужно обязательно погасить свет.", kanji: "電気が消えなければなりません", kana: "でんきがきえなければなりません" },
+        { type: "nakutemo", ru: "Можно не гасить свет.", kanji: "電気が消えなくてもいいです", kana: "でんきがきえなくてもいいです" }
+      ]},
+      { id: 37, nounK: "音楽", nounR: "おんがく", nounT: "музыка", verbK: "聞く", verbR: "きく", verbT: "слушать", forms: [
+        { type: "nai", ru: "Не слушать музыку.", kanji: "音楽を聞かない", kana: "おんがくをきかない" },
+        { type: "naide_kudasai", ru: "Не надо слушать музыку, пожалуйста.", kanji: "音楽を聞かないでください", kana: "おんがくをきかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно послушать музыку.", kanji: "音楽を聞かなければなりません", kana: "おんがくをきかなければなりません" },
+        { type: "nakutemo", ru: "Можно не слушать музыку.", kanji: "音楽を聞かなくてもいいです", kana: "おんがくをきかなくてもいいです" }
+      ]},
+      { id: 38, nounK: "紙", nounR: "かみ", nounT: "бумага", verbK: "切る", verbR: "きる", verbT: "резать", forms: [
+        { type: "nai", ru: "Не резать бумагу.", kanji: "紙を切らない", kana: "かみをきらない" },
+        { type: "naide_kudasai", ru: "Не надо резать бумагу, пожалуйста.", kanji: "紙を切らないでください", kana: "かみをきらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно разрезать бумагу.", kanji: "紙を切らなければなりません", kana: "かみをきらなければなりません" },
+        { type: "nakutemo", ru: "Можно не резать бумагу.", kanji: "紙を切らなくてもいいです", kana: "かみをきらなくてもいいです" }
+      ]},
+      { id: 39, nounK: "シャツ", nounR: "シャツ", nounT: "рубашка", verbK: "着る", verbR: "きる", verbT: "надевать на тело", forms: [
+        { type: "nai", ru: "Не надевать на тело рубашку.", kanji: "シャツを着ない", kana: "シャツをきない" },
+        { type: "naide_kudasai", ru: "Не надо надевать рубашку, пожалуйста.", kanji: "シャツを着ないでください", kana: "シャツをきないでください" },
+        { type: "nakereba", ru: "Нужно обязательно надеть рубашку.", kanji: "シャツを着なければなりません", kana: "シャツをきなければなりません" },
+        { type: "nakutemo", ru: "Можно не надевать рубашку.", kanji: "シャツを着なくてもいいです", kana: "シャツをきなくてもいいです" }
+      ]},
+      { id: 40, nounK: "先生", nounR: "せんせい", nounT: "учитель", verbK: "来る", verbR: "くる", verbT: "приходить", forms: [
+        { type: "nai", ru: "Учитель не приходит.", kanji: "先生が来ない", kana: "せんせいがこない" },
+        { type: "naide_kudasai", ru: "Не надо приходить к учителю, пожалуйста.", kanji: "先生が来ないでください", kana: "せんせいがこないでください" },
+        { type: "nakereba", ru: "Нужно обязательно прийти к учителю.", kanji: "先生が来なければなりません", kana: "せんせいがこなければなりません" },
+        { type: "nakutemo", ru: "Можно не приходить к учителю.", kanji: "先生が来なくてもいいです", kana: "せんせいがこなくてもいいです" }
+      ]},
+      { id: 41, nounK: "女の人", nounR: "おんなのひと", nounT: "женщина", verbK: "結婚する", verbR: "けっこんする", verbT: "жениться", forms: [
+        { type: "nai", ru: "Не жениться на этой женщине.", kanji: "女の人と結婚しない", kana: "おんなのひととけっこんしない" },
+        { type: "naide_kudasai", ru: "Не надо жениться на этой женщине, пожалуйста.", kanji: "女の人と結婚しないでください", kana: "おんなのひととけっこんしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно жениться на этой женщине.", kanji: "女の人と結婚しなければなりません", kana: "おんなのひととけっこんしなければなりません" },
+        { type: "nakutemo", ru: "Можно не жениться на этой женщине.", kanji: "女の人と結婚しなくてもいいです", kana: "おんなのひととけっこんしなくてもいいです" }
+      ]},
+      { id: 42, nounK: "テレビ", nounR: "テレビ", nounT: "телевизор", verbK: "消す", verbR: "けす", verbT: "выключать", forms: [
+        { type: "nai", ru: "Не выключать телевизор.", kanji: "テレビを消さない", kana: "テレビをけさない" },
+        { type: "naide_kudasai", ru: "Не надо выключать телевизор, пожалуйста.", kanji: "テレビを消さないでください", kana: "テレビをけさないでください" },
+        { type: "nakereba", ru: "Нужно обязательно выключить телевизор.", kanji: "テレビを消さなければなりません", kana: "テレビをけさなければなりません" },
+        { type: "nakutemo", ru: "Можно не выключать телевизор.", kanji: "テレビを消さなくてもいいです", kana: "テレビをけさなくてもいいです" }
+      ]},
+      { id: 43, nounK: "質問", nounR: "しつもん", nounT: "вопрос", verbK: "答える", verbR: "こたえる", verbT: "отвечать", forms: [
+        { type: "nai", ru: "Не отвечать на вопрос.", kanji: "質問に答えない", kana: "しつもんにこたえない" },
+        { type: "naide_kudasai", ru: "Не надо отвечать на вопрос, пожалуйста.", kanji: "質問に答えないでください", kana: "しつもんにこたえないでください" },
+        { type: "nakereba", ru: "Нужно обязательно ответить на вопрос.", kanji: "質問に答えなければなりません", kana: "しつもんにこたえなければなりません" },
+        { type: "nakutemo", ru: "Можно не отвечать на вопрос.", kanji: "質問に答えなくてもいいです", kana: "しつもんにこたえなくてもいいです" }
+      ]},
+      { id: 44, nounK: "ノート", nounR: "ノート", nounT: "тетрадь", verbK: "コピーする", verbR: "コピーする", verbT: "копировать", forms: [
+        { type: "nai", ru: "Не копировать тетрадь.", kanji: "ノートをコピーしない", kana: "ノートをコピーしない" },
+        { type: "naide_kudasai", ru: "Не надо копировать тетрадь, пожалуйста.", kanji: "ノートをコピーしないでください", kana: "ノートをコピーしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно скопировать тетрадь.", kanji: "ノートをコピーしなければなりません", kana: "ノートをコピーしなければなりません" },
+        { type: "nakutemo", ru: "Можно не копировать тетрадь.", kanji: "ノートをコピーしなくてもいいです", kana: "ノートをコピーしなくてもいいです" }
+      ]},
+      { id: 45, nounK: "仕事", nounR: "しごと", nounT: "работа", verbK: "困る", verbR: "こまる", verbT: "испытывать затруднения", forms: [
+        { type: "nai", ru: "Не испытывать затруднения на работе.", kanji: "仕事で困らない", kana: "しごとでこまらない" },
+        { type: "naide_kudasai", ru: "Не надо испытывать трудности на работе, пожалуйста.", kanji: "仕事で困らないでください", kana: "しごとでこまらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно столкнуться с трудностями на работе.", kanji: "仕事で困らなければなりません", kana: "しごとでこまらなければなりません" },
+        { type: "nakutemo", ru: "Можно не испытывать трудности на работе.", kanji: "仕事で困らなくてもいいです", kana: "しごとでこまらなくてもいいです" }
+      ]},
+      { id: 46, nounK: "花", nounR: "はな", nounT: "цветок", verbK: "咲く", verbR: "さく", verbT: "цвести", forms: [
+        { type: "nai", ru: "Цветок не цветёт.", kanji: "花が咲かない", kana: "はながさかない" },
+        { type: "naide_kudasai", ru: "Не надо давать цвести цветку, пожалуйста.", kanji: "花が咲かないでください", kana: "はながさかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно дать цветку зацвести.", kanji: "花が咲かなければなりません", kana: "はながさかなければなりません" },
+        { type: "nakutemo", ru: "Можно не давать цветку цвести.", kanji: "花が咲かなくてもいいです", kana: "はながさかなくてもいいです" }
+      ]},
+      { id: 47, nounK: "傘", nounR: "かさ", nounT: "зонт", verbK: "差す", verbR: "さす", verbT: "раскрывать", forms: [
+        { type: "nai", ru: "Не раскрывать зонт.", kanji: "傘を差さない", kana: "かさをささない" },
+        { type: "naide_kudasai", ru: "Не надо раскрывать зонт, пожалуйста.", kanji: "傘を差さないでください", kana: "かさをささないでください" },
+        { type: "nakereba", ru: "Нужно обязательно раскрыть зонт.", kanji: "傘を差さなければなりません", kana: "かさをささなければなりません" },
+        { type: "nakutemo", ru: "Можно не раскрывать зонт.", kanji: "傘を差さなくてもいいです", kana: "かさをささなくてもいいです" }
+      ]},
+      { id: 48, nounK: "犬", nounR: "いぬ", nounT: "собака", verbK: "散歩する", verbR: "さんぽする", verbT: "гулять", forms: [
+        { type: "nai", ru: "Не гулять с собакой.", kanji: "犬と散歩しない", kana: "いぬとさんぽしない" },
+        { type: "naide_kudasai", ru: "Не надо гулять с собакой, пожалуйста.", kanji: "犬と散歩しないでください", kana: "いぬとさんぽしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно погулять с собакой.", kanji: "犬と散歩しなければなりません", kana: "いぬとさんぽしなければなりません" },
+        { type: "nakutemo", ru: "Можно не гулять с собакой.", kanji: "犬と散歩しなくてもいいです", kana: "いぬとさんぽしなくてもいいです" }
+      ]},
+      { id: 49, nounK: "魚", nounR: "さかな", nounT: "рыба", verbK: "死ぬ", verbR: "しぬ", verbT: "умирать", forms: [
+        { type: "nai", ru: "Рыба не умирает.", kanji: "魚が死なない", kana: "さかながしなない" },
+        { type: "naide_kudasai", ru: "Не надо давать рыбе умереть, пожалуйста.", kanji: "魚が死なないでください", kana: "さかながしなないでください" },
+        { type: "nakereba", ru: "Нужно обязательно дать рыбе умереть.", kanji: "魚が死ななければなりません", kana: "さかながしななければなりません" },
+        { type: "nakutemo", ru: "Можно не давать рыбе умереть.", kanji: "魚が死ななくてもいいです", kana: "さかながしななくてもいいです" }
+      ]},
+      { id: 50, nounK: "店", nounR: "みせ", nounT: "магазин", verbK: "閉まる", verbR: "しまる", verbT: "закрываться", forms: [
+        { type: "nai", ru: "Магазин не закрывается.", kanji: "店が閉まらない", kana: "みせがしまらない" },
+        { type: "naide_kudasai", ru: "Не надо закрывать магазин, пожалуйста.", kanji: "店が閉まらないでください", kana: "みせがしまらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно закрыть магазин.", kanji: "店が閉まらなければなりません", kana: "みせがしまらなければなりません" },
+        { type: "nakutemo", ru: "Можно не закрывать магазин.", kanji: "店が閉まらなくてもいいです", kana: "みせがしまらなくてもいいです" }
+      ]},
+      { id: 51, nounK: "箱", nounR: "はこ", nounT: "коробка", verbK: "閉める", verbR: "しめる", verbT: "закрывать", forms: [
+        { type: "nai", ru: "Не закрывать коробку.", kanji: "箱を閉めない", kana: "はこをしめない" },
+        { type: "naide_kudasai", ru: "Не надо закрывать коробку, пожалуйста.", kanji: "箱を閉めないでください", kana: "はこをしめないでください" },
+        { type: "nakereba", ru: "Нужно обязательно закрыть коробку.", kanji: "箱を閉めなければなりません", kana: "はこをしめなければなりません" },
+        { type: "nakutemo", ru: "Можно не закрывать коробку.", kanji: "箱を閉めなくてもいいです", kana: "はこをしめなくてもいいです" }
+      ]},
+      { id: 52, nounK: "ネクタイ", nounR: "ネクタイ", nounT: "галстук", verbK: "締める", verbR: "しめる", verbT: "завязывать", forms: [
+        { type: "nai", ru: "Не завязывать галстук.", kanji: "ネクタイを締めない", kana: "ネクタイをしめない" },
+        { type: "naide_kudasai", ru: "Не надо завязывать галстук, пожалуйста.", kanji: "ネクタイを締めないでください", kana: "ネクタイをしめないでください" },
+        { type: "nakereba", ru: "Нужно обязательно завязать галстук.", kanji: "ネクタイを締めなければなりません", kana: "ネクタイをしめなければなりません" },
+        { type: "nakutemo", ru: "Можно не завязывать галстук.", kanji: "ネクタイを締めなくてもいいです", kana: "ネクタイをしめなくてもいいです" }
+      ]},
+      { id: 53, nounK: "写真", nounR: "しゃしん", nounT: "фотография", verbK: "撮る", verbR: "とる", verbT: "фотографировать", forms: [
+        { type: "nai", ru: "Не фотографировать.", kanji: "写真を撮らない", kana: "しゃしんをとらない" },
+        { type: "naide_kudasai", ru: "Не надо фотографировать, пожалуйста.", kanji: "写真を撮らないでください", kana: "しゃしんをとらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно сфотографировать.", kanji: "写真を撮らなければなりません", kana: "しゃしんをとらなければなりません" },
+        { type: "nakutemo", ru: "Можно не фотографировать.", kanji: "写真を撮らなくてもいいです", kana: "しゃしんをとらなくてもいいです" }
+      ]},
+      { id: 54, nounK: "医者", nounR: "いしゃ", nounT: "врач", verbK: "質問する", verbR: "しつもんする", verbT: "спрашивать", forms: [
+        { type: "nai", ru: "Не спрашивать врача.", kanji: "医者に質問しない", kana: "いしゃにしつもんしない" },
+        { type: "naide_kudasai", ru: "Не надо спрашивать врача, пожалуйста.", kanji: "医者に質問しないでください", kana: "いしゃにしつもんしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно спросить у врача.", kanji: "医者に質問しなければなりません", kana: "いしゃにしつもんしなければなりません" },
+        { type: "nakutemo", ru: "Можно не спрашивать врача.", kanji: "医者に質問しなくてもいいです", kana: "いしゃにしつもんしなくてもいいです" }
+      ]},
+      { id: 55, nounK: "ニュース", nounR: "ニュース", nounT: "новость", verbK: "知る", verbR: "しる", verbT: "узнавать", forms: [
+        { type: "nai", ru: "Не узнавать новости.", kanji: "ニュースを知らない", kana: "ニュースをしらない" },
+        { type: "naide_kudasai", ru: "Не надо узнавать новости, пожалуйста.", kanji: "ニュースを知らないでください", kana: "ニュースをしらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно узнать новости.", kanji: "ニュースを知らなければなりません", kana: "ニュースをしらなければなりません" },
+        { type: "nakutemo", ru: "Можно не узнавать новости.", kanji: "ニュースを知らなくてもいいです", kana: "ニュースをしらなくてもいいです" }
+      ]},
+      { id: 56, nounK: "たばこ", nounR: "たばこ", nounT: "сигарета", verbK: "吸う", verbR: "すう", verbT: "курить", forms: [
+        { type: "nai", ru: "Не курить сигарету.", kanji: "たばこを吸わない", kana: "たばこをすわない" },
+        { type: "naide_kudasai", ru: "Не надо курить сигарету, пожалуйста.", kanji: "たばこを吸わないでください", kana: "たばこをすわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно покурить сигарету.", kanji: "たばこを吸わなければなりません", kana: "たばこをすわなければなりません" },
+        { type: "nakutemo", ru: "Можно не курить сигарету.", kanji: "たばこを吸わなくてもいいです", kana: "たばこをすわなくてもいいです" }
+      ]},
+      { id: 57, nounK: "町", nounR: "まち", nounT: "город", verbK: "住む", verbR: "すむ", verbT: "жить", forms: [
+        { type: "nai", ru: "Не жить в городе.", kanji: "町に住まない", kana: "まちにすまない" },
+        { type: "naide_kudasai", ru: "Не надо жить в городе, пожалуйста.", kanji: "町に住まないでください", kana: "まちにすまないでください" },
+        { type: "nakereba", ru: "Нужно обязательно жить в городе.", kanji: "町に住まなければなりません", kana: "まちにすまなければなりません" },
+        { type: "nakutemo", ru: "Можно не жить в городе.", kanji: "町に住まなくてもいいです", kana: "まちにすまなくてもいいです" }
+      ]},
+      { id: 58, nounK: "宿題", nounR: "しゅくだい", nounT: "домашнее задание", verbK: "する", verbR: "する", verbT: "делать", forms: [
+        { type: "nai", ru: "Не делать домашнее задание.", kanji: "宿題をしない", kana: "しゅくだいをしない" },
+        { type: "naide_kudasai", ru: "Не надо делать домашнее задание, пожалуйста.", kanji: "宿題をしないでください", kana: "しゅくだいをしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно сделать домашнее задание.", kanji: "宿題をしなければなりません", kana: "しゅくだいをしなければなりません" },
+        { type: "nakutemo", ru: "Можно не делать домашнее задание.", kanji: "宿題をしなくてもいいです", kana: "しゅくだいをしなくてもいいです" }
+      ]},
+      { id: 59, nounK: "椅子", nounR: "いす", nounT: "стул", verbK: "座る", verbR: "すわる", verbT: "садиться", forms: [
+        { type: "nai", ru: "Не садиться на стул.", kanji: "椅子に座らない", kana: "いすにすわらない" },
+        { type: "naide_kudasai", ru: "Не надо садиться на стул, пожалуйста.", kanji: "椅子に座らないでください", kana: "いすにすわらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно сесть на стул.", kanji: "椅子に座らなければなりません", kana: "いすにすわらなければなりません" },
+        { type: "nakutemo", ru: "Можно не садиться на стул.", kanji: "椅子に座らなくてもいいです", kana: "いすにすわらなくてもいいです" }
+      ]},
+      { id: 60, nounK: "ズボン", nounR: "ズボン", nounT: "брюки", verbK: "洗濯する", verbR: "せんたくする", verbT: "стирать", forms: [
+        { type: "nai", ru: "Не стирать брюки.", kanji: "ズボンを洗濯しない", kana: "ズボンをせんたくしない" },
+        { type: "naide_kudasai", ru: "Не надо стирать брюки, пожалуйста.", kanji: "ズボンを洗濯しないでください", kana: "ズボンをせんたくしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно постирать брюки.", kanji: "ズボンを洗濯しなければなりません", kana: "ズボンをせんたくしなければなりません" },
+        { type: "nakutemo", ru: "Можно не стирать брюки.", kanji: "ズボンを洗濯しなくてもいいです", kana: "ズボンをせんたくしなくてもいいです" }
+      ]},
+      { id: 61, nounK: "部屋", nounR: "へや", nounT: "комната", verbK: "掃除する", verbR: "そうじする", verbT: "убираться", forms: [
+        { type: "nai", ru: "Не убирать комнату.", kanji: "部屋を掃除しない", kana: "へやをそうじしない" },
+        { type: "naide_kudasai", ru: "Не надо убирать комнату, пожалуйста.", kanji: "部屋を掃除しないでください", kana: "へやをそうじしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно убрать комнату.", kanji: "部屋を掃除しなければなりません", kana: "へやをそうじしなければなりません" },
+        { type: "nakutemo", ru: "Можно не убирать комнату.", kanji: "部屋を掃除しなくてもいいです", kana: "へやをそうじしなくてもいいです" }
+      ]},
+      { id: 62, nounK: "ごみ", nounR: "ごみ", nounT: "мусор", verbK: "出す", verbR: "だす", verbT: "выносить", forms: [
+        { type: "nai", ru: "Не выносить мусор.", kanji: "ごみを出さない", kana: "ごみをださない" },
+        { type: "naide_kudasai", ru: "Не надо выносить мусор, пожалуйста.", kanji: "ごみを出さないでください", kana: "ごみをださないでください" },
+        { type: "nakereba", ru: "Нужно обязательно вынести мусор.", kanji: "ごみを出さなければなりません", kana: "ごみをださなければなりません" },
+        { type: "nakutemo", ru: "Можно не выносить мусор.", kanji: "ごみを出さなくてもいいです", kana: "ごみをださなくてもいいです" }
+      ]},
+      { id: 63, nounK: "駅", nounR: "えき", nounT: "вокзал", verbK: "立つ", verbR: "たつ", verbT: "стоять, вставать", forms: [
+        { type: "nai", ru: "Не стоять перед вокзалом.", kanji: "駅の前に立たない", kana: "えきのまえにたたない" },
+        { type: "naide_kudasai", ru: "Не надо стоять перед вокзалом, пожалуйста.", kanji: "駅の前に立たないでください", kana: "えきのまえにたたないでください" },
+        { type: "nakereba", ru: "Нужно обязательно постоять перед вокзалом.", kanji: "駅の前に立たなければなりません", kana: "えきのまえにたたなければなりません" },
+        { type: "nakutemo", ru: "Можно не стоять перед вокзалом.", kanji: "駅の前に立たなくてもいいです", kana: "えきのまえにたたなくてもいいです" }
+      ]},
+      { id: 64, nounK: "コーヒー", nounR: "コーヒー", nounT: "кофе", verbK: "頼む", verbR: "たのむ", verbT: "заказывать", forms: [
+        { type: "nai", ru: "Не заказывать кофе.", kanji: "コーヒーを頼まない", kana: "コーヒーをたのまない" },
+        { type: "naide_kudasai", ru: "Не надо заказывать кофе, пожалуйста.", kanji: "コーヒーを頼まないでください", kana: "コーヒーをたのまないでください" },
+        { type: "nakereba", ru: "Нужно обязательно заказать кофе.", kanji: "コーヒーを頼まなければなりません", kana: "コーヒーをたのまなければなりません" },
+        { type: "nakutemo", ru: "Можно не заказывать кофе.", kanji: "コーヒーを頼まなくてもいいです", kana: "コーヒーをたのまなくてもいいです" }
+      ]},
+      { id: 65, nounK: "ご飯", nounR: "ごはん", nounT: "еда", verbK: "食べる", verbR: "たべる", verbT: "есть", forms: [
+        { type: "nai", ru: "Не есть еду.", kanji: "ご飯を食べない", kana: "ごはんをたべない" },
+        { type: "naide_kudasai", ru: "Не надо есть, пожалуйста.", kanji: "ご飯を食べないでください", kana: "ごはんをたべないでください" },
+        { type: "nakereba", ru: "Нужно обязательно поесть.", kanji: "ご飯を食べなければなりません", kana: "ごはんをたべなければなりません" },
+        { type: "nakutemo", ru: "Можно не есть.", kanji: "ご飯を食べなくてもいいです", kana: "ごはんをたべなくてもいいです" }
+      ]},
+      { id: 66, nounK: "色", nounR: "いろ", nounT: "цвет", verbK: "違う", verbR: "ちがう", verbT: "отличаться", forms: [
+        { type: "nai", ru: "Цвет не отличается.", kanji: "色が違わない", kana: "いろがちがわない" },
+        { type: "naide_kudasai", ru: "Не надо отличаться цветом, пожалуйста.", kanji: "色が違わないでください", kana: "いろがちがわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно отличаться цветом.", kanji: "色が違わなければなりません", kana: "いろがちがわなければなりません" },
+        { type: "nakutemo", ru: "Можно не отличаться цветом.", kanji: "色が違わなくてもいいです", kana: "いろがちがわなくてもいいです" }
+      ]},
+      { id: 67, nounK: "パソコン", nounR: "パソコン", nounT: "компьютер", verbK: "使う", verbR: "つかう", verbT: "использовать", forms: [
+        { type: "nai", ru: "Не использовать компьютер.", kanji: "パソコンを使わない", kana: "パソコンをつかわない" },
+        { type: "naide_kudasai", ru: "Не надо использовать компьютер, пожалуйста.", kanji: "パソコンを使わないでください", kana: "パソコンをつかわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно использовать компьютер.", kanji: "パソコンを使わなければなりません", kana: "パソコンをつかわなければなりません" },
+        { type: "nakutemo", ru: "Можно не использовать компьютер.", kanji: "パソコンを使わなくてもいいです", kana: "パソコンをつかわなくてもいいです" }
+      ]},
+      { id: 68, nounK: "旅行", nounR: "りょこう", nounT: "путешествие", verbK: "疲れる", verbR: "つかれる", verbT: "уставать", forms: [
+        { type: "nai", ru: "Не уставать от путешествия.", kanji: "旅行で疲れない", kana: "りょこうでつかれない" },
+        { type: "naide_kudasai", ru: "Не надо уставать от путешествия, пожалуйста.", kanji: "旅行で疲れないでください", kana: "りょこうでつかれないでください" },
+        { type: "nakereba", ru: "Нужно обязательно устать от путешествия.", kanji: "旅行で疲れなければなりません", kana: "りょこうでつかれなければなりません" },
+        { type: "nakutemo", ru: "Можно не уставать от путешествия.", kanji: "旅行で疲れなくてもいいです", kana: "りょこうでつかれなくてもいいです" }
+      ]},
+      { id: 69, nounK: "空港", nounR: "くうこう", nounT: "аэропорт", verbK: "着く", verbR: "つく", verbT: "прибывать", forms: [
+        { type: "nai", ru: "Не прибывать в аэропорт.", kanji: "空港に着かない", kana: "くうこうにつかない" },
+        { type: "naide_kudasai", ru: "Не надо прибывать в аэропорт, пожалуйста.", kanji: "空港に着かないでください", kana: "くうこうにつかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно прибыть в аэропорт.", kanji: "空港に着かなければなりません", kana: "くうこうにつかなければなりません" },
+        { type: "nakutemo", ru: "Можно не прибывать в аэропорт.", kanji: "空港に着かなくてもいいです", kana: "くうこうにつかなくてもいいです" }
+      ]},
+      { id: 70, nounK: "料理", nounR: "りょうり", nounT: "еда (блюдо)", verbK: "作る", verbR: "つくる", verbT: "готовить", forms: [
+        { type: "nai", ru: "Не готовить еду.", kanji: "料理を作らない", kana: "りょうりをつくらない" },
+        { type: "naide_kudasai", ru: "Не надо готовить еду, пожалуйста.", kanji: "料理を作らないでください", kana: "りょうりをつくらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно приготовить еду.", kanji: "料理を作らなければなりません", kana: "りょうりをつくらなければなりません" },
+        { type: "nakutemo", ru: "Можно не готовить еду.", kanji: "料理を作らなくてもいいです", kana: "りょうりをつくらなくてもいいです" }
+      ]},
+      { id: 71, nounK: "ラジオ", nounR: "ラジオ", nounT: "радио", verbK: "点ける", verbR: "つける", verbT: "включать", forms: [
+        { type: "nai", ru: "Не включать радио.", kanji: "ラジオを点けない", kana: "ラジオをつけない" },
+        { type: "naide_kudasai", ru: "Не надо включать радио, пожалуйста.", kanji: "ラジオを点けないでください", kana: "ラジオをつけないでください" },
+        { type: "nakereba", ru: "Нужно обязательно включить радио.", kanji: "ラジオを点けなければなりません", kana: "ラジオをつけなければなりません" },
+        { type: "nakutemo", ru: "Можно не включать радио.", kanji: "ラジオを点けなくてもいいです", kana: "ラジオをつけなくてもいいです" }
+      ]},
+      { id: 72, nounK: "会社", nounR: "かいしゃ", nounT: "компания", verbK: "勤める", verbR: "つとめる", verbT: "служить", forms: [
+        { type: "nai", ru: "Не служить в компании.", kanji: "会社に勤めない", kana: "かいしゃにつとめない" },
+        { type: "naide_kudasai", ru: "Не надо работать в компании, пожалуйста.", kanji: "会社に勤めないでください", kana: "かいしゃにつとめないでください" },
+        { type: "nakereba", ru: "Нужно обязательно работать в компании.", kanji: "会社に勤めなければなりません", kana: "かいしゃにつとめなければなりません" },
+        { type: "nakutemo", ru: "Можно не работать в компании.", kanji: "会社に勤めなくてもいいです", kana: "かいしゃにつとめなくてもいいです" }
+      ]},
+      { id: 73, nounK: "散歩", nounR: "さんぽ", nounT: "прогулка", verbK: "出かける", verbR: "でかける", verbT: "выходить из дома", forms: [
+        { type: "nai", ru: "Не выходить из дома на прогулку.", kanji: "散歩に出かけない", kana: "さんぽにでかけない" },
+        { type: "naide_kudasai", ru: "Не надо выходить на прогулку, пожалуйста.", kanji: "散歩に出かけないでください", kana: "さんぽにでかけないでください" },
+        { type: "nakereba", ru: "Нужно обязательно выйти на прогулку.", kanji: "散歩に出かけなければなりません", kana: "さんぽにでかけなければなりません" },
+        { type: "nakutemo", ru: "Можно не выходить на прогулку.", kanji: "散歩に出かけなくてもいいです", kana: "さんぽにでかけなくてもいいです" }
+      ]},
+      { id: 74, nounK: "日本語", nounR: "にほんご", nounT: "японский язык", verbK: "できる", verbR: "できる", verbT: "мочь", forms: [
+        { type: "nai", ru: "Не уметь говорить по-японски.", kanji: "日本語ができない", kana: "にほんごができない" },
+        { type: "naide_kudasai", ru: "Не надо владеть японским языком, пожалуйста.", kanji: "日本語ができないでください", kana: "にほんごができないでください" },
+        { type: "nakereba", ru: "Нужно обязательно владеть японским языком.", kanji: "日本語ができなければなりません", kana: "にほんごができなければなりません" },
+        { type: "nakutemo", ru: "Можно не владеть японским языком.", kanji: "日本語ができなくてもいいです", kana: "にほんごができなくてもいいです" }
+      ]},
+      { id: 75, nounK: "大学", nounR: "だいがく", nounT: "университет", verbK: "出る", verbR: "でる", verbT: "выходить, оканчивать", forms: [
+        { type: "nai", ru: "Не оканчивать университет.", kanji: "大学を出ない", kana: "だいがくをでない" },
+        { type: "naide_kudasai", ru: "Не надо оканчивать университет, пожалуйста.", kanji: "大学を出ないでください", kana: "だいがくをでないでください" },
+        { type: "nakereba", ru: "Нужно обязательно окончить университет.", kanji: "大学を出なければなりません", kana: "だいがくをでなければなりません" },
+        { type: "nakutemo", ru: "Можно не оканчивать университет.", kanji: "大学を出なくてもいいです", kana: "だいがくをでなくてもいいです" }
+      ]},
+      { id: 76, nounK: "病院", nounR: "びょういん", nounT: "больница", verbK: "電話する", verbR: "でんわする", verbT: "звонить по телефону", forms: [
+        { type: "nai", ru: "Не звонить по телефону в больницу.", kanji: "病院に電話しない", kana: "びょういんにでんわしない" },
+        { type: "naide_kudasai", ru: "Не надо звонить в больницу, пожалуйста.", kanji: "病院に電話しないでください", kana: "びょういんにでんわしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно позвонить в больницу.", kanji: "病院に電話しなければなりません", kana: "びょういんにでんわしなければなりません" },
+        { type: "nakutemo", ru: "Можно не звонить в больницу.", kanji: "病院に電話しなくてもいいです", kana: "びょういんにでんわしなくてもいいです" }
+      ]},
+      { id: 77, nounK: "飛行機", nounR: "ひこうき", nounT: "самолёт", verbK: "飛ぶ", verbR: "とぶ", verbT: "летать", forms: [
+        { type: "nai", ru: "Самолёт не летает.", kanji: "飛行機が飛ばない", kana: "ひこうきがとばない" },
+        { type: "naide_kudasai", ru: "Не надо лететь самолётом, пожалуйста.", kanji: "飛行機が飛ばないでください", kana: "ひこうきがとばないでください" },
+        { type: "nakereba", ru: "Нужно обязательно лететь самолётом.", kanji: "飛行機が飛ばなければなりません", kana: "ひこうきがとばなければなりません" },
+        { type: "nakutemo", ru: "Можно не лететь самолётом.", kanji: "飛行機が飛ばなくてもいいです", kana: "ひこうきがとばなくてもいいです" }
+      ]},
+      { id: 78, nounK: "車", nounR: "くるま", nounT: "машина", verbK: "止まる", verbR: "とまる", verbT: "останавливаться", forms: [
+        { type: "nai", ru: "Машина не останавливается.", kanji: "車が止まらない", kana: "くるまがとまらない" },
+        { type: "naide_kudasai", ru: "Не надо останавливать машину, пожалуйста.", kanji: "車が止まらないでください", kana: "くるまがとまらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно остановить машину.", kanji: "車が止まらなければなりません", kana: "くるまがとまらなければなりません" },
+        { type: "nakutemo", ru: "Можно не останавливать машину.", kanji: "車が止まらなくてもいいです", kana: "くるまがとまらなくてもいいです" }
+      ]},
+      { id: 79, nounK: "休み", nounR: "やすみ", nounT: "выходной", verbK: "取る", verbR: "とる", verbT: "брать", forms: [
+        { type: "nai", ru: "Не брать выходной.", kanji: "休みを取らない", kana: "やすみをとらない" },
+        { type: "naide_kudasai", ru: "Не надо брать выходной, пожалуйста.", kanji: "休みを取らないでください", kana: "やすみをとらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно взять выходной.", kanji: "休みを取らなければなりません", kana: "やすみをとらなければなりません" },
+        { type: "nakutemo", ru: "Можно не брать выходной.", kanji: "休みを取らなくてもいいです", kana: "やすみをとらなくてもいいです" }
+      ]},
+      { id: 80, nounK: "カメラ", nounR: "カメラ", nounT: "камера", verbK: "撮る", verbR: "とる", verbT: "снимать (фото)", forms: [
+        { type: "nai", ru: "Не снимать (фото) камерой.", kanji: "カメラで撮らない", kana: "カメラでとらない" },
+        { type: "naide_kudasai", ru: "Не надо снимать камерой, пожалуйста.", kanji: "カメラで撮らないでください", kana: "カメラでとらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно снять камерой.", kanji: "カメラで撮らなければなりません", kana: "カメラでとらなければなりません" },
+        { type: "nakutemo", ru: "Можно не снимать камерой.", kanji: "カメラで撮らなくてもいいです", kana: "カメラでとらなくてもいいです" }
+      ]},
+      { id: 81, nounK: "鳥", nounR: "とり", nounT: "птица", verbK: "鳴く", verbR: "なく", verbT: "петь (о птице)", forms: [
+        { type: "nai", ru: "Птица не поёт (о птице).", kanji: "鳥が鳴かない", kana: "とりがなかない" },
+        { type: "naide_kudasai", ru: "Не надо давать птице петь, пожалуйста.", kanji: "鳥が鳴かないでください", kana: "とりがなかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно дать птице спеть.", kanji: "鳥が鳴かなければなりません", kana: "とりがなかなければなりません" },
+        { type: "nakutemo", ru: "Можно не давать птице петь.", kanji: "鳥が鳴かなくてもいいです", kana: "とりがなかなくてもいいです" }
+      ]},
+      { id: 82, nounK: "銀行", nounR: "ぎんこう", nounT: "банк", verbK: "並ぶ", verbR: "ならぶ", verbT: "стоять в очереди", forms: [
+        { type: "nai", ru: "Не стоять в очереди в банке.", kanji: "銀行で並ばない", kana: "ぎんこうでならばない" },
+        { type: "naide_kudasai", ru: "Не надо стоять в очереди в банке, пожалуйста.", kanji: "銀行で並ばないでください", kana: "ぎんこうでならばないでください" },
+        { type: "nakereba", ru: "Нужно обязательно постоять в очереди в банке.", kanji: "銀行で並ばなければなりません", kana: "ぎんこうでならばなければなりません" },
+        { type: "nakutemo", ru: "Можно не стоять в очереди в банке.", kanji: "銀行で並ばなくてもいいです", kana: "ぎんこうでならばなくてもいいです" }
+      ]},
+      { id: 83, nounK: "お皿", nounR: "おさら", nounT: "тарелка", verbK: "並べる", verbR: "ならべる", verbT: "расставлять", forms: [
+        { type: "nai", ru: "Не расставлять тарелки.", kanji: "お皿を並べない", kana: "おさらをならべない" },
+        { type: "naide_kudasai", ru: "Не надо расставлять тарелки, пожалуйста.", kanji: "お皿を並べないでください", kana: "おさらをならべないでください" },
+        { type: "nakereba", ru: "Нужно обязательно расставить тарелки.", kanji: "お皿を並べなければなりません", kana: "おさらをならべなければなりません" },
+        { type: "nakutemo", ru: "Можно не расставлять тарелки.", kanji: "お皿を並べなくてもいいです", kana: "おさらをならべなくてもいいです" }
+      ]},
+      { id: 84, nounK: "大人", nounR: "おとな", nounT: "взрослый", verbK: "なる", verbR: "なる", verbT: "становиться", forms: [
+        { type: "nai", ru: "Не становиться взрослым.", kanji: "大人にならない", kana: "おとなにならない" },
+        { type: "naide_kudasai", ru: "Не надо становиться взрослым, пожалуйста.", kanji: "大人にならないでください", kana: "おとなにならないでください" },
+        { type: "nakereba", ru: "Нужно обязательно стать взрослым.", kanji: "大人にならなければなりません", kana: "おとなにならなければなりません" },
+        { type: "nakutemo", ru: "Можно не становиться взрослым.", kanji: "大人にならなくてもいいです", kana: "おとなにならなくてもいいです" }
+      ]},
+      { id: 85, nounK: "靴", nounR: "くつ", nounT: "обувь", verbK: "脱ぐ", verbR: "ぬぐ", verbT: "снимать одежду", forms: [
+        { type: "nai", ru: "Не снимать обувь.", kanji: "靴を脱がない", kana: "くつをぬがない" },
+        { type: "naide_kudasai", ru: "Не надо снимать обувь, пожалуйста.", kanji: "靴を脱がないでください", kana: "くつをぬがないでください" },
+        { type: "nakereba", ru: "Нужно обязательно снять обувь.", kanji: "靴を脱がなければなりません", kana: "くつをぬがなければなりません" },
+        { type: "nakutemo", ru: "Можно не снимать обувь.", kanji: "靴を脱がなくてもいいです", kana: "くつをぬがなくてもいいです" }
+      ]},
+      { id: 86, nounK: "ベッド", nounR: "ベッド", nounT: "кровать", verbK: "寝る", verbR: "ねる", verbT: "спать", forms: [
+        { type: "nai", ru: "Не спать в кровати.", kanji: "ベッドで寝ない", kana: "ベッドでねない" },
+        { type: "naide_kudasai", ru: "Не надо спать в кровати, пожалуйста.", kanji: "ベッドで寝ないでください", kana: "ベッドでねないでください" },
+        { type: "nakereba", ru: "Нужно обязательно поспать в кровати.", kanji: "ベッドで寝なければなりません", kana: "ベッドでねなければなりません" },
+        { type: "nakutemo", ru: "Можно не спать в кровати.", kanji: "ベッドで寝なくてもいいです", kana: "ベッドでねなくてもいいです" }
+      ]},
+      { id: 87, nounK: "山", nounR: "やま", nounT: "гора", verbK: "登る", verbR: "のぼる", verbT: "подниматься", forms: [
+        { type: "nai", ru: "Не подниматься на гору.", kanji: "山に登らない", kana: "やまにのぼらない" },
+        { type: "naide_kudasai", ru: "Не надо подниматься на гору, пожалуйста.", kanji: "山に登らないでください", kana: "やまにのぼらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно подняться на гору.", kanji: "山に登らなければなりません", kana: "やまにのぼらなければなりません" },
+        { type: "nakutemo", ru: "Можно не подниматься на гору.", kanji: "山に登らなくてもいいです", kana: "やまにのぼらなくてもいいです" }
+      ]},
+      { id: 88, nounK: "お茶", nounR: "おちゃ", nounT: "чай", verbK: "飲む", verbR: "のむ", verbT: "пить", forms: [
+        { type: "nai", ru: "Не пить чай.", kanji: "お茶を飲まない", kana: "おちゃをのまない" },
+        { type: "naide_kudasai", ru: "Не надо пить чай, пожалуйста.", kanji: "お茶を飲まないでください", kana: "おちゃをのまないでください" },
+        { type: "nakereba", ru: "Нужно обязательно выпить чай.", kanji: "お茶を飲まなければなりません", kana: "おちゃをのまなければなりません" },
+        { type: "nakutemo", ru: "Можно не пить чай.", kanji: "お茶を飲まなくてもいいです", kana: "おちゃをのまなくてもいいです" }
+      ]},
+      { id: 89, nounK: "電車", nounR: "でんしゃ", nounT: "поезд", verbK: "乗る", verbR: "のる", verbT: "садиться в транспорт", forms: [
+        { type: "nai", ru: "Не садиться на поезд.", kanji: "電車に乗らない", kana: "でんしゃにのらない" },
+        { type: "naide_kudasai", ru: "Не надо садиться на поезд, пожалуйста.", kanji: "電車に乗らないでください", kana: "でんしゃにのらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно сесть на поезд.", kanji: "電車に乗らなければなりません", kana: "でんしゃにのらなければなりません" },
+        { type: "nakutemo", ru: "Можно не садиться на поезд.", kanji: "電車に乗らなくてもいいです", kana: "でんしゃにのらなくてもいいです" }
+      ]},
+      { id: 90, nounK: "教室", nounR: "きょうしつ", nounT: "класс", verbK: "入る", verbR: "はいる", verbT: "входить", forms: [
+        { type: "nai", ru: "Не входить в класс.", kanji: "教室に入らない", kana: "きょうしつにはいらない" },
+        { type: "naide_kudasai", ru: "Не надо входить в класс, пожалуйста.", kanji: "教室に入らないでください", kana: "きょうしつにはいらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно войти в класс.", kanji: "教室に入らなければなりません", kana: "きょうしつにはいらなければなりません" },
+        { type: "nakutemo", ru: "Можно не входить в класс.", kanji: "教室に入らなくてもいいです", kana: "きょうしつにはいらなくてもいいです" }
+      ]},
+      { id: 91, nounK: "靴下", nounR: "くつした", nounT: "носок", verbK: "履く", verbR: "はく", verbT: "надевать обувь", forms: [
+        { type: "nai", ru: "Не надевать носки.", kanji: "靴下を履かない", kana: "くつしたをはかない" },
+        { type: "naide_kudasai", ru: "Не надо надевать носки, пожалуйста.", kanji: "靴下を履かないでください", kana: "くつしたをはかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно надеть носки.", kanji: "靴下を履かなければなりません", kana: "くつしたをはかなければなりません" },
+        { type: "nakutemo", ru: "Можно не надевать носки.", kanji: "靴下を履かなくてもいいです", kana: "くつしたをはかなくてもいいです" }
+      ]},
+      { id: 92, nounK: "川沿い", nounR: "かわぞい", nounT: "река", verbK: "走る", verbR: "はしる", verbT: "бежать", forms: [
+        { type: "nai", ru: "Не бежать вдоль реки.", kanji: "川沿いを走らない", kana: "かわぞいをはしらない" },
+        { type: "naide_kudasai", ru: "Не надо бежать вдоль реки, пожалуйста.", kanji: "川沿いを走らないでください", kana: "かわぞいをはしらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно бежать вдоль реки.", kanji: "川沿いを走らなければなりません", kana: "かわぞいをはしらなければなりません" },
+        { type: "nakutemo", ru: "Можно не бежать вдоль реки.", kanji: "川沿いを走らなくてもいいです", kana: "かわぞいをはしらなくてもいいです" }
+      ]},
+      { id: 93, nounK: "レストラン", nounR: "レストラン", nounT: "ресторан", verbK: "働く", verbR: "はたらく", verbT: "работать", forms: [
+        { type: "nai", ru: "Не работать в ресторане.", kanji: "レストランで働かない", kana: "レストランではたらかない" },
+        { type: "naide_kudasai", ru: "Не надо работать в ресторане, пожалуйста.", kanji: "レストランで働かないでください", kana: "レストランではたらかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно работать в ресторане.", kanji: "レストランで働かなければなりません", kana: "レストランではたらかなければなりません" },
+        { type: "nakutemo", ru: "Можно не работать в ресторане.", kanji: "レストランで働かなくてもいいです", kana: "レストランではたらかなくてもいいです" }
+      ]},
+      { id: 94, nounK: "英語", nounR: "えいご", nounT: "английский язык", verbK: "話す", verbR: "はなす", verbT: "говорить", forms: [
+        { type: "nai", ru: "Не говорить по-английски.", kanji: "英語を話さない", kana: "えいごをはなさない" },
+        { type: "naide_kudasai", ru: "Не надо говорить по-английски, пожалуйста.", kanji: "英語を話さないでください", kana: "えいごをはなさないでください" },
+        { type: "nakereba", ru: "Нужно обязательно говорить по-английски.", kanji: "英語を話さなければなりません", kana: "えいごをはなさなければなりません" },
+        { type: "nakutemo", ru: "Можно не говорить по-английски.", kanji: "英語を話さなくてもいいです", kana: "えいごをはなさなくてもいいです" }
+      ]},
+      { id: 95, nounK: "切手", nounR: "きって", nounT: "марка", verbK: "貼る", verbR: "はる", verbT: "наклеивать", forms: [
+        { type: "nai", ru: "Не наклеивать марку.", kanji: "切手を貼らない", kana: "きってをはらない" },
+        { type: "naide_kudasai", ru: "Не надо наклеивать марку, пожалуйста.", kanji: "切手を貼らないでください", kana: "きってをはらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно наклеить марку.", kanji: "切手を貼らなければなりません", kana: "きってをはらなければなりません" },
+        { type: "nakutemo", ru: "Можно не наклеивать марку.", kanji: "切手を貼らなくてもいいです", kana: "きってをはらなくてもいいです" }
+      ]},
+      { id: 96, nounK: "天気", nounR: "てんき", nounT: "погода", verbK: "晴れる", verbR: "はれる", verbT: "проясняться", forms: [
+        { type: "nai", ru: "Погода не проясняется.", kanji: "天気が晴れない", kana: "てんきがはれない" },
+        { type: "naide_kudasai", ru: "Не надо прояснять погоду, пожалуйста.", kanji: "天気が晴れないでください", kana: "てんきがはれないでください" },
+        { type: "nakereba", ru: "Нужно обязательно дать погоде проясниться.", kanji: "天気が晴れなければなりません", kana: "てんきがはれなければなりません" },
+        { type: "nakutemo", ru: "Можно не прояснять погоду.", kanji: "天気が晴れなくてもいいです", kana: "てんきがはれなくてもいいです" }
+      ]},
+      { id: 97, nounK: "風邪", nounR: "かぜ", nounT: "простуда", verbK: "引く", verbR: "ひく", verbT: "простужаться", forms: [
+        { type: "nai", ru: "Не простужаться.", kanji: "風邪を引かない", kana: "かぜをひかない" },
+        { type: "naide_kudasai", ru: "Не надо простужаться, пожалуйста.", kanji: "風邪を引かないでください", kana: "かぜをひかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно простудиться.", kanji: "風邪を引かなければなりません", kana: "かぜをひかなければなりません" },
+        { type: "nakutemo", ru: "Можно не простужаться.", kanji: "風邪を引かなくてもいいです", kana: "かぜをひかなくてもいいです" }
+      ]},
+      { id: 98, nounK: "ピアノ", nounR: "ピアノ", nounT: "пианино", verbK: "弾く", verbR: "ひく", verbT: "играть на инструменте", forms: [
+        { type: "nai", ru: "Не играть на пианино.", kanji: "ピアノを弾かない", kana: "ピアノをひかない" },
+        { type: "naide_kudasai", ru: "Не надо играть на пианино, пожалуйста.", kanji: "ピアノを弾かないでください", kana: "ピアノをひかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно играть на пианино.", kanji: "ピアノを弾かなければなりません", kana: "ピアノをひかなければなりません" },
+        { type: "nakutemo", ru: "Можно не играть на пианино.", kanji: "ピアノを弾かなくてもいいです", kana: "ピアノをひかなくてもいいです" }
+      ]},
+      { id: 99, nounK: "風", nounR: "かぜ", nounT: "ветер", verbK: "吹く", verbR: "ふく", verbT: "дуть", forms: [
+        { type: "nai", ru: "Ветер не дует.", kanji: "風が吹かない", kana: "かぜがふかない" },
+        { type: "naide_kudasai", ru: "Не надо давать дуть ветру, пожалуйста.", kanji: "風が吹かないでください", kana: "かぜがふかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно дать ветру подуть.", kanji: "風が吹かなければなりません", kana: "かぜがふかなければなりません" },
+        { type: "nakutemo", ru: "Можно не давать дуть ветру.", kanji: "風が吹かなくてもいいです", kana: "かぜがふかなくてもいいです" }
+      ]},
+      { id: 100, nounK: "雨", nounR: "あめ", nounT: "дождь", verbK: "降る", verbR: "ふる", verbT: "идти (об осадках)", forms: [
+        { type: "nai", ru: "Дождь не идёт (об осадках).", kanji: "雨が降らない", kana: "あめがふらない" },
+        { type: "naide_kudasai", ru: "Не надо давать идти дождю, пожалуйста.", kanji: "雨が降らないでください", kana: "あめがふらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно дать дождю пойти.", kanji: "雨が降らなければなりません", kana: "あめがふらなければなりません" },
+        { type: "nakutemo", ru: "Можно не давать идти дождю.", kanji: "雨が降らなくてもいいです", kana: "あめがふらなくてもいいです" }
+      ]},
+      { id: 101, nounK: "図書館", nounR: "としょかん", nounT: "библиотека", verbK: "勉強する", verbR: "べんきょうする", verbT: "учиться", forms: [
+        { type: "nai", ru: "Не учиться в библиотеке.", kanji: "図書館で勉強しない", kana: "としょかんでべんきょうしない" },
+        { type: "naide_kudasai", ru: "Не надо учиться в библиотеке, пожалуйста.", kanji: "図書館で勉強しないでください", kana: "としょかんでべんきょうしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно учиться в библиотеке.", kanji: "図書館で勉強しなければなりません", kana: "としょかんでべんきょうしなければなりません" },
+        { type: "nakutemo", ru: "Можно не учиться в библиотеке.", kanji: "図書館で勉強しなくてもいいです", kana: "としょかんでべんきょうしなくてもいいです" }
+      ]},
+      { id: 102, nounK: "角", nounR: "かど", nounT: "угол", verbK: "曲がる", verbR: "まがる", verbT: "поворачивать", forms: [
+        { type: "nai", ru: "Не поворачивать на углу.", kanji: "角を曲がらない", kana: "かどをまがらない" },
+        { type: "naide_kudasai", ru: "Не надо поворачивать на углу, пожалуйста.", kanji: "角を曲がらないでください", kana: "かどをまがらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно повернуть на углу.", kanji: "角を曲がらなければなりません", kana: "かどをまがらなければなりません" },
+        { type: "nakutemo", ru: "Можно не поворачивать на углу.", kanji: "角を曲がらなくてもいいです", kana: "かどをまがらなくてもいいです" }
+      ]},
+      { id: 103, nounK: "タクシー", nounR: "タクシー", nounT: "такси", verbK: "待つ", verbR: "まつ", verbT: "ждать", forms: [
+        { type: "nai", ru: "Не ждать такси.", kanji: "タクシーを待たない", kana: "タクシーをまたない" },
+        { type: "naide_kudasai", ru: "Не надо ждать такси, пожалуйста.", kanji: "タクシーを待たないでください", kana: "タクシーをまたないでください" },
+        { type: "nakereba", ru: "Нужно обязательно подождать такси.", kanji: "タクシーを待たなければなりません", kana: "タクシーをまたなければなりません" },
+        { type: "nakutemo", ru: "Можно не ждать такси.", kanji: "タクシーを待たなくてもいいです", kana: "タクシーをまたなくてもいいです" }
+      ]},
+      { id: 104, nounK: "歯", nounR: "は", nounT: "зуб", verbK: "磨く", verbR: "みがく", verbT: "чистить", forms: [
+        { type: "nai", ru: "Не чистить зубы.", kanji: "歯を磨かない", kana: "はをみがかない" },
+        { type: "naide_kudasai", ru: "Не надо чистить зубы, пожалуйста.", kanji: "歯を磨かないでください", kana: "はをみがかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно почистить зубы.", kanji: "歯を磨かなければなりません", kana: "はをみがかなければなりません" },
+        { type: "nakutemo", ru: "Можно не чистить зубы.", kanji: "歯を磨かなくてもいいです", kana: "はをみがかなくてもいいです" }
+      ]},
+      { id: 105, nounK: "絵", nounR: "え", nounT: "картина", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "nai", ru: "Не показывать картину.", kanji: "絵を見せない", kana: "えをみせない" },
+        { type: "naide_kudasai", ru: "Не надо показывать картину, пожалуйста.", kanji: "絵を見せないでください", kana: "えをみせないでください" },
+        { type: "nakereba", ru: "Нужно обязательно показать картину.", kanji: "絵を見せなければなりません", kana: "えをみせなければなりません" },
+        { type: "nakutemo", ru: "Можно не показывать картину.", kanji: "絵を見せなくてもいいです", kana: "えをみせなくてもいいです" }
+      ]},
+      { id: 106, nounK: "映画", nounR: "えいが", nounT: "фильм", verbK: "見る", verbR: "みる", verbT: "смотреть", forms: [
+        { type: "nai", ru: "Не смотреть фильм.", kanji: "映画を見ない", kana: "えいがをみない" },
+        { type: "naide_kudasai", ru: "Не надо смотреть фильм, пожалуйста.", kanji: "映画を見ないでください", kana: "えいがをみないでください" },
+        { type: "nakereba", ru: "Нужно обязательно посмотреть фильм.", kanji: "映画を見なければなりません", kana: "えいがをみなければなりません" },
+        { type: "nakutemo", ru: "Можно не смотреть фильм.", kanji: "映画を見なくてもいいです", kana: "えいがをみなくてもいいです" }
+      ]},
+      { id: 107, nounK: "荷物", nounR: "にもつ", nounT: "багаж", verbK: "持つ", verbR: "もつ", verbT: "держать", forms: [
+        { type: "nai", ru: "Не держать багаж.", kanji: "荷物を持たない", kana: "にもつをもたない" },
+        { type: "naide_kudasai", ru: "Не надо держать багаж, пожалуйста.", kanji: "荷物を持たないでください", kana: "にもつをもたないでください" },
+        { type: "nakereba", ru: "Нужно обязательно нести багаж.", kanji: "荷物を持たなければなりません", kana: "にもつをもたなければなりません" },
+        { type: "nakutemo", ru: "Можно не держать багаж.", kanji: "荷物を持たなくてもいいです", kana: "にもつをもたなくてもいいです" }
+      ]},
+      { id: 108, nounK: "先輩", nounR: "せんぱい", nounT: "старший товарищ", verbK: "呼ぶ", verbR: "よぶ", verbT: "звать", forms: [
+        { type: "nai", ru: "Не звать старшего товарища.", kanji: "先輩を呼ばない", kana: "せんぱいをよばない" },
+        { type: "naide_kudasai", ru: "Не надо звать старшего товарища, пожалуйста.", kanji: "先輩を呼ばないでください", kana: "せんぱいをよばないでください" },
+        { type: "nakereba", ru: "Нужно обязательно позвать старшего товарища.", kanji: "先輩を呼ばなければなりません", kana: "せんぱいをよばなければなりません" },
+        { type: "nakutemo", ru: "Можно не звать старшего товарища.", kanji: "先輩を呼ばなくてもいいです", kana: "せんぱいをよばなくてもいいです" }
+      ]},
+      { id: 109, nounK: "雑誌", nounR: "ざっし", nounT: "журнал", verbK: "読む", verbR: "よむ", verbT: "читать", forms: [
+        { type: "nai", ru: "Не читать журнал.", kanji: "雑誌を読まない", kana: "ざっしをよまない" },
+        { type: "naide_kudasai", ru: "Не надо читать журнал, пожалуйста.", kanji: "雑誌を読まないでください", kana: "ざっしをよまないでください" },
+        { type: "nakereba", ru: "Нужно обязательно почитать журнал.", kanji: "雑誌を読まなければなりません", kana: "ざっしをよまなければなりません" },
+        { type: "nakutemo", ru: "Можно не читать журнал.", kanji: "雑誌を読まなくてもいいです", kana: "ざっしをよまなくてもいいです" }
+      ]},
+      { id: 110, nounK: "外国", nounR: "がいこく", nounT: "заграница", verbK: "旅行する", verbR: "りょこうする", verbT: "путешествовать", forms: [
+        { type: "nai", ru: "Не путешествовать за границей.", kanji: "外国を旅行しない", kana: "がいこくをりょこうしない" },
+        { type: "naide_kudasai", ru: "Не надо путешествовать за границей, пожалуйста.", kanji: "外国を旅行しないでください", kana: "がいこくをりょこうしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно путешествовать за границей.", kanji: "外国を旅行しなければなりません", kana: "がいこくをりょこうしなければなりません" },
+        { type: "nakutemo", ru: "Можно не путешествовать за границей.", kanji: "外国を旅行しなくてもいいです", kana: "がいこくをりょこうしなくてもいいです" }
+      ]},
+      { id: 111, nounK: "スポーツ", nounR: "スポーツ", nounT: "спорт", verbK: "練習する", verbR: "れんしゅうする", verbT: "тренироваться", forms: [
+        { type: "nai", ru: "Не тренироваться в спорте.", kanji: "スポーツを練習しない", kana: "スポーツをれんしゅうしない" },
+        { type: "naide_kudasai", ru: "Не надо тренироваться в спорте, пожалуйста.", kanji: "スポーツを練習しないでください", kana: "スポーツをれんしゅうしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно тренироваться в спорте.", kanji: "スポーツを練習しなければなりません", kana: "スポーツをれんしゅうしなければなりません" },
+        { type: "nakutemo", ru: "Можно не тренироваться в спорте.", kanji: "スポーツを練習しなくてもいいです", kana: "スポーツをれんしゅうしなくてもいいです" }
+      ]},
+      { id: 112, nounK: "意味", nounR: "いみ", nounT: "смысл", verbK: "分かる", verbR: "わかる", verbT: "понимать", forms: [
+        { type: "nai", ru: "Не понимать смысл.", kanji: "意味が分からない", kana: "いみがわからない" },
+        { type: "naide_kudasai", ru: "Не надо понимать смысл, пожалуйста.", kanji: "意味が分からないでください", kana: "いみがわからないでください" },
+        { type: "nakereba", ru: "Нужно обязательно понять смысл.", kanji: "意味が分からなければなりません", kana: "いみがわからなければなりません" },
+        { type: "nakutemo", ru: "Можно не понимать смысл.", kanji: "意味が分からなくてもいいです", kana: "いみがわからなくてもいいです" }
+      ]},
+      { id: 113, nounK: "約束", nounR: "やくそく", nounT: "обещание", verbK: "忘れる", verbR: "わすれる", verbT: "забывать", forms: [
+        { type: "nai", ru: "Не забывать обещание.", kanji: "約束を忘れない", kana: "やくそくをわすれない" },
+        { type: "naide_kudasai", ru: "Не надо забывать обещание, пожалуйста.", kanji: "約束を忘れないでください", kana: "やくそくをわすれないでください" },
+        { type: "nakereba", ru: "Нужно обязательно забыть обещание.", kanji: "約束を忘れなければなりません", kana: "やくそくをわすれなければなりません" },
+        { type: "nakutemo", ru: "Можно не забывать обещание.", kanji: "約束を忘れなくてもいいです", kana: "やくそくをわすれなくてもいいです" }
+      ]},
+      { id: 114, nounK: "切符", nounR: "きっぷ", nounT: "билет", verbK: "渡す", verbR: "わたす", verbT: "передавать", forms: [
+        { type: "nai", ru: "Не передавать билет.", kanji: "切符を渡さない", kana: "きっぷをわたさない" },
+        { type: "naide_kudasai", ru: "Не надо передавать билет, пожалуйста.", kanji: "切符を渡さないでください", kana: "きっぷをわたさないでください" },
+        { type: "nakereba", ru: "Нужно обязательно передать билет.", kanji: "切符を渡さなければなりません", kana: "きっぷをわたさなければなりません" },
+        { type: "nakutemo", ru: "Можно не передавать билет.", kanji: "切符を渡さなくてもいいです", kana: "きっぷをわたさなくてもいいです" }
+      ]},
+      { id: 115, nounK: "橋", nounR: "はし", nounT: "мост", verbK: "渡る", verbR: "わたる", verbT: "переходить", forms: [
+        { type: "nai", ru: "Не переходить мост.", kanji: "橋を渡らない", kana: "はしをわたらない" },
+        { type: "naide_kudasai", ru: "Не надо переходить мост, пожалуйста.", kanji: "橋を渡らないでください", kana: "はしをわたらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно перейти мост.", kanji: "橋を渡らなければなりません", kana: "はしをわたらなければなりません" },
+        { type: "nakutemo", ru: "Можно не переходить мост.", kanji: "橋を渡らなくてもいいです", kana: "はしをわたらなくてもいいです" }
+      ]},
+      { id: 116, nounK: "子供", nounR: "こども", nounT: "ребёнок", verbK: "教える", verbR: "おしえる", verbT: "обучать", forms: [
+        { type: "nai", ru: "Не обучать ребёнка.", kanji: "子供に教えない", kana: "こどもにおしえない" },
+        { type: "naide_kudasai", ru: "Не надо обучать ребёнка, пожалуйста.", kanji: "子供に教えないでください", kana: "こどもにおしえないでください" },
+        { type: "nakereba", ru: "Нужно обязательно обучить ребёнка.", kanji: "子供に教えなければなりません", kana: "こどもにおしえなければなりません" },
+        { type: "nakutemo", ru: "Можно не обучать ребёнка.", kanji: "子供に教えなくてもいいです", kana: "こどもにおしえなくてもいいです" }
+      ]},
+      { id: 117, nounK: "試験", nounR: "しけん", nounT: "экзамен", verbK: "始まる", verbR: "はじまる", verbT: "начинаться", forms: [
+        { type: "nai", ru: "Экзамен не начинается.", kanji: "試験が始まらない", kana: "しけんがはじまらない" },
+        { type: "naide_kudasai", ru: "Не надо начинать экзамен, пожалуйста.", kanji: "試験が始まらないでください", kana: "しけんがはじまらないでください" },
+        { type: "nakereba", ru: "Нужно обязательно начать экзамен.", kanji: "試験が始まらなければなりません", kana: "しけんがはじまらなければなりません" },
+        { type: "nakutemo", ru: "Можно не начинать экзамен.", kanji: "試験が始まらなくてもいいです", kana: "しけんがはじまらなくてもいいです" }
+      ]},
+      { id: 118, nounK: "勉強", nounR: "べんきょう", nounT: "учёба", verbK: "始める", verbR: "はじめる", verbT: "начинать", forms: [
+        { type: "nai", ru: "Не начинать учёбу.", kanji: "勉強を始めない", kana: "べんきょうをはじめない" },
+        { type: "naide_kudasai", ru: "Не надо начинать учёбу, пожалуйста.", kanji: "勉強を始めないでください", kana: "べんきょうをはじめないでください" },
+        { type: "nakereba", ru: "Нужно обязательно начать учёбу.", kanji: "勉強を始めなければなりません", kana: "べんきょうをはじめなければなりません" },
+        { type: "nakutemo", ru: "Можно не начинать учёбу.", kanji: "勉強を始めなくてもいいです", kana: "べんきょうをはじめなくてもいいです" }
+      ]},
+      { id: 119, nounK: "お土産", nounR: "おみやげ", nounT: "сувенир", verbK: "もらう", verbR: "もらう", verbT: "получать", forms: [
+        { type: "nai", ru: "Не получать сувенир.", kanji: "お土産をもらわない", kana: "おみやげをもらわない" },
+        { type: "naide_kudasai", ru: "Не надо получать сувенир, пожалуйста.", kanji: "お土産をもらわないでください", kana: "おみやげをもらわないでください" },
+        { type: "nakereba", ru: "Нужно обязательно получить сувенир.", kanji: "お土産をもらわなければなりません", kana: "おみやげをもらわなければなりません" },
+        { type: "nakutemo", ru: "Можно не получать сувенир.", kanji: "お土産をもらわなくてもいいです", kana: "おみやげをもらわなくてもいいです" }
+      ]},
+      { id: 120, nounK: "お菓子", nounR: "おかし", nounT: "сладости", verbK: "くれる", verbR: "くれる", verbT: "давать (мне)", forms: [
+        { type: "nai", ru: "Не давать (мне) сладости.", kanji: "お菓子をくれない", kana: "おかしをくれない" },
+        { type: "naide_kudasai", ru: "Не надо давать сладости, пожалуйста.", kanji: "お菓子をくれないでください", kana: "おかしをくれないでください" },
+        { type: "nakereba", ru: "Нужно обязательно угостить сладостями.", kanji: "お菓子をくれなければなりません", kana: "おかしをくれなければなりません" },
+        { type: "nakutemo", ru: "Можно не давать сладости.", kanji: "お菓子をくれなくてもいいです", kana: "おかしをくれなくてもいいです" }
+      ]},
+      { id: 121, nounK: "女の子", nounR: "おんなのこ", nounT: "девочка", verbK: "泣く", verbR: "なく", verbT: "плакать", forms: [
+        { type: "nai", ru: "Девочка не плачет.", kanji: "女の子が泣かない", kana: "おんなのこがなかない" },
+        { type: "naide_kudasai", ru: "Девочка, пожалуйста, не плачь.", kanji: "女の子が泣かないでください", kana: "おんなのこがなかないでください" },
+        { type: "nakereba", ru: "Нужно обязательно девочке поплакать.", kanji: "女の子が泣かなければなりません", kana: "おんなのこがなかなければなりません" },
+        { type: "nakutemo", ru: "Можно не давать девочке плакать.", kanji: "女の子が泣かなくてもいいです", kana: "おんなのこがなかなくてもいいです" }
+      ]},
+      { id: 122, nounK: "地図", nounR: "ちず", nounT: "карта", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "nai", ru: "Не показывать карту.", kanji: "地図を見せない", kana: "ちずをみせない" },
+        { type: "naide_kudasai", ru: "Не надо показывать карту, пожалуйста.", kanji: "地図を見せないでください", kana: "ちずをみせないでください" },
+        { type: "nakereba", ru: "Нужно обязательно показать карту.", kanji: "地図を見せなければなりません", kana: "ちずをみせなければなりません" },
+        { type: "nakutemo", ru: "Можно не показывать карту.", kanji: "地図を見せなくてもいいです", kana: "ちずをみせなくてもいいです" }
+      ]},
+      { id: 123, nounK: "学生", nounR: "がくせい", nounT: "студент", verbK: "テストする", verbR: "テストする", verbT: "тестировать", forms: [
+        { type: "nai", ru: "Не тестировать студентов.", kanji: "学生をテストしない", kana: "がくせいをテストしない" },
+        { type: "naide_kudasai", ru: "Не надо тестировать студентов, пожалуйста.", kanji: "学生をテストしないでください", kana: "がくせいをテストしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно протестировать студентов.", kanji: "学生をテストしなければなりません", kana: "がくせいをテストしなければなりません" },
+        { type: "nakutemo", ru: "Можно не тестировать студентов.", kanji: "学生をテストしなくてもいいです", kana: "がくせいをテストしなくてもいいです" }
+      ]},
+      { id: 124, nounK: "パーティー", nounR: "パーティー", nounT: "вечеринка", verbK: "する", verbR: "する", verbT: "устраивать", forms: [
+        { type: "nai", ru: "Не устраивать вечеринку.", kanji: "パーティーをしない", kana: "パーティーをしない" },
+        { type: "naide_kudasai", ru: "Не надо устраивать вечеринку, пожалуйста.", kanji: "パーティーをしないでください", kana: "パーティーをしないでください" },
+        { type: "nakereba", ru: "Нужно обязательно устроить вечеринку.", kanji: "パーティーをしなければなりません", kana: "パーティーをしなければなりません" },
+        { type: "nakutemo", ru: "Можно не устраивать вечеринку.", kanji: "パーティーをしなくてもいいです", kana: "パーティーをしなくてもいいです" }
+      ]}
+    ];
+
+    /* ==========================================================================
+       ЛОГИКА СОСТОЯНИЯ 4 УРОВНЯ
+       ========================================================================== */
+    const STORAGE_KEY = "jp_app_save_level_4";
+
+    let state = {
+      mode: "level",
+      currentLevel: 4,
+      wordIndex: 0,
+      formSubIndex: 0,
+      playlist: [],
+      currentFormOrder: [0, 1, 2, 3],
+      errors: []
+    };
+
+    let isAnswerChecked = false;
+    let lastSpokenKana = "";
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Storage error", e);
+      }
+      updateErrorsBadge();
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            state = Object.assign(state, parsed);
+          }
+        }
+      } catch (e) {
+        console.warn("Resetting corrupt storage");
+      }
+
+      // Принудительно устанавливаем 4 уровень
+      state.currentLevel = 4;
+      if (state.mode !== "errors") {
+        state.mode = "level";
+      }
+
+      if (!Array.isArray(state.playlist) || state.playlist.length !== RAW_LEVEL_4_DATA.length) {
+        resetLevelPlaylist();
+      }
+      if (state.wordIndex < 0 || state.wordIndex >= RAW_LEVEL_4_DATA.length) {
+        state.wordIndex = 0;
+      }
+      if (state.formSubIndex < 0 || state.formSubIndex > 3) {
+        state.formSubIndex = 0;
+      }
+      if (!Array.isArray(state.currentFormOrder) || state.currentFormOrder.length !== 4) {
+        state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+      }
+      if (!Array.isArray(state.errors)) {
+        state.errors = [];
+      }
+    }
+
+    function resetLevelPlaylist() {
+      const indices = RAW_LEVEL_4_DATA.map((_, i) => i);
+      state.playlist = shuffleArray(indices);
+      state.wordIndex = 0;
+      state.formSubIndex = 0;
+      state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+    }
+
+    function confirmReset() {
+      if (confirm("Перемешать и начать 4 уровень с первого слова?")) {
+        resetLevelPlaylist();
+        state.mode = "level";
+        state.currentLevel = 4;
+        saveState();
+        renderScreen();
+      }
+    }
+
+    /* ==========================================================================
+       ОЗВУЧКА WEB SPEECH API
+       ========================================================================== */
+    let jaVoice = null;
+    function initVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      jaVoice = voices.find(v => (v.lang === 'ja-JP' || v.lang === 'ja_JP') && v.name.includes('Kyoko')) 
+             || voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.startsWith('ja')) 
+             || null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      initVoices();
+    }
+
+    function playAudio(kanaText) {
+      if (!('speechSynthesis' in window) || !kanaText) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(kanaText);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.88;
+        if (jaVoice) utterance.voice = jaVoice;
+        window.speechSynthesis.speak(utterance);
+        lastSpokenKana = kanaText;
+      } catch(e) {
+        console.warn("Audio warning", e);
+      }
+    }
+
+    function replayAudio() {
+      if (lastSpokenKana) {
+        playAudio(lastSpokenKana);
+      }
+    }
+
+    /* ==========================================================================
+       РЕНДЕР ЭКРАНА
+       ========================================================================== */
+    function getCurrentTask() {
+      if (state.mode === "errors") {
+        if (!state.errors || state.errors.length === 0) return null;
+        return state.errors[0];
+      }
+
+      if (!state.playlist || state.wordIndex >= state.playlist.length) {
+        return null;
+      }
+
+      const itemIdx = state.playlist[state.wordIndex];
+      const wordObj = RAW_LEVEL_4_DATA[itemIdx];
+      if (!wordObj || !wordObj.forms) return null;
+
+      const formOrder = (state.currentFormOrder && state.currentFormOrder.length === 4) 
+        ? state.currentFormOrder 
+        : [0, 1, 2, 3];
+      const formIdx = formOrder[state.formSubIndex] !== undefined ? formOrder[state.formSubIndex] : 0;
+      const formObj = wordObj.forms[formIdx];
+      if (!formObj) return null;
+
+      return { wordObj, formObj };
+    }
+
+    function renderScreen() {
+      updateErrorsBadge();
+
+      document.querySelectorAll(".nav-pill").forEach(p => {
+        p.classList.remove("active");
+        if (state.mode === "level" && p.innerText.trim() === String(state.currentLevel)) {
+          p.classList.add("active");
+        }
+      });
+      if (state.mode === "errors") {
+        document.getElementById("errorsNavBtn").classList.add("active");
+      }
+
+      const gameCard = document.getElementById("gameCard");
+      const placeholder = document.getElementById("placeholderView");
+      const progressWrap = document.getElementById("progressWrap");
+      const theoryBanner = document.getElementById("theoryBanner");
+
+      if (state.mode === "level" && state.currentLevel !== 4) {
+        gameCard.style.display = "none";
+        progressWrap.style.display = "none";
+        theoryBanner.style.display = "none";
+        placeholder.classList.add("active");
+        document.getElementById("placeholderTitle").innerText = `Уровень ${state.currentLevel}`;
+        return;
+      } else {
+        gameCard.style.display = "flex";
+        progressWrap.style.display = "flex";
+        theoryBanner.style.display = "flex";
+        placeholder.classList.remove("active");
+      }
+
+      isAnswerChecked = false;
+      const input = document.getElementById("userInput");
+      const actionBtn = document.getElementById("actionBtn");
+      const feedback = document.getElementById("feedbackBox");
+      
+      input.value = "";
+      input.readOnly = false;
+      actionBtn.innerText = "Проверить";
+      feedback.className = "feedback-box";
+
+      const task = getCurrentTask();
+
+      if (!task) {
+        if (state.mode === "errors") {
+          alert("🎉 Все ошибки успешно исправлены!");
+          state.mode = "level";
+          saveState();
+          renderScreen();
+          return;
+        } else {
+          alert("🏆 Поздравляем! Все 124 слова 4 уровня пройдены!");
+          resetLevelPlaylist();
+          saveState();
+          renderScreen();
+          return;
+        }
+      }
+
+      // 1. Опорные слова
+      document.getElementById("refNounKanji").innerText = task.wordObj.nounK;
+      document.getElementById("refNounKana").innerText = "- " + task.wordObj.nounR;
+      document.getElementById("refNounTrans").innerText = "- " + task.wordObj.nounT;
+
+      document.getElementById("refVerbKanji").innerText = task.wordObj.verbK;
+      document.getElementById("refVerbKana").innerText = "- " + task.wordObj.verbR;
+      document.getElementById("refVerbTrans").innerText = "- " + task.wordObj.verbT;
+
+      // 2. Вопрос
+      document.getElementById("promptRu").innerText = task.formObj.ru;
+      document.getElementById("modeLabel").innerText = state.mode === "errors" ? "Исправление ошибки" : "Переведите фразу";
+
+      // 3. Прогресс (для 4 форм на слово)
+      if (state.mode === "level") {
+        const total = RAW_LEVEL_4_DATA.length;
+        const currentNum = state.wordIndex + 1;
+        document.getElementById("progressWordLabel").innerText = `Слово ${currentNum} из ${total}`;
+        const pct = Math.round(((state.wordIndex * 4 + state.formSubIndex) / (total * 4)) * 100);
+        document.getElementById("progressPercentLabel").innerText = `${pct}%`;
+        document.getElementById("progressBarFill").style.width = `${pct}%`;
+
+        for (let i = 0; i < 4; i++) {
+          const dot = document.getElementById(`dot${i}`);
+          dot.className = "form-dot";
+          if (i < state.formSubIndex) dot.classList.add("done");
+          else if (i === state.formSubIndex) dot.classList.add("active");
+        }
+      } else {
+        document.getElementById("progressWordLabel").innerText = `Ошибок осталось: ${state.errors.length}`;
+        document.getElementById("progressPercentLabel").innerText = `Ошибки`;
+        document.getElementById("progressBarFill").style.width = `100%`;
+        for (let i = 0; i < 4; i++) {
+          document.getElementById(`dot${i}`).className = "form-dot";
+        }
+      }
+    }
+
+    /* ==========================================================================
+       ПРОВЕРКА ОТВЕТА (ТОЛЬКО КАНДЗИ И ХИРАГАНА)
+       ========================================================================== */
+    function cleanText(str) {
+      return (str || '').replace(/[\s　。、.!,?…-]/g, '').trim();
+    }
+
+    function handleAction() {
+      if (!isAnswerChecked) {
+        checkAnswer();
+      } else {
+        nextQuestion();
+      }
+    }
+
+    function checkAnswer() {
+      const task = getCurrentTask();
+      if (!task) return;
+
+      const input = document.getElementById("userInput");
+      const userVal = cleanText(input.value);
+      if (!userVal) {
+        return;
+      }
+
+      const targetKanji = cleanText(task.formObj.kanji);
+      const targetKana = cleanText(task.formObj.kana);
+
+      const isCorrect = (userVal === targetKanji || userVal === targetKana);
+
+      playAudio(task.formObj.kana);
+
+      const feedback = document.getElementById("feedbackBox");
+      const statusText = document.getElementById("feedbackStatus");
+      const fKanji = document.getElementById("feedbackKanji");
+      const fKana = document.getElementById("feedbackKana");
+
+      fKanji.innerText = task.formObj.kanji;
+      fKana.innerText = task.formObj.kana;
+
+      if (isCorrect) {
+        feedback.className = "feedback-box correct";
+        statusText.innerText = "✓ Правильно!";
+        if (state.mode === "errors") {
+          state.errors.shift();
+        }
+      } else {
+        feedback.className = "feedback-box incorrect";
+        statusText.innerText = "✕ Ошибка";
+        if (state.mode === "level") {
+          const alreadyExists = state.errors.some(e => e.formObj.kanji === task.formObj.kanji);
+          if (!alreadyExists) {
+            state.errors.push(task);
+          }
+        } else if (state.mode === "errors") {
+          state.errors.push(state.errors.shift());
+        }
+      }
+
+      input.readOnly = true;
+      isAnswerChecked = true;
+      document.getElementById("actionBtn").innerText = "Дальше ➔";
+      saveState();
+    }
+
+    function nextQuestion() {
+      if (state.mode === "level") {
+        state.formSubIndex++;
+        if (state.formSubIndex >= 4) {
+          state.formSubIndex = 0;
+          state.wordIndex++;
+          state.currentFormOrder = shuffleArray([0, 1, 2, 3]);
+        }
+      }
+      saveState();
+      renderScreen();
+    }
+
+   /* ==========================================================================
+       НАВИГАЦИЯ И СОБЫТИЯ
+       ========================================================================== */
+    function updateErrorsBadge() {
+      const btn = document.getElementById("errorsNavBtn");
+      if (!btn) return;
+      const count = (state.errors || []).length;
+      btn.innerText = `Ошибки (${count})`;
+      if (count > 0) btn.classList.add("has-errors");
+      else btn.classList.remove("has-errors");
+    }
+
+    function openErrorsTab() {
+      if (!state.errors || state.errors.length === 0) {
+        alert("У вас нет сохранённых ошибок! Отличный результат!");
+        return;
+      }
+      state.mode = "errors";
+      saveState();
+      renderScreen();
+    }
+
+    function switchLevel(lvl) {
+      const levelPages = {
+        1: '1ур.html', 
+        2: '2ур.html',
+        3: '3ур.html',
+        4: '4ур.html',
+        5: '5ур.html',
+        6: '6ур.html',
+        7: '7ур.html'
+      };
+
+      // Если кликнули на другой существующий уровень — переходим в него
+      if (levelPages[lvl] && lvl !== state.currentLevel) {
+        window.location.href = levelPages[lvl];
+        return;
+      }
+
+      state.mode = "level";
+      state.currentLevel = lvl;
+      saveState();
+      renderScreen();
+    }
+
+    function openTheoryModal() {
+      document.getElementById("theoryModal").classList.add("open");
+    }
+    function closeTheoryModal() {
+      document.getElementById("theoryModal").classList.remove("open");
+    }
+
+    // Инициализация при загрузке
+    loadState();
+    renderScreen();
+
+    // Горячие клавиши: Alt + Enter, Cmd + Enter (и Ctrl + Enter)
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && (e.altKey || e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleAction();
+      }
+    });
+  </script>
+</body>
+</html>

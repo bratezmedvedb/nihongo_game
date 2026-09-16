@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Японский тренажёр — 2 Уровень (て-форма)</title>
+  <style>
+    /* ==========================================================================
+       1. ЦВЕТОВАЯ ПАЛИТРА И СТИЛЬ (WARM PAPER MINIMALIST)
+       ========================================================================== */
+    :root {
+      --bg-page: #f4f1ea;
+      --bg-card: #ffffff;
+      --text-main: #2c2c2a;
+      --text-muted: #6b6a63;
+      --text-sub: #9a988f;
+      --border-color: #d3d1c7;
+      --border-light: #e5e2d8;
+      
+      --accent: #d97757;
+      --accent-hover: #c46445;
+
+      --selected-bg: #eeecf0;
+      --selected-border: #7f77dd;
+      --selected-text: #3c3489;
+
+      --success-bg: #eaf3de;
+      --success-border: #97c459;
+      --success-text: #386014;
+
+      --error-bg: #fdf0ee;
+      --error-border: #a32d2d;
+      --error-text: #a32d2d;
+
+      --radius-card: 14px;
+      --radius-pill: 20px;
+      --radius-btn: 10px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px 12px 32px 12px;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+    }
+
+    /* ==========================================================================
+       2. ВЕРХНЯЯ НАВИГАЦИЯ
+       ========================================================================== */
+    .nav-bar {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+      align-items: center;
+    }
+    .nav-bar::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      min-width: 38px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: var(--radius-pill);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+      touch-action: manipulation;
+    }
+
+    .nav-pill.active {
+      background: var(--text-main);
+      color: #ffffff;
+      border-color: var(--text-main);
+    }
+
+    .nav-pill.errors-pill {
+      margin-left: auto;
+      min-width: auto;
+      padding: 0 14px;
+      border-color: var(--border-color);
+    }
+    .nav-pill.errors-pill.has-errors {
+      color: var(--error-border);
+      border-color: var(--error-border);
+      background: #fff6f5;
+    }
+    .nav-pill.errors-pill.active {
+      background: var(--error-border);
+      color: #ffffff;
+    }
+
+    /* ==========================================================================
+       3. ПАНЕЛЬ ТЕОРИИ И ПРОГРЕСС-БАР
+       ========================================================================== */
+    .theory-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 10px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .progress-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-sub);
+    }
+    .progress-bar-bg {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ==========================================================================
+       4. КАРТОЧКА ТРЕНАЖЁРА
+       ========================================================================== */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .target-ref-box {
+      background: var(--bg-page);
+      border-radius: var(--radius-btn);
+      padding: 16px 20px;
+      border: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ref-line {
+      font-size: 18px;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .ref-kanji {
+      font-weight: 700;
+      font-size: 24px;
+    }
+    .ref-kana {
+      color: var(--text-muted);
+      font-size: 18px;
+    }
+    .ref-trans {
+      color: var(--selected-text);
+      font-weight: 600;
+      font-size: 18px;
+    }
+    .form-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+    .form-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border-light);
+    }
+    .form-dot.done { background: var(--success-border); }
+    .form-dot.active { background: var(--accent); }
+
+    .prompt-box {
+      text-align: center;
+      padding: 4px 0;
+    }
+    .prompt-label {
+      font-size: 12px;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    .prompt-text {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.35;
+    }
+
+    .input-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .input-field {
+      width: 100%;
+      height: 48px;
+      background: #faf9f6;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-btn);
+      padding: 0 14px;
+      font-size: 16px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .input-field:focus {
+      border-color: var(--accent);
+      background: #ffffff;
+    }
+    .input-field[readonly] {
+      background: #f0eee6;
+      color: var(--text-muted);
+    }
+
+    .btn-main {
+      height: 46px;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-main:active { background: var(--accent-hover); }
+
+    .feedback-box {
+      display: none;
+      border-radius: var(--radius-btn);
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .feedback-box.correct {
+      display: flex !important;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+    }
+    .feedback-box.incorrect {
+      display: flex !important;
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+    }
+
+    .feedback-status {
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .feedback-box.correct .feedback-status { color: var(--success-text); }
+    .feedback-box.incorrect .feedback-status { color: var(--error-text); }
+
+    .feedback-sentence-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    .feedback-texts {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .feedback-text-kanji {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+    .feedback-text-kana {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .btn-audio-right {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.1s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .btn-audio-right:active { transform: scale(0.90); }
+
+    .placeholder-view {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-card);
+      padding: 40px 20px;
+      text-align: center;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .placeholder-view.active { display: flex; }
+
+    .reset-link {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-sub);
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 8px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(44, 44, 42, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 1000;
+    }
+    .modal-overlay.open {
+      display: flex;
+    }
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: var(--radius-card);
+      border: 1px solid var(--border-color);
+      max-width: 440px;
+      width: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 85vh;
+      overflow-y: auto;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; }
+    .modal-body { font-size: 13px; line-height: 1.5; color: var(--text-muted); }
+    .modal-body strong { color: var(--text-main); }
+    .modal-close-btn {
+      align-self: flex-end;
+      padding: 8px 16px;
+      background: var(--text-main);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      font-size: 13px;
+      touch-action: manipulation;
+    }
+  
+  /* Кнопка возврата в главное меню */
+  .back-to-menu {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+    text-decoration: none;
+    color: #6b6a63;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    background: #fff;
+    border: 1px solid #d3d1c7;
+    border-radius: 20px;
+    margin-bottom: 4px;
+    transition: all 0.2s ease;
+  }
+  .back-to-menu:hover, .back-to-menu:active {
+    background: #2c2c2a;
+    color: #fff;
+    border-color: #2c2c2a;
+  }
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <a href="index.html" class="back-to-menu">← Меню</a>
+    <div class="nav-bar">
+      <button type="button" class="nav-pill" onclick="switchLevel(1)">1</button>
+      <button type="button" class="nav-pill active" onclick="switchLevel(2)">2</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(3)">3</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(4)">4</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(5)">5</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(6)">6</button>
+      <button type="button" class="nav-pill" onclick="switchLevel(7)">7</button>
+      <button type="button" class="nav-pill errors-pill" id="errorsNavBtn" onclick="openErrorsTab()">Ошибки (0)</button>
+    </div>
+
+    <div class="theory-banner" id="theoryBanner" onclick="openTheoryModal()">
+      <span id="theoryBannerText">📖 Теория 2 уровня (て-стиль)</span>
+      <span>➔</span>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-labels">
+        <span id="progressWordLabel">Слово 1 из 124</span>
+        <span id="progressPercentLabel">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+      </div>
+    </div>
+
+    <div class="card" id="gameCard">
+      <div class="target-ref-box">
+        <div class="ref-line">
+          <span class="ref-kanji" id="refNounKanji">友達</span>
+          <span class="ref-kana" id="refNounKana">- ともだち</span>
+          <span class="ref-trans" id="refNounTrans">- друг</span>
+        </div>
+        <div class="ref-line">
+          <span class="ref-kanji" id="refVerbKanji">会う</span>
+          <span class="ref-kana" id="refVerbKana">- あう</span>
+          <span class="ref-trans" id="refVerbTrans">- встречаться</span>
+        </div>
+      </div>
+
+      <!-- 3 точки для 3 форм 2 уровня -->
+      <div class="form-dots">
+        <div class="form-dot" id="dot0"></div>
+        <div class="form-dot" id="dot1"></div>
+        <div class="form-dot" id="dot2"></div>
+      </div>
+
+      <div class="prompt-box">
+        <div class="prompt-label" id="modeLabel">Переведите фразу</div>
+        <div class="prompt-text" id="promptRu">Сейчас встречаюсь с другом.</div>
+      </div>
+
+      <div class="input-wrap">
+        <input 
+          type="text" 
+          id="userInput" 
+          class="input-field" 
+          placeholder="Введите кандзи или хираганой..." 
+          autocomplete="off" 
+          autocorrect="off" 
+          autocapitalize="off" 
+          spellcheck="false"
+        />
+        <button type="button" class="btn-main" id="actionBtn" onclick="handleAction()">Проверить</button>
+      </div>
+
+      <div class="feedback-box" id="feedbackBox">
+        <div class="feedback-status" id="feedbackStatus">✓ Правильно!</div>
+        <div class="feedback-sentence-row">
+          <div class="feedback-texts">
+            <div class="feedback-text-kanji" id="feedbackKanji">友達に会っています</div>
+            <div class="feedback-text-kana" id="feedbackKana">ともだちにあっています</div>
+          </div>
+          <button type="button" class="btn-audio-right" title="Послушать ещё раз" onclick="replayAudio()">🔊</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="placeholder-view" id="placeholderView">
+      <h3 id="placeholderTitle" style="font-size: 18px; color: var(--text-main);">Уровень 3</h3>
+      <p style="font-size: 14px; color: var(--text-muted);">Этот уровень находится в разработке. Вернитесь к Уровню 1 или 2.</p>
+      <button type="button" class="btn-main" style="margin-top: 10px;" onclick="switchLevel(2)">Вернуться к Уровню 2</button>
+    </div>
+
+    <div class="reset-link" onclick="confirmReset()">Начать 2 уровень заново (перемешать)</div>
+  </div>
+
+  <div class="modal-overlay" id="theoryModal" onclick="closeTheoryModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-title">Грамматика 2 Уровня: Конструкции формы て</div>
+      <div class="modal-body">
+        <p><strong>3 ключевые конструкции:</strong></p>
+        <p>1. <strong>〜ています</strong> — Длительное действие / состояние <em>(Делаю сейчас)</em></p>
+        <p>2. <strong>〜てください</strong> — Вежливая просьба <em>(Сделайте, пожалуйста)</em></p>
+        <p>3. <strong>〜てもいいですか</strong> — Разрешение <em>(Можно ли сделать?)</em></p>
+        <br>
+        <p><strong>Правила образования て-формы (3 спр.):</strong></p>
+        <p>• <strong>1 спр.:</strong></p>
+        <p style="padding-left: 12px; margin-top: 2px;">
+          — <code>〜う</code>, <code>〜つ</code>, <code>〜る</code> → меняются на <strong>〜って</strong><br>
+          — <code>〜ぶ</code>, <code>〜む</code>, <code>〜ぬ</code> → меняются на <strong>〜んで</strong><br>
+          — <code>〜く</code> → меняется на <strong>〜いて</strong> <em>(Искл.: 行く → 行って)</em><br>
+          — <code>〜ぐ</code> → меняется на <strong>〜いで</strong><br>
+          — <code>〜す</code> → меняется на <strong>〜して</strong>
+        </p>
+        <p style="margin-top: 6px;">• <strong>2 спр. (-iru / -eru):</strong> Отбросьте финальный слог «る» → добавьте <strong>〜て</strong></p>
+        <p style="margin-top: 6px;">• <strong>3 спр. (исключения):</strong> Изменяется корень:</p>
+        <p style="padding-left: 12px; margin-top: 2px;">
+          — <code>する</code> → <strong>して</strong><br>
+          — <code>来る</code> (くる) → <strong>きて</strong>
+        </p>
+      </div>
+      <button type="button" class="modal-close-btn" onclick="closeTheoryModal()">Понятно</button>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       БАЗА ДАННЫХ 2 УРОВНЯ (124 ГЛАГОЛА ПО 3 ФОРМЫ НА 〜て)
+       ========================================================================== */
+    const RAW_LEVEL_2_DATA = [
+      { id: 1, nounK: "友達", nounR: "ともだち", nounT: "друг", verbK: "会う", verbR: "あう", verbT: "встречаться", forms: [
+        { type: "te_imasu", ru: "Сейчас встречаюсь с другом.", kanji: "友達に会っています", kana: "ともだちにあっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, встречайтесь с другом.", kanji: "友達に会ってください", kana: "ともだちにあってください" },
+        { type: "te_mo_ii", ru: "Можно встретиться с другом?", kanji: "友達に会ってもいいですか", kana: "ともだちにあってもいいですか" }
+      ]},
+      { id: 2, nounK: "ドア", nounR: "ドア", nounT: "дверь", verbK: "開く", verbR: "あく", verbT: "открываться", forms: [
+        { type: "te_imasu", ru: "Сейчас дверь открывается.", kanji: "ドアが開いています", kana: "ドアがあいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть дверь откроется.", kanji: "ドアが開いてください", kana: "ドアがあいてください" },
+        { type: "te_mo_ii", ru: "Можно открыть дверь?", kanji: "ドアが開いてもいいですか", kana: "ドアがあいてもいいですか" }
+      ]},
+      { id: 3, nounK: "窓", nounR: "まど", nounT: "окно", verbK: "開ける", verbR: "あける", verbT: "открывать", forms: [
+        { type: "te_imasu", ru: "Сейчас открываю окно.", kanji: "窓を開けています", kana: "まどをあけています" },
+        { type: "te_kudasai", ru: "Пожалуйста, откройте окно.", kanji: "窓を開けてください", kana: "まどをあけてください" },
+        { type: "te_mo_ii", ru: "Можно открыть окно?", kanji: "窓を開けてもいいですか", kana: "まどをあけてもいいですか" }
+      ]},
+      { id: 4, nounK: "プレゼント", nounR: "プレゼント", nounT: "подарок", verbK: "あげる", verbR: "あげる", verbT: "дарить", forms: [
+        { type: "te_imasu", ru: "Сейчас дарю подарок.", kanji: "プレゼントをあげています", kana: "プレゼントをあげています" },
+        { type: "te_kudasai", ru: "Пожалуйста, подарите подарок.", kanji: "プレゼントをあげてください", kana: "プレゼントをあげてください" },
+        { type: "te_mo_ii", ru: "Можно подарить подарок?", kanji: "プレゼントをあげてもいいですか", kana: "プレゼントをあげてもいいですか" }
+      ]},
+      { id: 5, nounK: "公園", nounR: "こうえん", nounT: "парк", verbK: "遊ぶ", verbR: "あそぶ", verbT: "играть", forms: [
+        { type: "te_imasu", ru: "Сейчас играю в парке.", kanji: "公園で遊んでいます", kana: "こうえんであそんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, поиграйте в парке.", kanji: "公園で遊んでください", kana: "こうえんであそんでください" },
+        { type: "te_mo_ii", ru: "Можно поиграть в парке?", kanji: "公園で遊んでもいいですか", kana: "こうえんであそんでもいいですか" }
+      ]},
+      { id: 6, nounK: "シャワー", nounR: "シャワー", nounT: "душ", verbK: "浴びる", verbR: "あびる", verbT: "принимать", forms: [
+        { type: "te_imasu", ru: "Сейчас принимаю душ.", kanji: "シャワーを浴びています", kana: "シャワーをあびています" },
+        { type: "te_kudasai", ru: "Пожалуйста, примите душ.", kanji: "シャワーを浴びてください", kana: "シャワーをあびてください" },
+        { type: "te_mo_ii", ru: "Можно принять душ?", kanji: "シャワーを浴びてもいいですか", kana: "シャワーをあびてもいいですか" }
+      ]},
+      { id: 7, nounK: "手", nounR: "て", nounT: "рука", verbK: "洗う", verbR: "あらう", verbT: "мыть", forms: [
+        { type: "te_imasu", ru: "Сейчас мою руки.", kanji: "手を洗っています", kana: "てをあらっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, помойте руки.", kanji: "手を洗ってください", kana: "てをあらってください" },
+        { type: "te_mo_ii", ru: "Можно помыть руки?", kanji: "手を洗ってもいいですか", kana: "てをあらってもいいですか" }
+      ]},
+      { id: 8, nounK: "新聞", nounR: "しんぶん", nounT: "газета", verbK: "ある", verbR: "ある", verbT: "иметься", forms: [
+        { type: "te_imasu", ru: "Сейчас есть газета.", kanji: "新聞があっています", kana: "しんぶんがあっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть будет газета.", kanji: "新聞があってください", kana: "しんぶんがあってください" },
+        { type: "te_mo_ii", ru: "Можно взять газету?", kanji: "新聞があってもいいですか", kana: "しんぶんがあってもいいですか" }
+      ]},
+      { id: 9, nounK: "道", nounR: "みち", nounT: "дорога", verbK: "歩く", verbR: "あるく", verbT: "идти пешком", forms: [
+        { type: "te_imasu", ru: "Сейчас иду пешком по дороге.", kanji: "道を歩いています", kana: "みちをあるいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, идите пешком по дороге.", kanji: "道を歩いてください", kana: "みちをあるいてください" },
+        { type: "te_mo_ii", ru: "Можно пройти пешком по дороге?", kanji: "道を歩いてもいいですか", kana: "みちをあるいてもいいですか" }
+      ]},
+      { id: 10, nounK: "名前", nounR: "なまえ", nounT: "имя", verbK: "言う", verbR: "いう", verbT: "говорить", forms: [
+        { type: "te_imasu", ru: "Сейчас называю имя.", kanji: "名前を言っています", kana: "なまえをいっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, назовите имя.", kanji: "名前を言ってください", kana: "なまえをいってください" },
+        { type: "te_mo_ii", ru: "Можно назвать имя?", kanji: "名前を言ってもいいですか", kana: "なまえをいってもいいですか" }
+      ]},
+      { id: 11, nounK: "学校", nounR: "がっこう", nounT: "школа", verbK: "行く", verbR: "いく", verbT: "идти, ехать", forms: [
+        { type: "te_imasu", ru: "Сейчас иду в школу.", kanji: "学校に行っています", kana: "がっこうにいっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, идите в школу.", kanji: "学校に行ってください", kana: "がっこうにいってください" },
+        { type: "te_mo_ii", ru: "Можно сходить в школу?", kanji: "学校に行ってもいいですか", kana: "がっこうにいってもいいですか" }
+      ]},
+      { id: 12, nounK: "猫", nounR: "ねこ", nounT: "кот", verbK: "いる", verbR: "いる", verbT: "находиться", forms: [
+        { type: "te_imasu", ru: "Сейчас есть кот.", kanji: "猫がいています", kana: "ねこがいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть будет кот.", kanji: "猫がいてください", kana: "ねこがいてください" },
+        { type: "te_mo_ii", ru: "Можно взять кота?", kanji: "猫がいてもいいですか", kana: "ねこがいてもいいですか" }
+      ]},
+      { id: 13, nounK: "お金", nounR: "おかね", nounT: "деньги", verbK: "要る", verbR: "いる", verbT: "требоваться", forms: [
+        { type: "te_imasu", ru: "Сейчас нужны деньги.", kanji: "お金が要っています", kana: "おかねがいっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть потребуются деньги.", kanji: "お金が要ってください", kana: "おかねがいってください" },
+        { type: "te_mo_ii", ru: "Можно получить деньги?", kanji: "お金が要ってもいいですか", kana: "おかねがいってもいいですか" }
+      ]},
+      { id: 14, nounK: "かばん", nounR: "かばん", nounT: "сумка", verbK: "入れる", verbR: "いれる", verbT: "класть внутрь", forms: [
+        { type: "te_imasu", ru: "Сейчас кладу в сумку.", kanji: "かばんに入れています", kana: "かばんにいれています" },
+        { type: "te_kudasai", ru: "Пожалуйста, положите в сумку.", kanji: "かばんに入れてください", kana: "かばんにいれてください" },
+        { type: "te_mo_ii", ru: "Можно положить в сумку?", kanji: "かばんに入れてもいいですか", kana: "かばんにいれてもいいですか" }
+      ]},
+      { id: 15, nounK: "歌", nounR: "うた", nounT: "песня", verbK: "歌う", verbR: "うたう", verbT: "петь", forms: [
+        { type: "te_imasu", ru: "Сейчас пою песню.", kanji: "歌を歌っています", kana: "うたをうたっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, спойте песню.", kanji: "歌を歌ってください", kana: "うたをうたってください" },
+        { type: "te_mo_ii", ru: "Можно спеть песню?", kanji: "歌を歌ってもいいですか", kana: "うたをうたってもいいですか" }
+      ]},
+      { id: 16, nounK: "赤ちゃん", nounR: "あかちゃん", nounT: "ребёнок", verbK: "生まれる", verbR: "うまれる", verbT: "рождаться", forms: [
+        { type: "te_imasu", ru: "Сейчас рождается ребёнок.", kanji: "赤ちゃんが生まれています", kana: "あかちゃんがうまれています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть родится ребёнок.", kanji: "赤ちゃんが生まれてください", kana: "あかちゃんがうまれてください" },
+        { type: "te_mo_ii", ru: "Можно родить ребёнка?", kanji: "赤ちゃんが生まれてもいいですか", kana: "あかちゃんがうまれてもいいですか" }
+      ]},
+      { id: 17, nounK: "りんご", nounR: "りんご", nounT: "яблоко", verbK: "売る", verbR: "うる", verbT: "продавать", forms: [
+        { type: "te_imasu", ru: "Сейчас продаю яблоки.", kanji: "りんごを売っています", kana: "りんごをうっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, продайте яблоки.", kanji: "りんごを売ってください", kana: "りんごをうってください" },
+        { type: "te_mo_ii", ru: "Можно продать яблоки?", kanji: "りんごを売ってもいいですか", kana: "りんごをうってもいいですか" }
+      ]},
+      { id: 18, nounK: "朝", nounR: "あさ", nounT: "утро", verbK: "起きる", verbR: "おきる", verbT: "просыпаться", forms: [
+        { type: "te_imasu", ru: "Сейчас просыпаюсь рано утром.", kanji: "朝早く起きています", kana: "あさはやくおきています" },
+        { type: "te_kudasai", ru: "Пожалуйста, просыпайтесь рано утром.", kanji: "朝早く起きてください", kana: "あさはやくおきてください" },
+        { type: "te_mo_ii", ru: "Можно проснуться рано утром?", kanji: "朝早く起きてもいいですか", kana: "あさはやくおきてもいいですか" }
+      ]},
+      { id: 19, nounK: "机", nounR: "つくえ", nounT: "стол", verbK: "置く", verbR: "おく", verbT: "ставить, класть", forms: [
+        { type: "te_imasu", ru: "Сейчас ставлю на стол.", kanji: "机の上に置いています", kana: "つくえのうえにおいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, поставьте на стол.", kanji: "机の上に置いてください", kana: "つくえのうえにおいてください" },
+        { type: "te_mo_ii", ru: "Можно поставить на стол?", kanji: "机の上に置いてもいいですか", kana: "つくえのうえにおいてもいいですか" }
+      ]},
+      { id: 20, nounK: "手紙", nounR: "てがみ", nounT: "письмо", verbK: "送る", verbR: "おくる", verbT: "отправлять", forms: [
+        { type: "te_imasu", ru: "Сейчас отправляю письмо.", kanji: "手紙を送っています", kana: "てがみをおくっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, отправьте письмо.", kanji: "手紙を送ってください", kana: "てがみをおくってください" },
+        { type: "te_mo_ii", ru: "Можно отправить письмо?", kanji: "手紙を送ってもいいですか", kana: "てがみをおくってもいいですか" }
+      ]},
+      { id: 21, nounK: "ボタン", nounR: "ボタン", nounT: "кнопка", verbK: "押す", verbR: "おす", verbT: "нажимать", forms: [
+        { type: "te_imasu", ru: "Сейчас нажимаю кнопку.", kanji: "ボタンを押しています", kana: "ボタンをおしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, нажмите кнопку.", kanji: "ボタンを押してください", kana: "ボタンをおしてください" },
+        { type: "te_mo_ii", ru: "Можно нажать кнопку?", kanji: "ボタンを押してもいいですか", kana: "ボタンをおしてもいいですか" }
+      ]},
+      { id: 22, nounK: "単語", nounR: "たんご", nounT: "слово", verbK: "覚える", verbR: "おぼえる", verbT: "запоминать", forms: [
+        { type: "te_imasu", ru: "Сейчас запоминаю слова.", kanji: "単語を覚えています", kana: "たんごをおぼえています" },
+        { type: "te_kudasai", ru: "Пожалуйста, запомните слова.", kanji: "単語を覚えてください", kana: "たんごをおぼえてください" },
+        { type: "te_mo_ii", ru: "Можно запомнить слова?", kanji: "単語を覚えてもいいですか", kana: "たんごをおぼえてもいいですか" }
+      ]},
+      { id: 23, nounK: "海", nounR: "うみ", nounT: "море", verbK: "泳ぐ", verbR: "およぐ", verbT: "плавать", forms: [
+        { type: "te_imasu", ru: "Сейчас плаваю в море.", kanji: "海で泳いでいます", kana: "うみでおよいでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, поплавайте в море.", kanji: "海で泳いでください", kana: "うみでおよいでください" },
+        { type: "te_mo_ii", ru: "Можно поплавать в море?", kanji: "海で泳いでもいいですか", kana: "うみでおよいでもいいですか" }
+      ]},
+      { id: 24, nounK: "バス", nounR: "バス", nounT: "автобус", verbK: "降りる", verbR: "おりる", verbT: "выходить из транспорта", forms: [
+        { type: "te_imasu", ru: "Сейчас выхожу из автобуса.", kanji: "バスを降りています", kana: "バスをおりています" },
+        { type: "te_kudasai", ru: "Пожалуйста, выйдите из автобуса.", kanji: "バスを降りてください", kana: "バスをおりてください" },
+        { type: "te_mo_ii", ru: "Можно выйти из автобуса?", kanji: "バスを降りてもいいですか", kana: "バスをおりてもいいですか" }
+      ]},
+      { id: 25, nounK: "授業", nounR: "じゅぎょう", nounT: "урок", verbK: "終わる", verbR: "おわる", verbT: "заканчиваться", forms: [
+        { type: "te_imasu", ru: "Сейчас урок заканчивается.", kanji: "授業が終わっています", kana: "じゅぎょうがおわっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть урок закончится.", kanji: "授業が終わってください", kana: "じゅぎょうがおわってください" },
+        { type: "te_mo_ii", ru: "Можно закончить урок?", kanji: "授業が終わってもいいですか", kana: "じゅぎょうがおわってもいいですか" }
+      ]},
+      { id: 26, nounK: "スーパー", nounR: "スーパー", nounT: "супермаркет", verbK: "買い物する", verbR: "かいものする", verbT: "делать покупки", forms: [
+        { type: "te_imasu", ru: "Сейчас делаю покупки в супермаркете.", kanji: "スーパーで買い物をしています", kana: "スーパーでかいものをしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, сделайте покупки в супермаркете.", kanji: "スーパーで買い物をしてください", kana: "スーパーでかいものをしてください" },
+        { type: "te_mo_ii", ru: "Можно сделать покупки в супермаркете?", kanji: "スーパーで買い物をしてもいいですか", kana: "スーパーでかいものをしてもいいですか" }
+      ]},
+      { id: 27, nounK: "服", nounR: "ふく", nounT: "одежда", verbK: "買う", verbR: "かう", verbT: "покупать", forms: [
+        { type: "te_imasu", ru: "Сейчас покупаю одежду.", kanji: "服を買っています", kana: "ふくをかっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, купите одежду.", kanji: "服を買ってください", kana: "ふくをかってください" },
+        { type: "te_mo_ii", ru: "Можно купить одежду?", kanji: "服を買ってもいいですか", kana: "ふくをかってもいいですか" }
+      ]},
+      { id: 28, nounK: "本", nounR: "ほん", nounT: "книга", verbK: "返す", verbR: "かえす", verbT: "возвращать", forms: [
+        { type: "te_imasu", ru: "Сейчас возвращаю книгу.", kanji: "本を返しています", kana: "ほんをかえしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, верните книгу.", kanji: "本を返してください", kana: "ほんをかえしてください" },
+        { type: "te_mo_ii", ru: "Можно вернуть книгу?", kanji: "本を返してもいいですか", kana: "ほんをかえしてもいいですか" }
+      ]},
+      { id: 29, nounK: "家", nounR: "いえ", nounT: "дом", verbK: "帰る", verbR: "かえる", verbT: "возвращаться домой", forms: [
+        { type: "te_imasu", ru: "Сейчас возвращаюсь домой.", kanji: "家に帰っています", kana: "いえにかえっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, возвращайтесь домой.", kanji: "家に帰ってください", kana: "いえにかえってください" },
+        { type: "te_mo_ii", ru: "Можно вернуться домой?", kanji: "家に帰ってもいいですか", kana: "いえにかえってもいいですか" }
+      ]},
+      { id: 30, nounK: "時間", nounR: "じかん", nounT: "время", verbK: "かかる", verbR: "かかる", verbT: "требоваться (о времени)", forms: [
+        { type: "te_imasu", ru: "Сейчас трачу время.", kanji: "時間がかかっています", kana: "じかんがかかっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть время будет потрачено.", kanji: "時間がかかってください", kana: "じかんがかかってください" },
+        { type: "te_mo_ii", ru: "Можно потратить время?", kanji: "時間がかかってもいいですか", kana: "じかんがかかってもいいですか" }
+      ]},
+      { id: 31, nounK: "漢字", nounR: "かんじ", nounT: "иероглиф", verbK: "書く", verbR: "かく", verbT: "писать", forms: [
+        { type: "te_imasu", ru: "Сейчас пишу иероглиф.", kanji: "漢字を書いています", kana: "かんじをかいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, напишите иероглиф.", kanji: "漢字を書いてください", kana: "かんじをかいてください" },
+        { type: "te_mo_ii", ru: "Можно написать иероглиф?", kanji: "漢字を書いてもいいですか", kana: "かんじをかいてもいいですか" }
+      ]},
+      { id: 32, nounK: "電話", nounR: "でんわ", nounT: "телефон", verbK: "かける", verbR: "かける", verbT: "звонить", forms: [
+        { type: "te_imasu", ru: "Сейчас звоню по телефону.", kanji: "電話をかけています", kana: "でんわをかけています" },
+        { type: "te_kudasai", ru: "Пожалуйста, позвоните по телефону.", kanji: "電話をかけてください", kana: "でんわをかけてください" },
+        { type: "te_mo_ii", ru: "Можно позвонить по телефону?", kanji: "電話をかけてもいいですか", kana: "でんわをかけてもいいですか" }
+      ]},
+      { id: 33, nounK: "ペン", nounR: "ペン", nounT: "ручка", verbK: "貸す", verbR: "かす", verbT: "одалживать", forms: [
+        { type: "te_imasu", ru: "Сейчас одалживаю ручку.", kanji: "ペンを貸しています", kana: "ペンをかしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, одолжите ручку.", kanji: "ペンを貸してください", kana: "ペンをかしてください" },
+        { type: "te_mo_ii", ru: "Можно одолжить ручку?", kanji: "ペンを貸してもいいですか", kana: "ペンをかしてもいいですか" }
+      ]},
+      { id: 34, nounK: "帽子", nounR: "ぼうし", nounT: "шляпа", verbK: "かぶる", verbR: "かぶる", verbT: "надевать на голову", forms: [
+        { type: "te_imasu", ru: "Сейчас надеваю шляпу.", kanji: "帽子をかぶっています", kana: "ぼうしをかぶっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, наденьте шляпу.", kanji: "帽子をかぶってください", kana: "ぼうしをかぶってください" },
+        { type: "te_mo_ii", ru: "Можно надеть шляпу?", kanji: "帽子をかぶってもいいですか", kana: "ぼうしをかぶってもいいですか" }
+      ]},
+      { id: 35, nounK: "辞書", nounR: "じしょ", nounT: "словарь", verbK: "借りる", verbR: "かりる", verbT: "брать взаймы", forms: [
+        { type: "te_imasu", ru: "Сейчас беру взаймы словарь.", kanji: "辞書を借りています", kana: "じしょをかりています" },
+        { type: "te_kudasai", ru: "Пожалуйста, возьмите взаймы словарь.", kanji: "辞書を借りてください", kana: "じしょをかりてください" },
+        { type: "te_mo_ii", ru: "Можно взять взаймы словарь?", kanji: "辞書を借りてもいいですか", kana: "じしょをかりてもいいですか" }
+      ]},
+      { id: 36, nounK: "電気", nounR: "でんき", nounT: "свет", verbK: "消える", verbR: "きえる", verbT: "гаснуть", forms: [
+        { type: "te_imasu", ru: "Сейчас гаснет свет.", kanji: "電気が消えています", kana: "でんきがきえています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть свет погаснет.", kanji: "電気が消えてください", kana: "でんきがきえてください" },
+        { type: "te_mo_ii", ru: "Можно погасить свет?", kanji: "電気が消えてもいいですか", kana: "でんきがきえてもいいですか" }
+      ]},
+      { id: 37, nounK: "音楽", nounR: "おんがく", nounT: "музыка", verbK: "聞く", verbR: "きく", verbT: "слушать", forms: [
+        { type: "te_imasu", ru: "Сейчас слушаю музыку.", kanji: "音楽を聞いています", kana: "おんがくをきいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, послушайте музыку.", kanji: "音楽を聞いてください", kana: "おんがくをきいてください" },
+        { type: "te_mo_ii", ru: "Можно послушать музыку?", kanji: "音楽を聞いてもいいですか", kana: "おんがくをきいてもいいですか" }
+      ]},
+      { id: 38, nounK: "紙", nounR: "かみ", nounT: "бумага", verbK: "切る", verbR: "きる", verbT: "резать", forms: [
+        { type: "te_imasu", ru: "Сейчас режу бумагу.", kanji: "紙を切っています", kana: "かみをきっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, разрежьте бумагу.", kanji: "紙を切ってください", kana: "かみをきってください" },
+        { type: "te_mo_ii", ru: "Можно разрезать бумагу?", kanji: "紙を切ってもいいですか", kana: "かみをきってもいいですか" }
+      ]},
+      { id: 39, nounK: "シャツ", nounR: "シャツ", nounT: "рубашка", verbK: "着る", verbR: "きる", verbT: "надевать на тело", forms: [
+        { type: "te_imasu", ru: "Сейчас надеваю рубашку.", kanji: "シャツを着ています", kana: "シャツをきています" },
+        { type: "te_kudasai", ru: "Пожалуйста, наденьте рубашку.", kanji: "シャツを着てください", kana: "シャツをきてください" },
+        { type: "te_mo_ii", ru: "Можно надеть рубашку?", kanji: "シャツを着てもいいですか", kana: "シャツをきてもいいですか" }
+      ]},
+      { id: 40, nounK: "先生", nounR: "せんせい", nounT: "учитель", verbK: "来る", verbR: "くる", verbT: "приходить", forms: [
+        { type: "te_imasu", ru: "Сейчас приходит учитель.", kanji: "先生が来ています", kana: "せんせいがきています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть учитель придёт.", kanji: "先生が来てください", kana: "せんせいがきてください" },
+        { type: "te_mo_ii", ru: "Можно пригласить учителя?", kanji: "先生が来てもいいですか", kana: "せんせいがきてもいいですか" }
+      ]},
+      { id: 41, nounK: "女の人", nounR: "おんなのひと", nounT: "женщина", verbK: "結婚する", verbR: "けっこんする", verbT: "жениться", forms: [
+        { type: "te_imasu", ru: "Сейчас женюсь на этой женщине.", kanji: "女の人と結婚しています", kana: "おんなのひととけっこんしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, женитесь на этой женщине.", kanji: "女の人と結婚してください", kana: "おんなのひととけっこんしてください" },
+        { type: "te_mo_ii", ru: "Можно жениться на этой женщине?", kanji: "女の人と結婚してもいいですか", kana: "おんなのひととけっこんしてもいいですか" }
+      ]},
+      { id: 42, nounK: "テレビ", nounR: "テレビ", nounT: "телевизор", verbK: "消す", verbR: "けす", verbT: "выключать", forms: [
+        { type: "te_imasu", ru: "Сейчас выключаю телевизор.", kanji: "テレビを消しています", kana: "テレビをけしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, выключите телевизор.", kanji: "テレビを消してください", kana: "テレビをけしてください" },
+        { type: "te_mo_ii", ru: "Можно выключить телевизор?", kanji: "テレビを消してもいいですか", kana: "テレビをけしてもいいですか" }
+      ]},
+      { id: 43, nounK: "質問", nounR: "しつもん", nounT: "вопрос", verbK: "答える", verbR: "こたえる", verbT: "отвечать", forms: [
+        { type: "te_imasu", ru: "Сейчас отвечаю на вопрос.", kanji: "質問に答えています", kana: "しつもんにこたえています" },
+        { type: "te_kudasai", ru: "Пожалуйста, ответьте на вопрос.", kanji: "質問に答えてください", kana: "しつもんにこたえてください" },
+        { type: "te_mo_ii", ru: "Можно ответить на вопрос?", kanji: "質問に答えてもいいですか", kana: "しつもんにこたえてもいいですか" }
+      ]},
+      { id: 44, nounK: "ノート", nounR: "ノート", nounT: "тетрадь", verbK: "コピーする", verbR: "コピーする", verbT: "копировать", forms: [
+        { type: "te_imasu", ru: "Сейчас копирую тетрадь.", kanji: "ノートをコピーしています", kana: "ノートをコピーしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, скопируйте тетрадь.", kanji: "ノートをコピーしてください", kana: "ノートをコピーしてください" },
+        { type: "te_mo_ii", ru: "Можно скопировать тетрадь?", kanji: "ノートをコピーしてもいいですか", kana: "ノートをコピーしてもいいですか" }
+      ]},
+      { id: 45, nounK: "仕事", nounR: "しごと", nounT: "работа", verbK: "困る", verbR: "こまる", verbT: "испытывать затруднения", forms: [
+        { type: "te_imasu", ru: "Сейчас испытываю трудности на работе.", kanji: "仕事で困っています", kana: "しごとでこまっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть будут трудности на работе.", kanji: "仕事で困ってください", kana: "しごとでこまってください" },
+        { type: "te_mo_ii", ru: "Можно столкнуться с трудностями на работе?", kanji: "仕事で困ってもいいですか", kana: "しごとでこまってもいいですか" }
+      ]},
+      { id: 46, nounK: "花", nounR: "はな", nounT: "цветок", verbK: "咲く", verbR: "さく", verbT: "цвести", forms: [
+        { type: "te_imasu", ru: "Сейчас цветёт цветок.", kanji: "花が咲いています", kana: "はながさいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть цветок зацветёт.", kanji: "花が咲いてください", kana: "はながさいてください" },
+        { type: "te_mo_ii", ru: "Можно дать цветку зацвести?", kanji: "花が咲いてもいいですか", kana: "はながさいてもいいですか" }
+      ]},
+      { id: 47, nounK: "傘", nounR: "かさ", nounT: "зонт", verbK: "差す", verbR: "さす", verbT: "раскрывать", forms: [
+        { type: "te_imasu", ru: "Сейчас раскрываю зонт.", kanji: "傘を差しています", kana: "かさをさしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, раскройте зонт.", kanji: "傘を差してください", kana: "かさをさしてください" },
+        { type: "te_mo_ii", ru: "Можно раскрыть зонт?", kanji: "傘を差してもいいですか", kana: "かさをさしてもいいですか" }
+      ]},
+      { id: 48, nounK: "犬", nounR: "いぬ", nounT: "собака", verbK: "散歩する", verbR: "さんぽする", verbT: "гулять", forms: [
+        { type: "te_imasu", ru: "Сейчас гуляю с собакой.", kanji: "犬と散歩しています", kana: "いぬとさんぽしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, погуляйте с собакой.", kanji: "犬と散歩してください", kana: "いぬとさんぽしてください" },
+        { type: "te_mo_ii", ru: "Можно погулять с собакой?", kanji: "犬と散歩してもいいですか", kana: "いぬとさんぽしてもいいですか" }
+      ]},
+      { id: 49, nounK: "魚", nounR: "さかな", nounT: "рыба", verbK: "死ぬ", verbR: "しぬ", verbT: "умирать", forms: [
+        { type: "te_imasu", ru: "Сейчас умирает рыба.", kanji: "魚が死んでいます", kana: "さかながしんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть рыба умрёт.", kanji: "魚が死んでください", kana: "さかながしんでください" },
+        { type: "te_mo_ii", ru: "Можно дать рыбе умереть?", kanji: "魚が死んでもいいですか", kana: "さかながしんでもいいですか" }
+      ]},
+      { id: 50, nounK: "店", nounR: "みせ", nounT: "магазин", verbK: "閉まる", verbR: "しまる", verbT: "закрываться", forms: [
+        { type: "te_imasu", ru: "Сейчас закрывается магазин.", kanji: "店が閉まっています", kana: "みせがしまっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, закройте магазин.", kanji: "店が閉まってください", kana: "みせがしまってください" },
+        { type: "te_mo_ii", ru: "Можно закрыть магазин?", kanji: "店が閉まってもいいですか", kana: "みせがしまってもいいですか" }
+      ]},
+      { id: 51, nounK: "箱", nounR: "はこ", nounT: "коробка", verbK: "閉める", verbR: "しめる", verbT: "закрывать", forms: [
+        { type: "te_imasu", ru: "Сейчас закрываю коробку.", kanji: "箱を閉めています", kana: "はこをしめています" },
+        { type: "te_kudasai", ru: "Пожалуйста, закройте коробку.", kanji: "箱を閉めてください", kana: "はこをしめてください" },
+        { type: "te_mo_ii", ru: "Можно закрыть коробку?", kanji: "箱を閉めてもいいですか", kana: "はこをしめてもいいですか" }
+      ]},
+      { id: 52, nounK: "ネクタイ", nounR: "ネクタイ", nounT: "галстук", verbK: "締める", verbR: "しめる", verbT: "завязывать", forms: [
+        { type: "te_imasu", ru: "Сейчас завязываю галстук.", kanji: "ネクタイを締めています", kana: "ネクタイをしめています" },
+        { type: "te_kudasai", ru: "Пожалуйста, завяжите галстук.", kanji: "ネクタイを締めてください", kana: "ネクタイをしめてください" },
+        { type: "te_mo_ii", ru: "Можно завязать галстук?", kanji: "ネクタイを締めてもいいですか", kana: "ネクタイをしめてもいいですか" }
+      ]},
+      { id: 53, nounK: "写真", nounR: "しゃしん", nounT: "фотография", verbK: "撮る", verbR: "とる", verbT: "фотографировать", forms: [
+        { type: "te_imasu", ru: "Сейчас фотографирую.", kanji: "写真を撮っています", kana: "しゃしんをとっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, сфотографируйте.", kanji: "写真を撮ってください", kana: "しゃしんをとってください" },
+        { type: "te_mo_ii", ru: "Можно сфотографировать?", kanji: "写真を撮ってもいいですか", kana: "しゃしんをとってもいいですか" }
+      ]},
+      { id: 54, nounK: "医者", nounR: "いしゃ", nounT: "врач", verbK: "質問する", verbR: "しつもんする", verbT: "спрашивать", forms: [
+        { type: "te_imasu", ru: "Сейчас спрашиваю у врача.", kanji: "医者に質問しています", kana: "いしゃにしつもんしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, спросите у врача.", kanji: "医者に質問してください", kana: "いしゃにしつもんしてください" },
+        { type: "te_mo_ii", ru: "Можно спросить у врача?", kanji: "医者に質問してもいいですか", kana: "いしゃにしつもんしてもいいですか" }
+      ]},
+      { id: 55, nounK: "ニュース", nounR: "ニュース", nounT: "новость", verbK: "知る", verbR: "しる", verbT: "узнавать", forms: [
+        { type: "te_imasu", ru: "Сейчас узнаю новости.", kanji: "ニュースを知っています", kana: "ニュースをしっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, узнайте новости.", kanji: "ニュースを知ってください", kana: "ニュースをしってください" },
+        { type: "te_mo_ii", ru: "Можно узнать новости?", kanji: "ニュースを知ってもいいですか", kana: "ニュースをしってもいいですか" }
+      ]},
+      { id: 56, nounK: "たばこ", nounR: "たばこ", nounT: "сигарета", verbK: "吸う", verbR: "すう", verbT: "курить", forms: [
+        { type: "te_imasu", ru: "Сейчас курю сигарету.", kanji: "たばこを吸っています", kana: "たばこをすっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, покурите сигарету.", kanji: "たばこを吸ってください", kana: "たばこをすってください" },
+        { type: "te_mo_ii", ru: "Можно покурить?", kanji: "たばこを吸ってもいいですか", kana: "たばこをすってもいいですか" }
+      ]},
+      { id: 57, nounK: "町", nounR: "まち", nounT: "город", verbK: "住む", verbR: "すむ", verbT: "жить", forms: [
+        { type: "te_imasu", ru: "Сейчас живу в городе.", kanji: "町に住んでいます", kana: "まちにすんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, живите в городе.", kanji: "町に住んでください", kana: "まちにすんでください" },
+        { type: "te_mo_ii", ru: "Можно пожить в городе?", kanji: "町に住んでもいいですか", kana: "まちにすんでもいいですか" }
+      ]},
+      { id: 58, nounK: "宿題", nounR: "しゅくだい", nounT: "домашнее задание", verbK: "する", verbR: "する", verbT: "делать", forms: [
+        { type: "te_imasu", ru: "Сейчас делаю домашнее задание.", kanji: "宿題をしています", kana: "しゅくだいをしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, сделайте домашнее задание.", kanji: "宿題をしてください", kana: "しゅくだいをしてください" },
+        { type: "te_mo_ii", ru: "Можно сделать домашнее задание?", kanji: "宿題をしてもいいですか", kana: "しゅくだいをしてもいいですか" }
+      ]},
+      { id: 59, nounK: "椅子", nounR: "いす", nounT: "стул", verbK: "座る", verbR: "すわる", verbT: "садиться", forms: [
+        { type: "te_imasu", ru: "Сейчас сажусь на стул.", kanji: "椅子に座っています", kana: "いすにすわっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, сядьте на стул.", kanji: "椅子に座ってください", kana: "いすにすわってください" },
+        { type: "te_mo_ii", ru: "Можно сесть на стул?", kanji: "椅子に座ってもいいですか", kana: "いすにすわってもいいですか" }
+      ]},
+      { id: 60, nounK: "ズボン", nounR: "ズボン", nounT: "брюки", verbK: "洗濯する", verbR: "せんたくする", verbT: "стирать", forms: [
+        { type: "te_imasu", ru: "Сейчас стираю брюки.", kanji: "ズボンを洗濯しています", kana: "ズボンをせんたくしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, постирайте брюки.", kanji: "ズボンを洗濯してください", kana: "ズボンをせんたくしてください" },
+        { type: "te_mo_ii", ru: "Можно постирать брюки?", kanji: "ズボンを洗濯してもいいですか", kana: "ズボンをせんたくしてもいいですか" }
+      ]},
+      { id: 61, nounK: "部屋", nounR: "へや", nounT: "комната", verbK: "掃除する", verbR: "そうじする", verbT: "убираться", forms: [
+        { type: "te_imasu", ru: "Сейчас убираю комнату.", kanji: "部屋を掃除しています", kana: "へやをそうじしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, уберите комнату.", kanji: "部屋を掃除してください", kana: "へやをそうじしてください" },
+        { type: "te_mo_ii", ru: "Можно убрать комнату?", kanji: "部屋を掃除してもいいですか", kana: "へやをそうじしてもいいですか" }
+      ]},
+      { id: 62, nounK: "ごみ", nounR: "ごみ", nounT: "мусор", verbK: "出す", verbR: "だす", verbT: "выносить", forms: [
+        { type: "te_imasu", ru: "Сейчас выношу мусор.", kanji: "ごみを出しています", kana: "ごみをだしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, вынесите мусор.", kanji: "ごみを出してください", kana: "ごみをだしてください" },
+        { type: "te_mo_ii", ru: "Можно вынести мусор?", kanji: "ごみを出してもいいですか", kana: "ごみをだしてもいいですか" }
+      ]},
+      { id: 63, nounK: "駅", nounR: "えき", nounT: "вокзал", verbK: "立つ", verbR: "たつ", verbT: "стоять, вставать", forms: [
+        { type: "te_imasu", ru: "Сейчас стою перед вокзалом.", kanji: "駅の前に立っています", kana: "えきのまえにたっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, постойте перед вокзалом.", kanji: "駅の前に立ってください", kana: "えきのまえにたってください" },
+        { type: "te_mo_ii", ru: "Можно постоять перед вокзалом?", kanji: "駅の前に立ってもいいですか", kana: "えきのまえにたってもいいですか" }
+      ]},
+      { id: 64, nounK: "コーヒー", nounR: "コーヒー", nounT: "кофе", verbK: "頼む", verbR: "たのむ", verbT: "заказывать", forms: [
+        { type: "te_imasu", ru: "Сейчас заказываю кофе.", kanji: "コーヒーを頼んでいます", kana: "コーヒーをたのんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, закажите кофе.", kanji: "コーヒーを頼んでください", kana: "コーヒーをたのんでください" },
+        { type: "te_mo_ii", ru: "Можно заказать кофе?", kanji: "コーヒーを頼んでもいいですか", kana: "コーヒーをたのんでもいいですか" }
+      ]},
+      { id: 65, nounK: "ご飯", nounR: "ごはん", nounT: "еда", verbK: "食べる", verbR: "たべる", verbT: "есть", forms: [
+        { type: "te_imasu", ru: "Сейчас ем.", kanji: "ご飯を食べています", kana: "ごはんをたべています" },
+        { type: "te_kudasai", ru: "Пожалуйста, поешьте.", kanji: "ご飯を食べてください", kana: "ごはんをたべてください" },
+        { type: "te_mo_ii", ru: "Можно поесть?", kanji: "ご飯を食べてもいいですか", kana: "ごはんをたべてもいいですか" }
+      ]},
+      { id: 66, nounK: "色", nounR: "いろ", nounT: "цвет", verbK: "違う", verbR: "ちがう", verbT: "отличаться", forms: [
+        { type: "te_imasu", ru: "Сейчас отличаюсь цветом.", kanji: "色が違っています", kana: "いろがちがっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть цвет отличается.", kanji: "色が違ってください", kana: "いろがちがってください" },
+        { type: "te_mo_ii", ru: "Можно изменить цвет?", kanji: "色が違ってもいいですか", kana: "いろがちがってもいいですか" }
+      ]},
+      { id: 67, nounK: "パソコン", nounR: "パソコン", nounT: "компьютер", verbK: "使う", verbR: "つかう", verbT: "использовать", forms: [
+        { type: "te_imasu", ru: "Сейчас использую компьютер.", kanji: "パソコンを使っています", kana: "パソコンをつかっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, используйте компьютер.", kanji: "パソコンを使ってください", kana: "パソコンをつかってください" },
+        { type: "te_mo_ii", ru: "Можно использовать компьютер?", kanji: "パソコンを使ってもいいですか", kana: "パソコンをつかってもいいですか" }
+      ]},
+      { id: 68, nounK: "旅行", nounR: "りょこう", nounT: "путешествие", verbK: "疲れる", verbR: "つかれる", verbT: "уставать", forms: [
+        { type: "te_imasu", ru: "Сейчас устаю от путешествия.", kanji: "旅行で疲れています", kana: "りょこうでつかれています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть устанут от путешествия.", kanji: "旅行で疲れてください", kana: "りょこうでつかれてください" },
+        { type: "te_mo_ii", ru: "Можно устать от путешествия?", kanji: "旅行で疲れてもいいですか", kana: "りょこうでつかれてもいいですか" }
+      ]},
+      { id: 69, nounK: "空港", nounR: "くうこう", nounT: "аэропорт", verbK: "着く", verbR: "つく", verbT: "прибывать", forms: [
+        { type: "te_imasu", ru: "Сейчас прибываю в аэропорт.", kanji: "空港に着いています", kana: "くうこうについています" },
+        { type: "te_kudasai", ru: "Пожалуйста, прибудьте в аэропорт.", kanji: "空港に着いてください", kana: "くうこうについてください" },
+        { type: "te_mo_ii", ru: "Можно прибыть в аэропорт?", kanji: "空港に着いてもいいですか", kana: "くうこうについてもいいですか" }
+      ]},
+      { id: 70, nounK: "料理", nounR: "りょうり", nounT: "еда (блюдо)", verbK: "作る", verbR: "つくる", verbT: "готовить", forms: [
+        { type: "te_imasu", ru: "Сейчас готовлю еду.", kanji: "料理を作っています", kana: "りょうりをつくっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, приготовьте еду.", kanji: "料理を作ってください", kana: "りょうりをつくってください" },
+        { type: "te_mo_ii", ru: "Можно приготовить еду?", kanji: "料理を作ってもいいですか", kana: "りょうりをつくってもいいですか" }
+      ]},
+      { id: 71, nounK: "ラジオ", nounR: "ラジオ", nounT: "радио", verbK: "点ける", verbR: "つける", verbT: "включать", forms: [
+        { type: "te_imasu", ru: "Сейчас включаю радио.", kanji: "ラジオを点けています", kana: "ラジオをつけています" },
+        { type: "te_kudasai", ru: "Пожалуйста, включите радио.", kanji: "ラジオを点けてください", kana: "ラジオをつけてください" },
+        { type: "te_mo_ii", ru: "Можно включить радио?", kanji: "ラジオを点けてもいいですか", kana: "ラジオをつけてもいいですか" }
+      ]},
+      { id: 72, nounK: "会社", nounR: "かいしゃ", nounT: "компания", verbK: "勤める", verbR: "つとめる", verbT: "служить", forms: [
+        { type: "te_imasu", ru: "Сейчас служу в компании.", kanji: "会社に勤めています", kana: "かいしゃにつとめています" },
+        { type: "te_kudasai", ru: "Пожалуйста, служите в компании.", kanji: "会社に勤めてください", kana: "かいしゃにつとめてください" },
+        { type: "te_mo_ii", ru: "Можно поработать в компании?", kanji: "会社に勤めてもいいですか", kana: "かいしゃにつとめてもいいですか" }
+      ]},
+      { id: 73, nounK: "散歩", nounR: "さんぽ", nounT: "прогулка", verbK: "出かける", verbR: "でかける", verbT: "выходить из дома", forms: [
+        { type: "te_imasu", ru: "Сейчас выхожу на прогулку.", kanji: "散歩に出かけています", kana: "さんぽにでかけています" },
+        { type: "te_kudasai", ru: "Пожалуйста, выйдите на прогулку.", kanji: "散歩に出かけてください", kana: "さんぽにでかけてください" },
+        { type: "te_mo_ii", ru: "Можно выйти на прогулку?", kanji: "散歩に出かけてもいいですか", kana: "さんぽにでかけてもいいですか" }
+      ]},
+      { id: 74, nounK: "日本語", nounR: "にほんご", nounT: "японский язык", verbK: "できる", verbR: "できる", verbT: "мочь", forms: [
+        { type: "te_imasu", ru: "Сейчас умею говорить по-японски.", kanji: "日本語ができています", kana: "にほんごができています" },
+        { type: "te_kudasai", ru: "Пожалуйста, умейте говорить по-японски.", kanji: "日本語ができてください", kana: "にほんごができてください" },
+        { type: "te_mo_ii", ru: "Можно заговорить по-японски?", kanji: "日本語ができてもいいですか", kana: "にほんごができてもいいですか" }
+      ]},
+      { id: 75, nounK: "大学", nounR: "だいがく", nounT: "университет", verbK: "出る", verbR: "でる", verbT: "выходить, оканчивать", forms: [
+        { type: "te_imasu", ru: "Сейчас оканчиваю университет.", kanji: "大学を出ています", kana: "だいがくをでています" },
+        { type: "te_kudasai", ru: "Пожалуйста, окончите университет.", kanji: "大学を出てください", kana: "だいがくをでてください" },
+        { type: "te_mo_ii", ru: "Можно окончить университет?", kanji: "大学を出てもいいですか", kana: "だいがくをでてもいいですか" }
+      ]},
+      { id: 76, nounK: "病院", nounR: "びょういん", nounT: "больница", verbK: "電話する", verbR: "でんわする", verbT: "звонить по телефону", forms: [
+        { type: "te_imasu", ru: "Сейчас звоню в больницу.", kanji: "病院に電話しています", kana: "びょういんにでんわしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, позвоните в больницу.", kanji: "病院に電話してください", kana: "びょういんにでんわしてください" },
+        { type: "te_mo_ii", ru: "Можно позвонить в больницу?", kanji: "病院に電話してもいいですか", kana: "びょういんにでんわしてもいいですか" }
+      ]},
+      { id: 77, nounK: "飛行機", nounR: "ひこうき", nounT: "самолёт", verbK: "飛ぶ", verbR: "とぶ", verbT: "летать", forms: [
+        { type: "te_imasu", ru: "Сейчас летает самолёт.", kanji: "飛行機が飛んでいます", kana: "ひこうきがとんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть самолёт летит.", kanji: "飛行機が飛んでください", kana: "ひこうきがとんでください" },
+        { type: "te_mo_ii", ru: "Можно полететь на самолёте?", kanji: "飛行機が飛んでもいいですか", kana: "ひこうきがとんでもいいですか" }
+      ]},
+      { id: 78, nounK: "車", nounR: "くるま", nounT: "машина", verbK: "止まる", verbR: "とまる", verbT: "останавливаться", forms: [
+        { type: "te_imasu", ru: "Сейчас останавливается машина.", kanji: "車が止まっています", kana: "くるまがとまっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, остановите машину.", kanji: "車が止まってください", kana: "くるまがとまってください" },
+        { type: "te_mo_ii", ru: "Можно остановить машину?", kanji: "車が止まってもいいですか", kana: "くるまがとまってもいいですか" }
+      ]},
+      { id: 79, nounK: "休み", nounR: "やすみ", nounT: "выходной", verbK: "取る", verbR: "とる", verbT: "брать", forms: [
+        { type: "te_imasu", ru: "Сейчас беру выходной.", kanji: "休みを取っています", kana: "やすみをとっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, возьмите выходной.", kanji: "休みを取ってください", kana: "やすみをとってください" },
+        { type: "te_mo_ii", ru: "Можно взять выходной?", kanji: "休みを取ってもいいですか", kana: "やすみをとってもいいですか" }
+      ]},
+      { id: 80, nounK: "カメラ", nounR: "カメラ", nounT: "камера", verbK: "撮る", verbR: "とる", verbT: "снимать (фото)", forms: [
+        { type: "te_imasu", ru: "Сейчас снимаю камерой.", kanji: "カメラで撮っています", kana: "カメラでとっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, снимите камерой.", kanji: "カメラで撮ってください", kana: "カメラでとってください" },
+        { type: "te_mo_ii", ru: "Можно снять на камеру?", kanji: "カメラで撮ってもいいですか", kana: "カメラでとってもいいですか" }
+      ]},
+      { id: 81, nounK: "鳥", nounR: "とり", nounT: "птица", verbK: "鳴く", verbR: "なく", verbT: "петь (о птице)", forms: [
+        { type: "te_imasu", ru: "Сейчас поёт птица.", kanji: "鳥が鳴いています", kana: "とりがないています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть птица поёт.", kanji: "鳥が鳴いてください", kana: "とりがないてください" },
+        { type: "te_mo_ii", ru: "Можно послушать пение птиц?", kanji: "鳥が鳴いてもいいですか", kana: "とりがないてもいいですか" }
+      ]},
+      { id: 82, nounK: "銀行", nounR: "ぎんこう", nounT: "банк", verbK: "並ぶ", verbR: "ならぶ", verbT: "стоять в очереди", forms: [
+        { type: "te_imasu", ru: "Сейчас стою в очереди в банке.", kanji: "銀行で並んでいます", kana: "ぎんこうでならんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, постойте в очереди в банке.", kanji: "銀行で並んでください", kana: "ぎんこうでならんでください" },
+        { type: "te_mo_ii", ru: "Можно постоять в очереди в банке?", kanji: "銀行で並んでもいいですか", kana: "ぎんこうでならんでもいいですか" }
+      ]},
+      { id: 83, nounK: "お皿", nounR: "おさら", nounT: "тарелка", verbK: "並べる", verbR: "ならべる", verbT: "расставлять", forms: [
+        { type: "te_imasu", ru: "Сейчас расставляю тарелки.", kanji: "お皿を並べています", kana: "おさらをならべています" },
+        { type: "te_kudasai", ru: "Пожалуйста, расставьте тарелки.", kanji: "お皿を並べてください", kana: "おさらをならべてください" },
+        { type: "te_mo_ii", ru: "Можно расставить тарелки?", kanji: "お皿を並べてもいいですか", kana: "おさらをならべてもいいですか" }
+      ]},
+      { id: 84, nounK: "大人", nounR: "おとな", nounT: "взрослый", verbK: "なる", verbR: "なる", verbT: "становиться", forms: [
+        { type: "te_imasu", ru: "Сейчас становлюсь взрослым.", kanji: "大人になっています", kana: "おとなになっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, станьте взрослым.", kanji: "大人になってください", kana: "おとなになってください" },
+        { type: "te_mo_ii", ru: "Можно стать взрослым?", kanji: "大人になってもいいですか", kana: "おとなになってもいいですか" }
+      ]},
+      { id: 85, nounK: "靴", nounR: "くつ", nounT: "обувь", verbK: "脱ぐ", verbR: "ぬぐ", verbT: "снимать одежду", forms: [
+        { type: "te_imasu", ru: "Сейчас снимаю обувь.", kanji: "靴を脱いでいます", kana: "くつをぬいでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, снимите обувь.", kanji: "靴を脱いでください", kana: "くつをぬいでください" },
+        { type: "te_mo_ii", ru: "Можно снять обувь?", kanji: "靴を脱いでもいいですか", kana: "くつをぬいでもいいですか" }
+      ]},
+      { id: 86, nounK: "ベッド", nounR: "ベッド", nounT: "кровать", verbK: "寝る", verbR: "ねる", verbT: "спать", forms: [
+        { type: "te_imasu", ru: "Сейчас сплю в кровати.", kanji: "ベッドで寝ています", kana: "ベッドでねています" },
+        { type: "te_kudasai", ru: "Пожалуйста, поспите в кровати.", kanji: "ベッドで寝てください", kana: "ベッドでねてください" },
+        { type: "te_mo_ii", ru: "Можно поспать в кровати?", kanji: "ベッドで寝てもいいですか", kana: "ベッドでねてもいいですか" }
+      ]},
+      { id: 87, nounK: "山", nounR: "やま", nounT: "гора", verbK: "登る", verbR: "のぼる", verbT: "подниматься", forms: [
+        { type: "te_imasu", ru: "Сейчас поднимаюсь на гору.", kanji: "山に登っています", kana: "やまにのぼっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, поднимитесь на гору.", kanji: "山に登ってください", kana: "やまにのぼってください" },
+        { type: "te_mo_ii", ru: "Можно подняться на гору?", kanji: "山に登ってもいいですか", kana: "やまにのぼってもいいですか" }
+      ]},
+      { id: 88, nounK: "お茶", nounR: "おちゃ", nounT: "чай", verbK: "飲む", verbR: "のむ", verbT: "пить", forms: [
+        { type: "te_imasu", ru: "Сейчас пью чай.", kanji: "お茶を飲んでいます", kana: "おちゃをのんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, выпейте чай.", kanji: "お茶を飲んでください", kana: "おちゃをのんでください" },
+        { type: "te_mo_ii", ru: "Можно выпить чай?", kanji: "お茶を飲んでもいいですか", kana: "おちゃをのんでもいいですか" }
+      ]},
+      { id: 89, nounK: "電車", nounR: "でんしゃ", nounT: "поезд", verbK: "乗る", verbR: "のる", verbT: "садиться в транспорт", forms: [
+        { type: "te_imasu", ru: "Сейчас сажусь на поезд.", kanji: "電車に乗っています", kana: "でんしゃにのっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, сядьте на поезд.", kanji: "電車に乗ってください", kana: "でんしゃにのってください" },
+        { type: "te_mo_ii", ru: "Можно сесть на поезд?", kanji: "電車に乗ってもいいですか", kana: "でんしゃにのってもいいですか" }
+      ]},
+      { id: 90, nounK: "教室", nounR: "きょうしつ", nounT: "класс", verbK: "入る", verbR: "はいる", verbT: "входить", forms: [
+        { type: "te_imasu", ru: "Сейчас вхожу в класс.", kanji: "教室に入っています", kana: "きょうしつにはいっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, войдите в класс.", kanji: "教室に入ってください", kana: "きょうしつにはいってください" },
+        { type: "te_mo_ii", ru: "Можно войти в класс?", kanji: "教室に入ってもいいですか", kana: "きょうしつにはいってもいいですか" }
+      ]},
+      { id: 91, nounK: "靴下", nounR: "くつした", nounT: "носок", verbK: "履く", verbR: "はく", verbT: "надевать обувь", forms: [
+        { type: "te_imasu", ru: "Сейчас надеваю носки.", kanji: "靴下を履いています", kana: "くつしたをはいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, наденьте носки.", kanji: "靴下を履いてください", kana: "くつしたをはいてください" },
+        { type: "te_mo_ii", ru: "Можно надеть носки?", kanji: "靴下を履いてもいいですか", kana: "くつしたをはいてもいいですか" }
+      ]},
+      { id: 92, nounK: "川沿い", nounR: "かわぞい", nounT: "река", verbK: "走る", verbR: "はしる", verbT: "бежать", forms: [
+        { type: "te_imasu", ru: "Сейчас бегу вдоль реки.", kanji: "川沿いを走っています", kana: "かわぞいをはしっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, бегите вдоль реки.", kanji: "川沿いを走ってください", kana: "かわぞいをはしってください" },
+        { type: "te_mo_ii", ru: "Можно побежать вдоль реки?", kanji: "川沿いを走ってもいいですか", kana: "かわぞいをはしってもいいですか" }
+      ]},
+      { id: 93, nounK: "レストラン", nounR: "レストラン", nounT: "ресторан", verbK: "働く", verbR: "はたらく", verbT: "работать", forms: [
+        { type: "te_imasu", ru: "Сейчас работаю в ресторане.", kanji: "レストランで働いています", kana: "レストランではたらいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, работайте в ресторане.", kanji: "レストランで働いてください", kana: "レストランではたらいてください" },
+        { type: "te_mo_ii", ru: "Можно поработать в ресторане?", kanji: "レストランで働いてもいいですか", kana: "レストランではたらいてもいいですか" }
+      ]},
+      { id: 94, nounK: "英語", nounR: "えいご", nounT: "английский язык", verbK: "話す", verbR: "はなす", verbT: "говорить", forms: [
+        { type: "te_imasu", ru: "Сейчас говорю по-английски.", kanji: "英語を話しています", kana: "えいごをはなしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, говорите по-английски.", kanji: "英語を話してください", kana: "えいごをはなしてください" },
+        { type: "te_mo_ii", ru: "Можно заговорить по-английски?", kanji: "英語を話してもいいですか", kana: "えいごをはなしてもいいですか" }
+      ]},
+      { id: 95, nounK: "切手", nounR: "きって", nounT: "марка", verbK: "貼る", verbR: "はる", verbT: "наклеивать", forms: [
+        { type: "te_imasu", ru: "Сейчас наклеиваю марку.", kanji: "切手を貼っています", kana: "きってをはっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, наклейте марку.", kanji: "切手を貼ってください", kana: "きってをはってください" },
+        { type: "te_mo_ii", ru: "Можно наклеить марку?", kanji: "切手を貼ってもいいですか", kana: "きってをはってもいいですか" }
+      ]},
+      { id: 96, nounK: "天気", nounR: "てんき", nounT: "погода", verbK: "晴れる", verbR: "はれる", verbT: "проясняться", forms: [
+        { type: "te_imasu", ru: "Сейчас проясняется погода.", kanji: "天気が晴れています", kana: "てんきがはれています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть погода прояснится.", kanji: "天気が晴れてください", kana: "てんきがはれてください" },
+        { type: "te_mo_ii", ru: "Можно дождаться ясной погоды?", kanji: "天気が晴れてもいいですか", kana: "てんきがはれてもいいですか" }
+      ]},
+      { id: 97, nounK: "風邪", nounR: "かぜ", nounT: "простуда", verbK: "引く", verbR: "ひく", verbT: "простужаться", forms: [
+        { type: "te_imasu", ru: "Сейчас простужаюсь.", kanji: "風邪を引いています", kana: "かぜをひいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, простудитесь.", kanji: "風邪を引いてください", kana: "かぜをひいてください" },
+        { type: "te_mo_ii", ru: "Можно простудиться?", kanji: "風邪を引いてもいいですか", kana: "かぜをひいてもいいですか" }
+      ]},
+      { id: 98, nounK: "ピアノ", nounR: "ピアノ", nounT: "пианино", verbK: "弾く", verbR: "ひく", verbT: "играть на инструменте", forms: [
+        { type: "te_imasu", ru: "Сейчас играю на пианино.", kanji: "ピアノを弾いています", kana: "ピアノをひいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, играйте на пианино.", kanji: "ピアノを弾いてください", kana: "ピアノをひいてください" },
+        { type: "te_mo_ii", ru: "Можно поиграть на пианино?", kanji: "ピアノを弾いてもいいですか", kana: "ピアノをひいてもいいですか" }
+      ]},
+      { id: 99, nounK: "風", nounR: "かぜ", nounT: "ветер", verbK: "吹く", verbR: "ふく", verbT: "дуть", forms: [
+        { type: "te_imasu", ru: "Сейчас дует ветер.", kanji: "風が吹いています", kana: "かぜがふいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть ветер дует.", kanji: "風が吹いてください", kana: "かぜがふいてください" },
+        { type: "te_mo_ii", ru: "Можно подождать ветра?", kanji: "風が吹いてもいいですか", kana: "かぜがふいてもいいですか" }
+      ]},
+      { id: 100, nounK: "雨", nounR: "あめ", nounT: "дождь", verbK: "降る", verbR: "ふる", verbT: "идти (об осадках)", forms: [
+        { type: "te_imasu", ru: "Сейчас идёт дождь.", kanji: "雨が降っています", kana: "あめがふっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть дождь идёт.", kanji: "雨が降ってください", kana: "あめがふってください" },
+        { type: "te_mo_ii", ru: "Можно переждать дождь?", kanji: "雨が降ってもいいですか", kana: "あめがふってもいいですか" }
+      ]},
+      { id: 101, nounK: "図書館", nounR: "としょかん", nounT: "библиотека", verbK: "勉強する", verbR: "べんきょうする", verbT: "учиться", forms: [
+        { type: "te_imasu", ru: "Сейчас учусь в библиотеке.", kanji: "図書館で勉強しています", kana: "としょかんでべんきょうしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, учитесь в библиотеке.", kanji: "図書館で勉強してください", kana: "としょかんでべんきょうしてください" },
+        { type: "te_mo_ii", ru: "Можно позаниматься в библиотеке?", kanji: "図書館で勉強してもいいですか", kana: "としょかんでべんきょうしてもいいですか" }
+      ]},
+      { id: 102, nounK: "角", nounR: "かど", nounT: "угол", verbK: "曲がる", verbR: "まがる", verbT: "поворачивать", forms: [
+        { type: "te_imasu", ru: "Сейчас поворачиваю на углу.", kanji: "角を曲がっています", kana: "かどをまがっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, поверните на углу.", kanji: "角を曲がってください", kana: "かどをまがってください" },
+        { type: "te_mo_ii", ru: "Можно повернуть на углу?", kanji: "角を曲がってもいいですか", kana: "かどをまがってもいいですか" }
+      ]},
+      { id: 103, nounK: "タクシー", nounR: "タクシー", nounT: "такси", verbK: "待つ", verbR: "まつ", verbT: "ждать", forms: [
+        { type: "te_imasu", ru: "Сейчас жду такси.", kanji: "タクシーを待っています", kana: "タクシーをまっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, подождите такси.", kanji: "タクシーを待ってください", kana: "タクシーをまってください" },
+        { type: "te_mo_ii", ru: "Можно подождать такси?", kanji: "タクシーを待ってもいいですか", kana: "タクシーをまってもいいですか" }
+      ]},
+      { id: 104, nounK: "歯", nounR: "は", nounT: "зуб", verbK: "磨く", verbR: "みがく", verbT: "чистить", forms: [
+        { type: "te_imasu", ru: "Сейчас чищу зубы.", kanji: "歯を磨いています", kana: "はをみがいています" },
+        { type: "te_kudasai", ru: "Пожалуйста, почистите зубы.", kanji: "歯を磨いてください", kana: "はをみがいてください" },
+        { type: "te_mo_ii", ru: "Можно почистить зубы?", kanji: "歯を磨いてもいいですか", kana: "はをみがいてもいいですか" }
+      ]},
+      { id: 105, nounK: "絵", nounR: "え", nounT: "картина", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "te_imasu", ru: "Сейчас показываю картину.", kanji: "絵を見せています", kana: "えをみせています" },
+        { type: "te_kudasai", ru: "Пожалуйста, покажите картину.", kanji: "絵を見せてください", kana: "えをみせてください" },
+        { type: "te_mo_ii", ru: "Можно показать картину?", kanji: "絵を見せてもいいですか", kana: "えをみせてもいいですか" }
+      ]},
+      { id: 106, nounK: "映画", nounR: "えいが", nounT: "фильм", verbK: "見る", verbR: "みる", verbT: "смотреть", forms: [
+        { type: "te_imasu", ru: "Сейчас смотрю фильм.", kanji: "映画を見ています", kana: "えいがをみています" },
+        { type: "te_kudasai", ru: "Пожалуйста, посмотрите фильм.", kanji: "映画を見てください", kana: "えいがをみてください" },
+        { type: "te_mo_ii", ru: "Можно посмотреть фильм?", kanji: "映画を見てもいいですか", kana: "えいがをみてもいいですか" }
+      ]},
+      { id: 107, nounK: "荷物", nounR: "にもつ", nounT: "багаж", verbK: "持つ", verbR: "もつ", verbT: "держать", forms: [
+        { type: "te_imasu", ru: "Сейчас держу багаж.", kanji: "荷物を持っています", kana: "にもつをもっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, держите багаж.", kanji: "荷物を持ってください", kana: "にもつをもってください" },
+        { type: "te_mo_ii", ru: "Можно подержать багаж?", kanji: "荷物を持ってもいいですか", kana: "にもつをもってもいいですか" }
+      ]},
+      { id: 108, nounK: "先輩", nounR: "せんぱい", nounT: "старший товарищ", verbK: "呼ぶ", verbR: "よぶ", verbT: "звать", forms: [
+        { type: "te_imasu", ru: "Сейчас зову старшего товарища.", kanji: "先輩を呼んでいます", kana: "せんぱいをよんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, позовите старшего товарища.", kanji: "先輩を呼んでください", kana: "せんぱいをよんでください" },
+        { type: "te_mo_ii", ru: "Можно позвать старшего товарища?", kanji: "先輩を呼んでもいいですか", kana: "せんぱいをよんでもいいですか" }
+      ]},
+      { id: 109, nounK: "雑誌", nounR: "ざっし", nounT: "журнал", verbK: "読む", verbR: "よむ", verbT: "читать", forms: [
+        { type: "te_imasu", ru: "Сейчас читаю журнал.", kanji: "雑誌を読んでいます", kana: "ざっしをよんでいます" },
+        { type: "te_kudasai", ru: "Пожалуйста, почитайте журнал.", kanji: "雑誌を読んでください", kana: "ざっしをよんでください" },
+        { type: "te_mo_ii", ru: "Можно почитать журнал?", kanji: "雑誌を読んでもいいですか", kana: "ざっしをよんでもいいですか" }
+      ]},
+      { id: 110, nounK: "外国", nounR: "がいこく", nounT: "заграница", verbK: "旅行する", verbR: "りょこうする", verbT: "путешествовать", forms: [
+        { type: "te_imasu", ru: "Сейчас путешествую за границей.", kanji: "外国を旅行しています", kana: "がいこくをりょこうしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, путешествуйте за границей.", kanji: "外国を旅行してください", kana: "がいこくをりょこうしてください" },
+        { type: "te_mo_ii", ru: "Можно съездить за границу?", kanji: "外国を旅行してもいいですか", kana: "がいこくをりょこうしてもいいですか" }
+      ]},
+      { id: 111, nounK: "スポーツ", nounR: "スポーツ", nounT: "спорт", verbK: "練習する", verbR: "れんしゅうする", verbT: "тренироваться", forms: [
+        { type: "te_imasu", ru: "Сейчас тренируюсь в спорте.", kanji: "スポーツを練習しています", kana: "スポーツをれんしゅうしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, тренируйтесь в спорте.", kanji: "スポーツを練習してください", kana: "スポーツをれんしゅうしてください" },
+        { type: "te_mo_ii", ru: "Можно потренироваться в спорте?", kanji: "スポーツを練習してもいいですか", kana: "スポーツをれんしゅうしてもいいですか" }
+      ]},
+      { id: 112, nounK: "意味", nounR: "いみ", nounT: "смысл", verbK: "分かる", verbR: "わかる", verbT: "понимать", forms: [
+        { type: "te_imasu", ru: "Сейчас понимаю смысл.", kanji: "意味が分かっています", kana: "いみがわかっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, поймите смысл.", kanji: "意味が分かってください", kana: "いみがわかってください" },
+        { type: "te_mo_ii", ru: "Можно понять смысл?", kanji: "意味が分かってもいいですか", kana: "いみがわかってもいいですか" }
+      ]},
+      { id: 113, nounK: "約束", nounR: "やくそく", nounT: "обещание", verbK: "忘れる", verbR: "わすれる", verbT: "забывать", forms: [
+        { type: "te_imasu", ru: "Сейчас забываю обещание.", kanji: "約束を忘れています", kana: "やくそくをわすれています" },
+        { type: "te_kudasai", ru: "Пожалуйста, забудьте обещание.", kanji: "約束を忘れてください", kana: "やくそくをわすれてください" },
+        { type: "te_mo_ii", ru: "Можно забыть обещание?", kanji: "約束を忘れてもいいですか", kana: "やくそくをわすれてもいいですか" }
+      ]},
+      { id: 114, nounK: "切符", nounR: "きっぷ", nounT: "билет", verbK: "渡す", verbR: "わたす", verbT: "передавать", forms: [
+        { type: "te_imasu", ru: "Сейчас передаю билет.", kanji: "切符を渡しています", kana: "きっぷをわたしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, передайте билет.", kanji: "切符を渡してください", kana: "きっぷをわたしてください" },
+        { type: "te_mo_ii", ru: "Можно передать билет?", kanji: "切符を渡してもいいですか", kana: "きっぷをわたしてもいいですか" }
+      ]},
+      { id: 115, nounK: "橋", nounR: "はし", nounT: "мост", verbK: "渡る", verbR: "わたる", verbT: "переходить", forms: [
+        { type: "te_imasu", ru: "Сейчас перехожу мост.", kanji: "橋を渡っています", kana: "はしをわたっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, перейдите мост.", kanji: "橋を渡ってください", kana: "はしをわたってください" },
+        { type: "te_mo_ii", ru: "Можно перейти мост?", kanji: "橋を渡ってもいいですか", kana: "はしをわたってもいいですか" }
+      ]},
+      { id: 116, nounK: "子供", nounR: "こども", nounT: "ребёнок", verbK: "教える", verbR: "おしえる", verbT: "обучать", forms: [
+        { type: "te_imasu", ru: "Сейчас обучаю ребёнка.", kanji: "子供に教えています", kana: "こどもにおしえています" },
+        { type: "te_kudasai", ru: "Пожалуйста, обучите ребёнка.", kanji: "子供に教えてください", kana: "こどもにおしえてください" },
+        { type: "te_mo_ii", ru: "Можно обучить ребёнка?", kanji: "子供に教えてもいいですか", kana: "こどもにおしえてもいいですか" }
+      ]},
+      { id: 117, nounK: "試験", nounR: "しけん", nounT: "экзамен", verbK: "始まる", verbR: "はじまる", verbT: "начинаться", forms: [
+        { type: "te_imasu", ru: "Сейчас начинается экзамен.", kanji: "試験が始まっています", kana: "しけんがはじまっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть экзамен начнётся.", kanji: "試験が始まってください", kana: "しけんがはじまってください" },
+        { type: "te_mo_ii", ru: "Можно начать экзамен?", kanji: "試験が始まってもいいですか", kana: "しけんがはじまってもいいですか" }
+      ]},
+      { id: 118, nounK: "勉強", nounR: "べんきょう", nounT: "учёба", verbK: "始める", verbR: "はじめる", verbT: "начинать", forms: [
+        { type: "te_imasu", ru: "Сейчас начинаю учёбу.", kanji: "勉強を始めています", kana: "べんきょうをはじめています" },
+        { type: "te_kudasai", ru: "Пожалуйста, начните учёбу.", kanji: "勉強を始めてください", kana: "べんきょうをはじめてください" },
+        { type: "te_mo_ii", ru: "Можно приступить к учёбе?", kanji: "勉強を始めてもいいですか", kana: "べんきょうをはじめてもいいですか" }
+      ]},
+      { id: 119, nounK: "お土産", nounR: "おみやげ", nounT: "сувенир", verbK: "もらう", verbR: "もらう", verbT: "получать", forms: [
+        { type: "te_imasu", ru: "Сейчас получаю сувенир.", kanji: "お土産をもらっています", kana: "おみやげをもらっています" },
+        { type: "te_kudasai", ru: "Пожалуйста, получите сувенир.", kanji: "お土産をもらってください", kana: "おみやげをもらってください" },
+        { type: "te_mo_ii", ru: "Можно получить сувенир?", kanji: "お土産をもらってもいいですか", kana: "おみやげをもらってもいいですか" }
+      ]},
+      { id: 120, nounK: "お菓子", nounR: "おかし", nounT: "сладости", verbK: "くれる", verbR: "くれる", verbT: "давать (мне)", forms: [
+        { type: "te_imasu", ru: "Сейчас даю сладости.", kanji: "お菓子をくれています", kana: "おかしをくれています" },
+        { type: "te_kudasai", ru: "Пожалуйста, дайте сладости.", kanji: "お菓子をください", kana: "おかしをください" },
+        { type: "te_mo_ii", ru: "Можно угостить сладостями?", kanji: "お菓子をくれてもいいですか", kana: "おかしをくれてもいいですか" }
+      ]},
+      { id: 121, nounK: "女の子", nounR: "おんなのこ", nounT: "девочка", verbK: "泣く", verbR: "なく", verbT: "плакать", forms: [
+        { type: "te_imasu", ru: "Сейчас плачет девочка.", kanji: "女の子が泣いています", kana: "おんなのこがないています" },
+        { type: "te_kudasai", ru: "Пожалуйста, пусть девочка плачет.", kanji: "女の子が泣いてください", kana: "おんなのこがないてください" },
+        { type: "te_mo_ii", ru: "Можно дать девочке поплакать?", kanji: "女の子が泣いてもいいですか", kana: "おんなのこがないてもいいですか" }
+      ]},
+      { id: 122, nounK: "地図", nounR: "ちず", nounT: "карта", verbK: "見せる", verbR: "みせる", verbT: "показывать", forms: [
+        { type: "te_imasu", ru: "Сейчас показываю карту.", kanji: "地図を見せています", kana: "ちずをみせています" },
+        { type: "te_kudasai", ru: "Пожалуйста, покажите карту.", kanji: "地図を見せてください", kana: "ちずをみせてください" },
+        { type: "te_mo_ii", ru: "Можно показать карту?", kanji: "地図を見せてもいいですか", kana: "ちずをみせてもいいですか" }
+      ]},
+      { id: 123, nounK: "学生", nounR: "がくせい", nounT: "студент", verbK: "テストする", verbR: "テストする", verbT: "тестировать", forms: [
+        { type: "te_imasu", ru: "Сейчас тестирую студентов.", kanji: "学生をテストしています", kana: "がくせいをテストしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, протестируйте студентов.", kanji: "学生をテストしてください", kana: "がくせいをテストしてください" },
+        { type: "te_mo_ii", ru: "Можно протестировать студентов?", kanji: "学生をテストしてもいいですか", kana: "がくせいをテストしてもいいですか" }
+      ]},
+      { id: 124, nounK: "パーティー", nounR: "パーティー", nounT: "вечеринка", verbK: "する", verbR: "する", verbT: "устраивать", forms: [
+        { type: "te_imasu", ru: "Сейчас устраиваю вечеринку.", kanji: "パーティーをしています", kana: "パーティーをしています" },
+        { type: "te_kudasai", ru: "Пожалуйста, устройте вечеринку.", kanji: "パーティーをしてください", kana: "パーティーをしてください" },
+        { type: "te_mo_ii", ru: "Можно устроить вечеринку?", kanji: "パーティーをしてもいいですか", kana: "パーティーをしてもいいですか" }
+      ]}
+    ];
+
+    /* ==========================================================================
+       ЛОГИКА СОСТОЯНИЯ 2 УРОВНЯ
+       ========================================================================== */
+    const STORAGE_KEY = "jp_app_save_level_2";
+
+    let state = {
+      mode: "level",
+      currentLevel: 2,
+      wordIndex: 0,
+      formSubIndex: 0,
+      playlist: [],
+      currentFormOrder: [0, 1, 2],
+      errors: []
+    };
+
+    let isAnswerChecked = false;
+    let lastSpokenKana = "";
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn("Storage error", e);
+      }
+      updateErrorsBadge();
+    }
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            state = Object.assign(state, parsed);
+          }
+        }
+      } catch (e) {
+        console.warn("Resetting corrupt storage");
+      }
+
+      
+      state.currentLevel = 2;
+      if (state.mode !== "errors") {
+        state.mode = "level";
+      }
+
+      if (!Array.isArray(state.playlist) || state.playlist.length !== RAW_LEVEL_2_DATA.length) {
+        resetLevelPlaylist();
+      }
+      if (state.wordIndex < 0 || state.wordIndex >= RAW_LEVEL_2_DATA.length) {
+        state.wordIndex = 0;
+      }
+      if (state.formSubIndex < 0 || state.formSubIndex > 2) {
+        state.formSubIndex = 0;
+      }
+      if (!Array.isArray(state.currentFormOrder) || state.currentFormOrder.length !== 3) {
+        state.currentFormOrder = shuffleArray([0, 1, 2]);
+      }
+      if (!Array.isArray(state.errors)) {
+        state.errors = [];
+      }
+    }
+
+    function resetLevelPlaylist() {
+      const indices = RAW_LEVEL_2_DATA.map((_, i) => i);
+      state.playlist = shuffleArray(indices);
+      state.wordIndex = 0;
+      state.formSubIndex = 0;
+      state.currentFormOrder = shuffleArray([0, 1, 2]);
+    }
+
+    function confirmReset() {
+      if (confirm("Перемешать и начать 2 уровень с первого слова?")) {
+        resetLevelPlaylist();
+        state.mode = "level";
+        state.currentLevel = 2;
+        saveState();
+        renderScreen();
+      }
+    }
+
+    /* ==========================================================================
+       ОЗВУЧКА WEB SPEECH API
+       ========================================================================== */
+    let jaVoice = null;
+    function initVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      jaVoice = voices.find(v => (v.lang === 'ja-JP' || v.lang === 'ja_JP') && v.name.includes('Kyoko')) 
+             || voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.startsWith('ja')) 
+             || null;
+    }
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = initVoices;
+      initVoices();
+    }
+
+    function playAudio(kanaText) {
+      if (!('speechSynthesis' in window) || !kanaText) return;
+      try {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(kanaText);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.88;
+        if (jaVoice) utterance.voice = jaVoice;
+        window.speechSynthesis.speak(utterance);
+        lastSpokenKana = kanaText;
+      } catch(e) {
+        console.warn("Audio warning", e);
+      }
+    }
+
+    function replayAudio() {
+      if (lastSpokenKana) {
+        playAudio(lastSpokenKana);
+      }
+    }
+
+    /* ==========================================================================
+       РЕНДЕР ЭКРАНА
+       ========================================================================== */
+    function getCurrentTask() {
+      if (state.mode === "errors") {
+        if (!state.errors || state.errors.length === 0) return null;
+        return state.errors[0];
+      }
+
+      if (!state.playlist || state.wordIndex >= state.playlist.length) {
+        return null;
+      }
+
+      const itemIdx = state.playlist[state.wordIndex];
+      const wordObj = RAW_LEVEL_2_DATA[itemIdx];
+      if (!wordObj || !wordObj.forms) return null;
+
+      const formOrder = (state.currentFormOrder && state.currentFormOrder.length === 3) 
+        ? state.currentFormOrder 
+        : [0, 1, 2];
+      const formIdx = formOrder[state.formSubIndex] !== undefined ? formOrder[state.formSubIndex] : 0;
+      const formObj = wordObj.forms[formIdx];
+      if (!formObj) return null;
+
+      return { wordObj, formObj };
+    }
+
+    function renderScreen() {
+      updateErrorsBadge();
+
+      document.querySelectorAll(".nav-pill").forEach(p => {
+        p.classList.remove("active");
+        if (state.mode === "level" && p.innerText.trim() === String(state.currentLevel)) {
+          p.classList.add("active");
+        }
+      });
+      if (state.mode === "errors") {
+        document.getElementById("errorsNavBtn").classList.add("active");
+      }
+
+      const gameCard = document.getElementById("gameCard");
+      const placeholder = document.getElementById("placeholderView");
+      const progressWrap = document.getElementById("progressWrap");
+      const theoryBanner = document.getElementById("theoryBanner");
+
+      if (state.mode === "level" && state.currentLevel !== 2) {
+        gameCard.style.display = "none";
+        progressWrap.style.display = "none";
+        theoryBanner.style.display = "none";
+        placeholder.classList.add("active");
+        document.getElementById("placeholderTitle").innerText = `Уровень ${state.currentLevel}`;
+        return;
+      } else {
+        gameCard.style.display = "flex";
+        progressWrap.style.display = "flex";
+        theoryBanner.style.display = "flex";
+        placeholder.classList.remove("active");
+      }
+
+      isAnswerChecked = false;
+      const input = document.getElementById("userInput");
+      const actionBtn = document.getElementById("actionBtn");
+      const feedback = document.getElementById("feedbackBox");
+      
+      input.value = "";
+      input.readOnly = false;
+      actionBtn.innerText = "Проверить";
+      feedback.className = "feedback-box";
+
+      const task = getCurrentTask();
+
+      if (!task) {
+        if (state.mode === "errors") {
+          alert("🎉 Все ошибки успешно исправлены!");
+          state.mode = "level";
+          saveState();
+          renderScreen();
+          return;
+        } else {
+          alert("🏆 Поздравляем! Все 124 слова 2 уровня пройдены!");
+          resetLevelPlaylist();
+          saveState();
+          renderScreen();
+          return;
+        }
+      }
+
+      // 1. Опорные слова
+      document.getElementById("refNounKanji").innerText = task.wordObj.nounK;
+      document.getElementById("refNounKana").innerText = "- " + task.wordObj.nounR;
+      document.getElementById("refNounTrans").innerText = "- " + task.wordObj.nounT;
+
+      document.getElementById("refVerbKanji").innerText = task.wordObj.verbK;
+      document.getElementById("refVerbKana").innerText = "- " + task.wordObj.verbR;
+      document.getElementById("refVerbTrans").innerText = "- " + task.wordObj.verbT;
+
+      // 2. Вопрос
+      document.getElementById("promptRu").innerText = task.formObj.ru;
+      document.getElementById("modeLabel").innerText = state.mode === "errors" ? "Исправление ошибки" : "Переведите фразу";
+
+      // 3. Прогресс (для 3 форм на слово)
+      if (state.mode === "level") {
+        const total = RAW_LEVEL_2_DATA.length;
+        const currentNum = state.wordIndex + 1;
+        document.getElementById("progressWordLabel").innerText = `Слово ${currentNum} из ${total}`;
+        const pct = Math.round(((state.wordIndex * 3 + state.formSubIndex) / (total * 3)) * 100);
+        document.getElementById("progressPercentLabel").innerText = `${pct}%`;
+        document.getElementById("progressBarFill").style.width = `${pct}%`;
+
+        for (let i = 0; i < 3; i++) {
+          const dot = document.getElementById(`dot${i}`);
+          dot.className = "form-dot";
+          if (i < state.formSubIndex) dot.classList.add("done");
+          else if (i === state.formSubIndex) dot.classList.add("active");
+        }
+      } else {
+        document.getElementById("progressWordLabel").innerText = `Ошибок осталось: ${state.errors.length}`;
+        document.getElementById("progressPercentLabel").innerText = `Ошибки`;
+        document.getElementById("progressBarFill").style.width = `100%`;
+        for (let i = 0; i < 3; i++) {
+          document.getElementById(`dot${i}`).className = "form-dot";
+        }
+      }
+    }
+
+    /* ==========================================================================
+       ПРОВЕРКА ОТВЕТА (ТОЛЬКО КАНДЗИ И ХИРАГАНА)
+       ========================================================================== */
+    function cleanText(str) {
+      return (str || '').replace(/[\s　。、.!,?]/g, '').trim();
+    }
+
+    function handleAction() {
+      if (!isAnswerChecked) {
+        checkAnswer();
+      } else {
+        nextQuestion();
+      }
+    }
+
+    function checkAnswer() {
+      const task = getCurrentTask();
+      if (!task) return;
+
+      const input = document.getElementById("userInput");
+      const userVal = cleanText(input.value);
+      if (!userVal) {
+        return;
+      }
+
+      const targetKanji = cleanText(task.formObj.kanji);
+      const targetKana = cleanText(task.formObj.kana);
+
+      const isCorrect = (userVal === targetKanji || userVal === targetKana);
+
+      playAudio(task.formObj.kana);
+
+      const feedback = document.getElementById("feedbackBox");
+      const statusText = document.getElementById("feedbackStatus");
+      const fKanji = document.getElementById("feedbackKanji");
+      const fKana = document.getElementById("feedbackKana");
+
+      fKanji.innerText = task.formObj.kanji;
+      fKana.innerText = task.formObj.kana;
+
+      if (isCorrect) {
+        feedback.className = "feedback-box correct";
+        statusText.innerText = "✓ Правильно!";
+        if (state.mode === "errors") {
+          state.errors.shift();
+        }
+      } else {
+        feedback.className = "feedback-box incorrect";
+        statusText.innerText = "✕ Ошибка";
+        if (state.mode === "level") {
+          const alreadyExists = state.errors.some(e => e.formObj.kanji === task.formObj.kanji);
+          if (!alreadyExists) {
+            state.errors.push(task);
+          }
+        } else if (state.mode === "errors") {
+          state.errors.push(state.errors.shift());
+        }
+      }
+
+      input.readOnly = true;
+      isAnswerChecked = true;
+      document.getElementById("actionBtn").innerText = "Дальше ➔";
+      saveState();
+    }
+
+    function nextQuestion() {
+      if (state.mode === "level") {
+        state.formSubIndex++;
+        if (state.formSubIndex >= 3) {
+          state.formSubIndex = 0;
+          state.wordIndex++;
+          state.currentFormOrder = shuffleArray([0, 1, 2]);
+        }
+      }
+      saveState();
+      renderScreen();
+    }
+
+    /* ==========================================================================
+       НАВИГАЦИЯ МЕЖДУ ФАЙЛАМИ
+       ========================================================================== */
+    function updateErrorsBadge() {
+      const btn = document.getElementById("errorsNavBtn");
+      if (!btn) return;
+      const count = (state.errors || []).length;
+      btn.innerText = `Ошибки (${count})`;
+      if (count > 0) btn.classList.add("has-errors");
+      else btn.classList.remove("has-errors");
+    }
+
+    function openErrorsTab() {
+      if (!state.errors || state.errors.length === 0) {
+        alert("У вас нет сохранённых ошибок! Отличный результат!");
+        return;
+      }
+      state.mode = "errors";
+      saveState();
+      renderScreen();
+    }
+
+    function switchLevel(lvl) {
+      const levelPages = {
+        1: '1ур.html',
+        2: '2ур.html',
+        3: '3ур.html',
+        4: '4ур.html',
+        5: '5ур.html',
+        6: '6ур.html',
+        7: '7ур.html'
+      };
+
+      if (lvl !== state.currentLevel && levelPages[lvl]) {
+        window.location.href = levelPages[lvl];
+        return;
+      }
+
+      state.mode = "level";
+      state.currentLevel = lvl;
+      saveState();
+      renderScreen();
+    }
+
+    function openTheoryModal() {
+      document.getElementById("theoryModal").classList.add("open");
+    }
+    function closeTheoryModal() {
+      document.getElementById("theoryModal").classList.remove("open");
+    }
+
+    // Инициализация
+    loadState();
+    renderScreen();
+// Горячие клавиши: Alt + Enter, Cmd + Enter (и Ctrl + Enter)
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && (e.altKey || e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        handleAction();
+      }
+    });
+  </script>
+</body>
+</html>
