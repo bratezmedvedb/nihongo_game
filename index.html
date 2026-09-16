@@ -8,17 +8,8 @@
 <!-- Подключение Telegram WebApp SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<!-- УМНЫЕ ОТСТУПЫ ПОД ОБЫЧНЫЙ И ПОЛНОЭКРАННЫЙ РЕЖИМ -->
 <style>
   body {
-    /* 1. Обычный режим: аккуратный и компактный отступ (16px) */
-    padding-top: calc(16px + env(safe-area-inset-top, 0px)) !important;
-    transition: padding-top 0.25s ease !important;
-  }
-
-  /* 2. Полноэкранный режим: опускается вниз на 90px под плашку Telegram */
-  body.tg-fullscreen,
-  :fullscreen body {
     padding-top: calc(110px + env(safe-area-inset-top, 0px)) !important;
   }
 </style>
