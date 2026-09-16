@@ -1,3 +1,5 @@
+code
+Html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -40,7 +42,8 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 16px 14px calc(50px + env(safe-area-inset-bottom, 0px));
+    /* ОТСТУП СВЕРХУ: опускает меню ниже кнопок Telegram */
+    padding: calc(56px + env(safe-area-inset-top, 0px)) 14px calc(50px + env(safe-area-inset-bottom, 0px));
   }
 
   .wrap {
@@ -225,7 +228,7 @@
   /* Мобильная адаптация */
   @media (max-width: 400px) {
     body {
-      padding: 12px 10px calc(40px + env(safe-area-inset-bottom, 0px));
+      padding: calc(52px + env(safe-area-inset-top, 0px)) 10px calc(40px + env(safe-area-inset-bottom, 0px));
     }
     .header {
       margin-bottom: 12px;

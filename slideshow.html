@@ -8,6 +8,13 @@
   <!-- Подключение Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+  <!-- Отступ шапки под кнопки Telegram -->
+  <style>
+    header {
+      padding-top: calc(56px + env(safe-area-inset-top, 0px)) !important;
+    }
+  </style>
+
   <style>
     :root {
       --bg: #f4f1ea;
