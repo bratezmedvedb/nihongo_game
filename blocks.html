@@ -5,12 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Японский тренажёр: Конструктор предложений</title>
 
-  <!-- Отступ под кнопки Telegram -->
-  <style>
-    body {
-      padding-top: calc(100px + env(safe-area-inset-top, 0px)) !important;
-    }
-  </style>
+<!-- УМНЫЕ ОТСТУПЫ ПОД ОБЫЧНЫЙ И ПОЛНОЭКРАННЫЙ РЕЖИМ -->
+<style>
+  body {
+    /* 1. Обычный режим: аккуратный и компактный отступ (16px) */
+    padding-top: calc(16px + env(safe-area-inset-top, 0px)) !important;
+    transition: padding-top 0.25s ease !important;
+  }
+
+  /* 2. Полноэкранный режим: опускается вниз на 90px под плашку Telegram */
+  body.tg-fullscreen,
+  :fullscreen body {
+    padding-top: calc(100px + env(safe-area-inset-top, 0px)) !important;
+  }
+</style>
 
   <style>
   :root {
