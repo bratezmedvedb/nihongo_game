@@ -8,6 +8,13 @@
 <!-- Подключение Telegram WebApp SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+<!-- ПРИНУДИТЕЛЬНЫЙ ОТСТУП ПОД КНОПКИ TELEGRAM -->
+<style>
+  html, body {
+    padding-top: calc(90px + env(safe-area-inset-top, 0px)) !important;
+  }
+</style>
+
 <style>
   :root {
     --bg-page: #f4f1ea;
