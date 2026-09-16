@@ -2,8 +2,12 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>JLPT N5 — Слайд-шоу</title>
+  
+  <!-- Подключение Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
     :root {
       --bg: #f4f1ea;
@@ -35,44 +39,46 @@
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
       min-height: 100vh;
+      min-height: 100dvh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      overflow-x: hidden;
+      overflow: hidden;
     }
 
     /* Верхнее меню */
     header {
       width: 100%;
-      padding: 12px 30px;
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       border-bottom: 1px solid var(--border-light);
       background: var(--bg);
       z-index: 10;
-      gap: 16px;
+      gap: 12px;
+      flex-shrink: 0;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
     }
 
-    /* Кнопка возврата в главное меню */
     .back-to-menu {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       text-decoration: none;
       color: var(--sub-text);
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      padding: 7px 14px;
+      padding: 6px 12px;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 16px;
       white-space: nowrap;
       flex-shrink: 0;
       transition: all 0.2s ease;
@@ -87,8 +93,8 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-size: 1.15rem;
+      gap: 8px;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--text);
     }
@@ -96,26 +102,30 @@
     .badge-n5 {
       background: var(--accent);
       color: white;
-      padding: 3px 12px;
-      border-radius: 14px;
-      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.75rem;
       font-weight: 600;
     }
 
     .nav-tabs {
       display: flex;
-      gap: 8px;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+    .nav-tabs::-webkit-scrollbar { display: none; }
 
     .nav-btn {
       background: transparent;
       color: var(--sub-text);
       border: 1px solid var(--border);
-      padding: 8px 18px;
-      border-radius: 20px;
-      font-size: 0.9rem;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
       transition: all 0.2s ease;
     }
 
@@ -136,8 +146,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 15px 25px;
+      padding: 10px;
       position: relative;
+      min-height: 0;
     }
 
     .tab-content {
@@ -156,26 +167,26 @@
 
     /* Карточка с абсолютным центром */
     .presentation-card {
-      width: 96vw;
-      max-width: 1440px;
-      min-height: 74vh;
+      width: 100%;
+      max-width: 1400px;
+      height: 100%;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 32px;
+      border-radius: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
-      padding: 30px;
+      padding: 20px;
       transition: all 0.3s ease;
       overflow: hidden;
     }
 
     .card-top {
       position: absolute;
-      top: 24px;
-      left: 36px;
-      right: 36px;
+      top: 16px;
+      left: 20px;
+      right: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -188,7 +199,7 @@
     }
 
     .deck-indicator {
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       color: var(--sub-text);
       font-weight: 600;
     }
@@ -199,23 +210,22 @@
     }
 
     .action-circle-btn {
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 1px solid var(--border);
       background: var(--bg);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.95rem;
+      font-size: 1rem;
       cursor: pointer;
       color: var(--text);
-      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: all 0.2s ease;
     }
 
-    .action-circle-btn:hover {
-      transform: scale(1.12);
-      border-color: var(--text);
+    .action-circle-btn:active {
+      transform: scale(0.92);
     }
 
     .action-circle-btn.btn-voice:hover {
@@ -241,12 +251,6 @@
       color: var(--sub-text);
     }
 
-    .action-circle-btn.btn-esc:hover {
-      background: #fee2e2;
-      border-color: #ef4444;
-      color: #b91c1c;
-    }
-
     /* Блок текста по центру */
     .card-center {
       text-align: center;
@@ -258,56 +262,52 @@
       width: 100%;
       height: 100%;
       margin: 0;
-      padding: 0 20px;
+      padding: 0 10px;
     }
 
-    /* Автомасштаб шрифтов */
+    /* Автомасштаб шрифтов под экраны */
     .kanji-display {
-      font-size: clamp(6.5rem, 15vw, 13.5rem);
+      font-size: clamp(4.8rem, 18vw, 13rem);
       font-weight: 800;
       color: var(--text);
-      line-height: 1;
+      line-height: 1.05;
       letter-spacing: 0 !important;
-      margin: 0 0 16px 0;
+      margin: 0 0 12px 0;
       text-align: center;
       white-space: nowrap;
       max-width: 95vw;
     }
 
     .reading-display {
-      font-size: clamp(2.6rem, 5.5vw, 4.6rem);
+      font-size: clamp(2.2rem, 7vw, 4.5rem);
       color: var(--kana);
       font-weight: 400;
       line-height: 1.1;
       letter-spacing: 0 !important;
-      margin: 0 0 16px 0;
+      margin: 0 0 14px 0;
       text-align: center;
       white-space: nowrap;
       max-width: 95vw;
     }
 
     .kanji-display.len-4 {
-      font-size: clamp(5rem, 11vw, 9.8rem);
-      margin-bottom: 12px;
+      font-size: clamp(3.8rem, 13vw, 9.5rem);
     }
 
     .kanji-display.len-5 {
-      font-size: clamp(4rem, 8.8vw, 7.8rem);
-      margin-bottom: 10px;
+      font-size: clamp(3.2rem, 11vw, 7.8rem);
     }
 
     .kanji-display.len-long {
-      font-size: clamp(3rem, 6.8vw, 6rem);
-      margin-bottom: 8px;
+      font-size: clamp(2.6rem, 8.5vw, 6rem);
     }
 
     .reading-display.len-long {
-      font-size: clamp(1.8rem, 3.8vw, 3.2rem);
-      margin-bottom: 10px;
+      font-size: clamp(1.6rem, 5vw, 3.2rem);
     }
 
     .meaning-display {
-      font-size: clamp(0.95rem, 1.8vw, 1.4rem);
+      font-size: clamp(1.1rem, 3.8vw, 1.6rem);
       color: var(--ink);
       font-weight: 600;
       display: inline-block;
@@ -325,48 +325,44 @@
       opacity: 0.15;
     }
 
-    /* Нижняя панель */
+    /* Нижняя панель управления */
     .bottom-bar {
       width: 100%;
       background: var(--card-bg);
       border-top: 1px solid var(--border-light);
-      padding: 14px 30px;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       align-items: center;
-      gap: 12px;
+      gap: 8px;
       position: relative;
+      flex-shrink: 0;
     }
 
     .ctrl-btn {
       background: var(--bg);
       color: var(--text);
       border: 1px solid var(--border);
-      padding: 8px 18px;
-      border-radius: 12px;
-      font-size: 0.95rem;
+      padding: 7px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       transition: all 0.2s ease;
     }
 
-    .ctrl-btn:hover {
-      border-color: var(--text);
-      background: #eae6dc;
+    .ctrl-btn:active {
+      transform: scale(0.95);
     }
 
     .ctrl-btn.primary {
       background: var(--accent);
       color: white;
       border-color: var(--accent);
-    }
-
-    .ctrl-btn.primary:hover {
-      background: var(--accent-hover);
     }
 
     .ctrl-btn.active-toggle {
@@ -379,9 +375,9 @@
       background: var(--bg);
       color: var(--text);
       border: 1px solid var(--border);
-      padding: 8px 14px;
-      border-radius: 12px;
-      font-size: 0.95rem;
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 0.88rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -402,86 +398,117 @@
       transition: width 0.05s linear;
     }
 
-    /* Fullscreen ТВ режим */
+    /* ПОЛНОЭКРАННЫЙ РЕЖИМ (И ДЛЯ БРАУЗЕРА, И ДЛЯ TELEGRAM) */
+    body.app-fullscreen header,
+    body.app-fullscreen .bottom-bar,
+    body.app-fullscreen .deck-indicator,
     :fullscreen header,
     :fullscreen .bottom-bar,
     :fullscreen .deck-indicator {
       display: none !important;
     }
 
+    body.app-fullscreen,
     :fullscreen body {
       background: var(--bg);
     }
 
+    body.app-fullscreen main,
     :fullscreen main {
-      padding: 0;
-      width: 100vw;
-      height: 100vh;
+      padding: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
     }
 
+    body.app-fullscreen .presentation-card,
     :fullscreen .presentation-card {
-      width: 100vw;
-      height: 100vh;
-      max-width: none;
-      min-height: 100vh;
-      border: none;
-      border-radius: 0;
-      background: var(--bg);
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-width: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      background: var(--bg) !important;
+      padding: 0 !important;
     }
 
+    body.app-fullscreen .card-top,
     :fullscreen .card-top {
-      top: 36px;
-      left: 48px;
-      right: 48px;
+      top: 20px;
+      left: 20px;
+      right: 20px;
     }
 
+    body.app-fullscreen .action-circle-btn.btn-esc,
     :fullscreen .action-circle-btn.btn-esc {
-      display: flex;
+      display: flex !important;
     }
 
+    body.app-fullscreen .kanji-display,
     :fullscreen .kanji-display {
-      font-size: clamp(12rem, 26vw, 24rem);
-      margin-bottom: 24px;
+      font-size: clamp(6.5rem, 24vw, 22rem);
     }
-    :fullscreen .kanji-display.len-4 {
-      font-size: clamp(8.5rem, 18vw, 16.5rem);
-      margin-bottom: 18px;
-    }
-    :fullscreen .kanji-display.len-5 {
-      font-size: clamp(7rem, 14vw, 13rem);
-      margin-bottom: 16px;
-    }
-    :fullscreen .kanji-display.len-long {
-      font-size: clamp(4.8rem, 10.5vw, 9.8rem);
-      margin-bottom: 14px;
-    }
-
+    body.app-fullscreen .reading-display,
     :fullscreen .reading-display {
-      font-size: clamp(4.5rem, 10vw, 9rem);
-      margin-bottom: 24px;
+      font-size: clamp(3rem, 10vw, 8rem);
     }
-    :fullscreen .reading-display.len-long {
-      font-size: clamp(2.8rem, 6vw, 5.2rem);
-      margin-bottom: 16px;
+    body.app-fullscreen .meaning-display,
+    :fullscreen .meaning-display {
+      font-size: clamp(1.4rem, 4.5vw, 2.4rem);
     }
 
-    :fullscreen .meaning-display {
-      font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+    /* Мобильная адаптация интерфейса */
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px 10px;
+        gap: 6px;
+      }
+      .header-left {
+        justify-content: space-between;
+      }
+      .nav-tabs {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      main {
+        padding: 6px;
+      }
+      .presentation-card {
+        border-radius: 18px;
+        padding: 12px;
+      }
+      .card-top {
+        top: 10px;
+        left: 12px;
+        right: 12px;
+      }
+      .action-circle-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9rem;
+      }
+      .bottom-bar {
+        padding: 6px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+        gap: 5px;
+      }
+      .ctrl-btn, .select-custom {
+        padding: 6px 8px;
+        font-size: 0.8rem;
+      }
     }
 
     /* Списки во вкладках */
     .list-wrapper {
-      width: 96vw;
-      max-width: 1440px;
+      width: 100%;
+      max-width: 1400px;
+      height: 100%;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 28px;
-      padding: 28px;
-      max-height: 78vh;
+      border-radius: 20px;
+      padding: 16px;
       display: flex;
       flex-direction: column;
     }
@@ -490,54 +517,56 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
       flex-wrap: wrap;
-      gap: 14px;
+      gap: 10px;
     }
 
     .search-input {
-      padding: 10px 16px;
+      padding: 8px 12px;
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: 10px;
       background: var(--bg);
-      font-size: 1rem;
-      min-width: 280px;
+      font-size: 0.9rem;
+      width: 100%;
+      max-width: 300px;
     }
 
     .words-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
       overflow-y: auto;
-      padding-right: 8px;
+      padding-right: 4px;
+      flex: 1;
     }
 
     .word-item {
       background: var(--bg);
       border: 1px solid var(--border-light);
-      padding: 14px 18px;
-      border-radius: 16px;
+      padding: 10px 14px;
+      border-radius: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .word-item .main-info .w-kanji {
-      font-size: 1.4rem;
+      font-size: 1.25rem;
       font-weight: bold;
       color: var(--text);
     }
 
     .word-item .main-info .w-reading {
-      font-size: 1rem;
+      font-size: 0.9rem;
       color: var(--sub-text);
-      margin-left: 8px;
+      margin-left: 6px;
     }
 
     .word-item .main-info .w-meaning {
-      font-size: 0.95rem;
+      font-size: 0.88rem;
       color: var(--ink);
-      margin-top: 4px;
+      margin-top: 2px;
       font-weight: 500;
     }
 
@@ -550,19 +579,14 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 50%;
-      width: 34px;
-      height: 34px;
-      font-size: 0.95rem;
+      width: 32px;
+      height: 32px;
+      font-size: 0.9rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s ease;
-    }
-
-    .mini-btn:hover {
-      transform: scale(1.1);
-      border-color: var(--text);
     }
 
     .mini-btn.starred {
@@ -579,13 +603,13 @@
 
     .empty-state {
       text-align: center;
-      padding: 50px 20px;
+      padding: 40px 10px;
       color: var(--sub-text);
-      font-size: 1.15rem;
+      font-size: 1rem;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
+      from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
@@ -601,16 +625,16 @@
     <div class="header-left">
       <a href="index.html" class="back-to-menu">← Меню</a>
       <div class="brand">
-        <span>日本語 JLPT N5</span>
+        <span>JLPT N5</span>
         <span class="badge-n5">710 Слов</span>
       </div>
     </div>
 
     <div class="nav-tabs">
-      <button class="nav-btn active" onclick="switchTab('presentation')">📺 Презентация</button>
+      <button class="nav-btn active" onclick="switchTab('presentation')">📺 Показ</button>
       <button class="nav-btn" id="favTabBtn" onclick="switchTab('favorites')">⭐ Избранные (0)</button>
       <button class="nav-btn" id="learnedTabBtn" onclick="switchTab('learned')">✔️ Изученные (0)</button>
-      <button class="nav-btn" onclick="switchTab('all')">📚 Все 710 слов</button>
+      <button class="nav-btn" onclick="switchTab('all')">📚 Все слова</button>
     </div>
   </header>
 
@@ -623,18 +647,10 @@
           <div class="deck-indicator" id="deckIndicator">Слово 1 из 710</div>
           
           <div class="corner-actions">
-            <button class="action-circle-btn btn-star" id="starActionBtn" onclick="toggleCurrentFavorite()" title="В избранное / Доучить (S)">
-              ⭐
-            </button>
-            <button class="action-circle-btn btn-voice" onclick="speakCurrentWord(true)" title="Озвучить Kyoko (V)">
-              🔊
-            </button>
-            <button class="action-circle-btn btn-check" onclick="markCurrentAsLearned()" title="Знаю слово (Enter или K)">
-              ✔️
-            </button>
-            <button class="action-circle-btn btn-esc" onclick="toggleFullScreen()" title="Выйти из полного экрана (ESC / F)">
-              ✕
-            </button>
+            <button class="action-circle-btn btn-star" id="starActionBtn" onclick="toggleCurrentFavorite()" title="В избранное">⭐</button>
+            <button class="action-circle-btn btn-voice" onclick="speakCurrentWord(true)" title="Озвучить">🔊</button>
+            <button class="action-circle-btn btn-check" onclick="markCurrentAsLearned()" title="Знаю слово">✔️</button>
+            <button class="action-circle-btn btn-esc" onclick="toggleFullScreen()" title="Выйти из полного экрана">✕</button>
           </div>
         </div>
 
@@ -655,9 +671,9 @@
         <div class="list-header">
           <div>
             <h2>⭐ Избранные слова</h2>
-            <p style="color:var(--sub-text); font-size:0.95rem;">Слова, добавленные для повторения</p>
+            <p style="color:var(--sub-text); font-size:0.85rem;">Слова для повторения</p>
           </div>
-          <button class="ctrl-btn primary" onclick="startDeckMode('favorites')">▶ Запустить презентацию из избранных</button>
+          <button class="ctrl-btn primary" onclick="startDeckMode('favorites')">▶ Запустить презентацию</button>
         </div>
         <div class="words-grid" id="favoritesGrid"></div>
       </div>
@@ -669,9 +685,9 @@
         <div class="list-header">
           <div>
             <h2>✔️ Изученные слова</h2>
-            <p style="color:var(--sub-text); font-size:0.95rem;">Исключены из основного показа</p>
+            <p style="color:var(--sub-text); font-size:0.85rem;">Исключены из основного показа</p>
           </div>
-          <button class="ctrl-btn" onclick="resetAllLearned()">Вернуть все в колоду</button>
+          <button class="ctrl-btn" onclick="resetAllLearned()">Вернуть все</button>
         </div>
         <div class="words-grid" id="learnedGrid"></div>
       </div>
@@ -682,10 +698,10 @@
       <div class="list-wrapper">
         <div class="list-header">
           <div>
-            <h2>📚 Полный словарь (710 слов)</h2>
-            <p style="color:var(--sub-text); font-size:0.95rem;" id="allWordsCount">Всего: 710 слов</p>
+            <h2>📚 Полный словарь (710)</h2>
+            <p style="color:var(--sub-text); font-size:0.85rem;" id="allWordsCount">Всего: 710 слов</p>
           </div>
-          <input type="text" class="search-input" id="searchAllInput" placeholder="Поиск по кандзи, чтению или смыслу..." oninput="filterAllWords()">
+          <input type="text" class="search-input" id="searchAllInput" placeholder="Поиск..." oninput="filterAllWords()">
         </div>
         <div class="words-grid" id="allWordsGrid"></div>
       </div>
@@ -698,30 +714,35 @@
       <div class="progress-line" id="progressLine"></div>
     </div>
 
-    <button class="ctrl-btn" onclick="prevSlide()" title="Стрелка влево">◀ Назад</button>
+    <button class="ctrl-btn" onclick="prevSlide()">◀</button>
     <button class="ctrl-btn primary" id="playBtn" onclick="togglePlay()">⏸ Пауза</button>
-    <button class="ctrl-btn" onclick="nextSlide()" title="Стрелка вправо">Вперёд ▶</button>
+    <button class="ctrl-btn" onclick="nextSlide()">▶</button>
     
     <select class="select-custom" id="timerSelect" onchange="changeInterval()">
-      <option value="3000">3 сек</option>
-      <option value="5000" selected>5 сек</option>
-      <option value="8000">8 сек</option>
-      <option value="10000">10 сек</option>
-      <option value="15000">15 сек</option>
-      <option value="30000">30 сек</option>
-      <option value="45000">45 сек</option>
+      <option value="3000">3с</option>
+      <option value="5000" selected>5с</option>
+      <option value="8000">8с</option>
+      <option value="10000">10с</option>
+      <option value="15000">15с</option>
+      <option value="30000">30с</option>
     </select>
 
-    <button class="ctrl-btn active-toggle" id="autoVoiceBtn" onclick="toggleAutoVoice()" title="Клавиша A">
-      🔊 Автоозвучка: ВКЛ
+    <button class="ctrl-btn active-toggle" id="autoVoiceBtn" onclick="toggleAutoVoice()">
+      🔊 Звук
     </button>
 
-    <button class="ctrl-btn" onclick="toggleHideAnswer()" title="Клавиша H">👁 Ответ</button>
-    <button class="ctrl-btn" onclick="shuffleCurrentDeck()">🔀 Перемешать</button>
-    <button class="ctrl-btn" onclick="toggleFullScreen()" title="Клавиша F">⛶ Экран (16:9)</button>
+    <button class="ctrl-btn" onclick="toggleHideAnswer()">👁 Скрыть</button>
+    <button class="ctrl-btn" onclick="shuffleCurrentDeck()">🔀 Микс</button>
+    <button class="ctrl-btn" onclick="toggleFullScreen()">⛶ Экран</button>
   </div>
 
   <script>
+    // Инициализация Telegram WebApp
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
+    }
+
     const RAW_VOCABULARY = [
       { id:1, k:"ああ", r:"ああ", m:"А! (восклицание)" },
       { id:2, k:"会う", r:"あう", m:"встречаться" },
@@ -1158,7 +1179,7 @@
       { id:433, k:"出る", r:"でる", m:"выходить, покидать" },
       { id:434, k:"テレビ", r:"テレビ", m:"телевизор" },
       { id:435, k:"天気", r:"てんき", m:"погода" },
-      { id:436, k:"電気", r:"でんき", m:"электричество, свет" },
+      { id:436, k:"電気", r:"деnki", m:"электричество, свет" },
       { id:437, k:"電車", r:"でんしゃ", m:"электричка" },
       { id:438, k:"電話", r:"でんわ", m:"телефон" },
       { id:439, k:"戸", r:"と", m:"дверь (раздвижная)" },
@@ -1470,7 +1491,6 @@
       learnedTabBtn.textContent = `✔️ Изученные (${learnedSet.size})`;
     }
 
-    // Алгоритм Фишера-Йетса для честного перемешивания
     function shuffleArray(arr) {
       for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -1511,7 +1531,6 @@
       dispReading.textContent = item.r;
       dispMeaning.textContent = item.m;
 
-      // Автомасштаб под длину слова
       const kLen = item.k.length;
       const rLen = item.r.length;
 
@@ -1579,11 +1598,11 @@
     function toggleAutoVoice() {
       isAutoVoice = !isAutoVoice;
       if (isAutoVoice) {
-        autoVoiceBtn.textContent = '🔊 Автоозвучка: ВКЛ';
+        autoVoiceBtn.textContent = '🔊 Звук: ВКЛ';
         autoVoiceBtn.classList.add('active-toggle');
         speakCurrentWord(true);
       } else {
-        autoVoiceBtn.textContent = '🔇 Автоозвучка: ВЫКЛ';
+        autoVoiceBtn.textContent = '🔇 Звук: ВЫКЛ';
         autoVoiceBtn.classList.remove('active-toggle');
         window.speechSynthesis.cancel();
       }
@@ -1595,7 +1614,6 @@
       toggleFavById(item.id);
     }
 
-    // Интерактивная звезда для любого слова
     function toggleFavById(id) {
       if (starredSet.has(id)) {
         starredSet.delete(id);
@@ -1620,7 +1638,6 @@
       }
     }
 
-    // Интерактивная галочка (изучено)
     function toggleLearnedById(id) {
       if (learnedSet.has(id)) {
         learnedSet.delete(id);
@@ -1730,11 +1747,23 @@
       updateCard();
     }
 
+    // Полноэкранный режим: инициирует как нативный, так и программный Telegram/CSS режим
     function toggleFullScreen() {
+      const isFull = document.body.classList.toggle('app-fullscreen');
+      
+      // Полноэкранный режим в новых версиях Telegram
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.requestFullscreen) {
+        try {
+          if (isFull) window.Telegram.WebApp.requestFullscreen();
+          else window.Telegram.WebApp.exitFullscreen();
+        } catch (e) {}
+      }
+
+      // Обычный браузерный Fullscreen (на ПК/ТВ)
       if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
+        document.documentElement.requestFullscreen?.().catch(() => {});
       } else {
-        if (document.exitFullscreen) document.exitFullscreen();
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
       }
     }
 
@@ -1853,8 +1882,8 @@
           </div>
           <div class="item-actions">
             <button class="mini-btn ${isFav ? 'starred' : ''}" onclick="toggleFavById(${w.id})" title="${isFav ? 'В избранном' : 'Добавить в избранное'}">⭐</button>
-            <button class="mini-btn" onclick="speakWordText('${w.r}')" title="Озвучить Kyoko">🔊</button>
-            <button class="mini-btn ${isLrn ? 'learned' : ''}" onclick="toggleLearnedById(${w.id})" title="${isLrn ? 'Изучено (нажмите чтобы вернуть)' : 'Пометить как изученное'}">✔️</button>
+            <button class="mini-btn" onclick="speakWordText('${w.r}')" title="Озвучить">🔊</button>
+            <button class="mini-btn ${isLrn ? 'learned' : ''}" onclick="toggleLearnedById(${w.id})" title="${isLrn ? 'Изучено' : 'Пометить как изученное'}">✔️</button>
           </div>
         `;
         grid.appendChild(div);
