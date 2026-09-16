@@ -40,8 +40,14 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    /* ОТСТУП СВЕРХУ: опускает меню ниже кнопок Telegram */
-    padding: calc(56px + env(safe-area-inset-top, 0px)) 14px calc(50px + env(safe-area-inset-bottom, 0px));
+    /* Увеличенный безопасный отступ под плашку Telegram */
+    padding: calc(75px + env(safe-area-inset-top, 0px)) 14px calc(50px + env(safe-area-inset-bottom, 0px));
+    transition: padding-top 0.2s ease;
+  }
+
+  /* Режим активного полного экрана */
+  body.tg-fullscreen {
+    padding-top: calc(90px + env(safe-area-inset-top, 0px)) !important;
   }
 
   .wrap {
@@ -226,7 +232,10 @@
   /* Мобильная адаптация */
   @media (max-width: 400px) {
     body {
-      padding: calc(52px + env(safe-area-inset-top, 0px)) 10px calc(40px + env(safe-area-inset-bottom, 0px));
+      padding: calc(75px + env(safe-area-inset-top, 0px)) 10px calc(40px + env(safe-area-inset-bottom, 0px));
+    }
+    body.tg-fullscreen {
+      padding-top: calc(88px + env(safe-area-inset-top, 0px)) !important;
     }
     .header {
       margin-bottom: 12px;
@@ -470,40 +479,51 @@
     tg.ready();
     tg.expand();
     
-    // Красим шапку Телеграма под цвет фона нашей страницы
     if (tg.setHeaderColor) tg.setHeaderColor('#f4f1ea');
     if (tg.setBackgroundColor) tg.setBackgroundColor('#f4f1ea');
-    
-    // Блокируем случайное закрытие свайпом вниз
     if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+
+    // Слушатель системного изменения экрана в Telegram
+    if (tg.onEvent) {
+      tg.onEvent('fullscreenChanged', () => {
+        const btn = document.getElementById('fsBtn');
+        if (tg.isFullscreen) {
+          document.body.classList.add('tg-fullscreen');
+          if (btn) btn.textContent = '✕ Свернуть';
+        } else {
+          document.body.classList.remove('tg-fullscreen');
+          if (btn) btn.textContent = '⛶ Во весь экран';
+        }
+      });
+    }
   }
 
-  let isFullscreen = false;
   function toggleAppFullscreen() {
     const btn = document.getElementById('fsBtn');
-    isFullscreen = !isFullscreen;
 
-    // 1. Полноэкранный режим для Telegram
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.requestFullscreen) {
       try {
-        if (isFullscreen) {
+        if (!window.Telegram.WebApp.isFullscreen) {
           window.Telegram.WebApp.requestFullscreen();
+          document.body.classList.add('tg-fullscreen');
           btn.textContent = '✕ Свернуть';
         } else {
           window.Telegram.WebApp.exitFullscreen();
+          document.body.classList.remove('tg-fullscreen');
           btn.textContent = '⛶ Во весь экран';
         }
         return;
       } catch(e){}
     }
 
-    // 2. Обычный браузерный Fullscreen (fallback)
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen?.().then(() => {
+        document.body.classList.add('tg-fullscreen');
         btn.textContent = '✕ Свернуть';
       }).catch(() => {});
     } else {
       document.exitFullscreen?.().then(() => {
+        document.body.classList.remove('tg-fullscreen');
         btn.textContent = '⛶ Во весь экран';
       }).catch(() => {});
     }
