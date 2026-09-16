@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Тренажёры японского языка</title>
+
+<!-- Подключение Telegram WebApp SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
 <style>
   :root {
     --bg-page: #f4f1ea;
@@ -36,7 +40,7 @@
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    padding: 24px 14px calc(60px + env(safe-area-inset-bottom, 0px));
+    padding: 16px 14px calc(50px + env(safe-area-inset-bottom, 0px));
   }
 
   .wrap {
@@ -47,21 +51,48 @@
     flex-direction: column;
   }
 
-  /* Заголовок */
-  .header {
-    text-align: center;
-    margin-bottom: 18px;
+  /* Верхняя панель с кнопкой Fullscreen */
+  .top-bar-tools {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
   }
+
   .badge {
     display: inline-block;
     background: #e5e2d8;
     color: var(--text-sub);
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
-    padding: 3px 10px;
+    padding: 3px 9px;
     border-radius: 12px;
-    margin-bottom: 6px;
     letter-spacing: 0.5px;
+  }
+
+  .fullscreen-btn {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+  }
+  .fullscreen-btn:active {
+    transform: scale(0.95);
+    background: #eae6dc;
+  }
+
+  /* Заголовок */
+  .header {
+    text-align: center;
+    margin-bottom: 16px;
   }
   h1 {
     font-size: 22px;
@@ -191,19 +222,19 @@
     background: var(--accent-hover);
   }
 
-  /* Мобильная адаптация под узкие экраны */
+  /* Мобильная адаптация */
   @media (max-width: 400px) {
     body {
-      padding: 16px 10px calc(50px + env(safe-area-inset-bottom, 0px));
+      padding: 12px 10px calc(40px + env(safe-area-inset-bottom, 0px));
     }
     .header {
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     h1 {
-      font-size: 20px;
+      font-size: 19px;
     }
     .game-card {
-      padding: 9px 10px;
+      padding: 8px 10px;
       gap: 6px;
     }
     .game-left {
@@ -218,7 +249,6 @@
       width: 32px;
       height: 32px;
       font-size: 16px;
-      border-radius: 8px;
     }
     .game-text h2 {
       font-size: 13.5px;
@@ -308,8 +338,12 @@
 <body>
 <div class="wrap">
   
-  <div class="header">
+  <div class="top-bar-tools">
     <div class="badge">日本語トレーニング</div>
+    <button type="button" class="fullscreen-btn" id="fsBtn" onclick="toggleAppFullscreen()">⛶ Во весь экран</button>
+  </div>
+
+  <div class="header">
     <h1>Тренажёры японского</h1>
     <p class="sub">Выберите режим обучения</p>
   </div>
@@ -429,6 +463,51 @@
 </div>
 
 <script>
+  // Инициализация параметров Telegram WebApp
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+    
+    // Красим шапку Телеграма под цвет фона нашей страницы
+    if (tg.setHeaderColor) tg.setHeaderColor('#f4f1ea');
+    if (tg.setBackgroundColor) tg.setBackgroundColor('#f4f1ea');
+    
+    // Блокируем случайное закрытие свайпом вниз
+    if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+  }
+
+  let isFullscreen = false;
+  function toggleAppFullscreen() {
+    const btn = document.getElementById('fsBtn');
+    isFullscreen = !isFullscreen;
+
+    // 1. Полноэкранный режим для Telegram
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.requestFullscreen) {
+      try {
+        if (isFullscreen) {
+          window.Telegram.WebApp.requestFullscreen();
+          btn.textContent = '✕ Свернуть';
+        } else {
+          window.Telegram.WebApp.exitFullscreen();
+          btn.textContent = '⛶ Во весь экран';
+        }
+        return;
+      } catch(e){}
+    }
+
+    // 2. Обычный браузерный Fullscreen (fallback)
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.().then(() => {
+        btn.textContent = '✕ Свернуть';
+      }).catch(() => {});
+    } else {
+      document.exitFullscreen?.().then(() => {
+        btn.textContent = '⛶ Во весь экран';
+      }).catch(() => {});
+    }
+  }
+
   const GAME_INFOS = {
     slideshow: {
       icon: "📺",
@@ -496,21 +575,9 @@
     backdrop.classList.remove('show');
   }
 
-// Закрытие по клавише Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
   });
 </script>
-
-<!-- ПОДКЛЮЧЕНИЕ TELEGRAM SDK -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script>
-  // Проверяем, что игра открыта внутри Telegram, и разворачиваем на весь экран
-  if (window.Telegram && window.Telegram.WebApp) {
-    window.Telegram.WebApp.ready();
-    window.Telegram.WebApp.expand();
-  }
-</script>
-
 </body>
 </html>
