@@ -244,6 +244,71 @@
     background: var(--accent-hover);
   }
 
+  /* Блок кнопки "Поддержать проект" внизу */
+  .support-section {
+    margin-top: 18px;
+    text-align: center;
+    padding-bottom: 12px;
+  }
+  .support-trigger-btn {
+    background: transparent;
+    border: 1px dashed var(--accent);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .support-trigger-btn:hover {
+    background: var(--info-bg);
+    transform: translateY(-1px);
+  }
+  .support-trigger-btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Кнопки внутри всплывающего окна доната */
+  .support-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+  }
+  .support-action-btn {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+  }
+  .support-action-btn:active {
+    transform: scale(0.97);
+  }
+  .btn-ad {
+    background: var(--info-bg);
+    color: var(--info-text);
+    border: 1px solid var(--info-border);
+  }
+  .btn-donate {
+    background: var(--accent);
+    color: #ffffff;
+  }
+  .btn-donate:hover {
+    background: var(--accent-hover);
+  }
+
   /* Мобильная адаптация */
   @media (max-width: 400px) {
     body {
@@ -357,6 +422,16 @@
   }
   .modal-close-btn:hover {
     background: #000;
+  }
+  .modal-close-text {
+    background: none;
+    border: none;
+    color: var(--text-sub);
+    font-size: 12.5px;
+    cursor: pointer;
+    margin-top: 4px;
+    text-align: center;
+    padding: 6px;
   }
 </style>
 </head>
@@ -473,9 +548,16 @@
 
   </div>
 
+  <!-- Кнопка "Поддержать проект" в самом низу -->
+  <div class="support-section">
+    <button type="button" class="support-trigger-btn" onclick="openSupportModal()">
+      ☕ Поддержать проект
+    </button>
+  </div>
+
 </div>
 
-<!-- Всплывающее окно с пояснением -->
+<!-- 1. Всплывающее окно с пояснением к игре -->
 <div class="modal-backdrop" id="modalBackdrop" onclick="closeModal()">
   <div class="modal-card" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -484,6 +566,31 @@
     </div>
     <div class="modal-desc" id="modalDesc">Описание игры...</div>
     <button type="button" class="modal-close-btn" onclick="closeModal()">Понятно</button>
+  </div>
+</div>
+
+<!-- 2. Всплывающее окно "Поддержать автора" -->
+<div class="modal-backdrop" id="supportModalBackdrop" onclick="closeSupportModal()">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-icon">🌸</div>
+      <h3 class="modal-title">Поддержка проекта</h3>
+    </div>
+    <div class="modal-desc">Тренажёр полностью бесплатный. Вы можете сказать автору «спасибо» и помочь развитию игры любым способом:</div>
+    
+    <div class="support-actions">
+      <!-- Кнопка 1: Реклама -->
+      <button type="button" class="support-action-btn btn-ad" onclick="handleWatchAd()">
+        🎬 Посмотреть ролик (Бесплатно, 15 сек)
+      </button>
+
+      <!-- Кнопка 2: Донат / Кофе -->
+      <button type="button" class="support-action-btn btn-donate" onclick="handleDonateCoffee()">
+        ☕ Угостить автора кофе (Донат)
+      </button>
+    </div>
+
+    <button type="button" class="modal-close-text" onclick="closeSupportModal()">Закрыть</button>
   </div>
 </div>
 
@@ -592,10 +699,13 @@
   const modalTitle = document.getElementById('modalTitle');
   const modalDesc = document.getElementById('modalDesc');
 
+  const supportBackdrop = document.getElementById('supportModalBackdrop');
+
   function goTo(url) {
     window.location.href = url;
   }
 
+  // Модальное окно с описанием игр
   function openModal(gameKey) {
     const info = GAME_INFOS[gameKey];
     if (!info) return;
@@ -611,8 +721,31 @@
     backdrop.classList.remove('show');
   }
 
+  // Модальное окно "Поддержать проект"
+  function openSupportModal() {
+    supportBackdrop.classList.add('show');
+  }
+
+  function closeSupportModal() {
+    supportBackdrop.classList.remove('show');
+  }
+
+  // --- ФУНКЦИИ-ПУСТЫШКИ ДЛЯ ДОНАТА И РЕКЛАМЫ ---
+  function handleWatchAd() {
+    closeSupportModal();
+    alert("🎬 Здесь запустится реклама Adsgram (код пришьём позже)");
+  }
+
+  function handleDonateCoffee() {
+    closeSupportModal();
+    alert("☕ Здесь откроется ссылка на донат / чаевые (ссылку пришьём позже)");
+  }
+
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Escape') {
+      closeModal();
+      closeSupportModal();
+    }
   });
 </script>
 </body>
