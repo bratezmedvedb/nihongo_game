@@ -5,44 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Тренажёры японского языка</title>
 
-  <!-- 1. Подключение Telegram WebApp SDK -->
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- 2. Скрипт мгновенного раскрытия на весь экран -->
+  <!-- Авто-раскрытие на весь экран -->
   <script>
     if (window.Telegram && window.Telegram.WebApp) {
       const tg = window.Telegram.WebApp;
       tg.ready();
-      
-      // Раскрыть на максимум
       tg.expand();
-      
-      // Запрос на полный экран без рамок (Telegram 8.0+)
       if (tg.requestFullscreen) {
         tg.requestFullscreen();
       }
-      
-      // Запретить закрытие игры случайным свайпом вниз
       if (tg.disableVerticalSwipes) {
         tg.disableVerticalSwipes();
       }
     }
   </script>
 
-  <!-- 3. Фиксированный отступ под плашку Telegram -->
   <style>
-    body {
-      margin: 0;
-      padding-top: calc(110px + env(safe-area-inset-top, 0px)) !important;
-      box-sizing: border-box;
-    }
-  </style>
-
-  <!-- Ваши остальные стили -->
-  <style>
-    /* Дальше пишите ваши стили для игры... */
-  </style>
-</head>
   :root {
     --bg-page: #f4f1ea;
     --card-bg: #ffffff;
