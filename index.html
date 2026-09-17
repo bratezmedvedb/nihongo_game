@@ -8,6 +8,9 @@
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
+  <!-- Adsgram SDK -->
+  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
   <!-- Авто-раскрытие на весь экран -->
   <script>
     if (window.Telegram && window.Telegram.WebApp) {
@@ -551,7 +554,7 @@
   <!-- Кнопка "Поддержать проект" в самом низу -->
   <div class="support-section">
     <button type="button" class="support-trigger-btn" onclick="openSupportModal()">
-      ☕ Поддержать проект
+      Поддержать проект
     </button>
   </div>
 
@@ -581,12 +584,12 @@
     <div class="support-actions">
       <!-- Кнопка 1: Реклама -->
       <button type="button" class="support-action-btn btn-ad" onclick="handleWatchAd()">
-        🎬 Посмотреть ролик (Бесплатно, 15 сек)
+        🎬 Посмотреть ролик
       </button>
 
-      <!-- Кнопка 2: Донат / Кофе -->
+      <!-- Кнопка 2: Донат -->
       <button type="button" class="support-action-btn btn-donate" onclick="handleDonateCoffee()">
-        ☕ Угостить автора кофе (Донат)
+        ☕ Донат автору
       </button>
     </div>
 
@@ -619,6 +622,9 @@
       });
     }
   }
+
+  // Инициализация рекламы Adsgram (UnitID: 48319)
+  const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "48319" }) : null;
 
   function toggleAppFullscreen() {
     const btn = document.getElementById('fsBtn');
@@ -730,15 +736,35 @@
     supportBackdrop.classList.remove('show');
   }
 
-  // --- ФУНКЦИИ-ПУСТЫШКИ ДЛЯ ДОНАТА И РЕКЛАМЫ ---
+  // 1. Показ видео-рекламы Adsgram
   function handleWatchAd() {
     closeSupportModal();
-    alert("🎬 Здесь запустится реклама Adsgram (код пришьём позже)");
+    
+    if (!AdController) {
+      alert("Реклама временно недоступна. Попробуйте позже!");
+      return;
+    }
+
+    AdController.show()
+      .then((result) => {
+        alert("Большое спасибо за просмотр! 🌸 Вы помогаете развивать тренажёр.");
+      })
+      .catch((result) => {
+        console.log("Просмотр не завершен:", result);
+      });
   }
 
+  // 2. Переход к донату CloudTips
   function handleDonateCoffee() {
     closeSupportModal();
-    alert("☕ Здесь откроется ссылка на донат / чаевые (ссылку пришьём позже)");
+    
+    const donateUrl = "https://pay.cloudtips.ru/p/63912644";
+    
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openLink) {
+      window.Telegram.WebApp.openLink(donateUrl);
+    } else {
+      window.open(donateUrl, '_blank');
+    }
   }
 
   document.addEventListener('keydown', (e) => {
