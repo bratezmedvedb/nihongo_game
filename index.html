@@ -513,7 +513,19 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 6. Блоки -->
+    <!-- 6. Квиз 3 -->
+    <div class="game-card" onclick="goTo('quiz3.html')">
+      <div class="game-left">
+        <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('quiz3')" title="Пояснение к игре">i</button>
+        <div class="game-icon">🎏</div>
+        <div class="game-text">
+          <h2>Квиз 3</h2>
+        </div>
+      </div>
+      <div class="play-btn">Играть →</div>
+    </div>
+
+    <!-- 7. Блоки -->
     <div class="game-card" onclick="goTo('blocks.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('blocks')" title="Пояснение к игре">i</button>
@@ -525,7 +537,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 7. て-форма -->
+    <!-- 8. て-форма -->
     <div class="game-card" onclick="goTo('te_form.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('te_form')" title="Пояснение к игре">i</button>
@@ -537,7 +549,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 8. Мастер глаголов  -->
+    <!-- 9. Мастер глаголов  -->
     <div class="game-card" onclick="goTo('1ур.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('verbs')" title="Пояснение к игре">i</button>
@@ -682,6 +694,11 @@
       icon: "🌸",
       title: "Квиз 2",
       desc: "Тренажёр японских частиц: расширенная практика и новая лексика.\nВторая часть квиза с новыми словами и более разнообразными предложениями. Закрепляйте падежи и предлоги в новом контексте с подробным разбором правил и озвучкой диктором."
+    },
+    quiz3: {
+      icon: "🎏",
+      title: "Квиз 3",
+      desc: "Тренажёр японских частиц: большой блок практики из 109 предложений.\nЗакрепление ключевых грамматических конструкций JLPT N5/N4, устойчивых оборотов и падежных частиц с детальными пояснениями, озвучкой и отработкой сложных случаев."
     },
     blocks: {
       icon: "🧩",
