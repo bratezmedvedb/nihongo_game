@@ -7,6 +7,39 @@
   
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  
+<!-- Проверка доступа и Авто-раскрытие -->
+  <script>
+    const ALLOWED_USERS = [370567050, 669192721]; // Ваши Telegram ID
+
+    if (window.Telegram && window.Telegram.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+
+      const userId = tg.initDataUnsafe?.user?.id;
+
+      // Проверяем, есть ли пользователь в белом списке
+      if (!ALLOWED_USERS.includes(userId)) {
+        // Если это чужой человек — блокируем экран сразу после загрузки
+        document.addEventListener("DOMContentLoaded", () => {
+          document.body.style.cssText = "display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; font-family:sans-serif; background:#121212; color:#fff; margin:0; padding:20px; text-align:center;";
+          document.body.innerHTML = `
+            <h1 style="color: #ff4d4d; font-size: 22px; margin-bottom: 8px;">🚫 Доступ закрыт</h1>
+            <p style="color: #aaa; font-size: 14px;">Приложение находится в закрытой разработке.</p>
+          `;
+        });
+      } else {
+        // Если это ВЫ — применяем все нужные настройки игры
+        tg.expand();
+        if (tg.requestFullscreen) {
+          tg.requestFullscreen();
+        }
+        if (tg.disableVerticalSwipes) {
+          tg.disableVerticalSwipes();
+        }
+      }
+    }
+  </script>
 
   <style>
     :root {
