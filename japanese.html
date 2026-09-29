@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>JLPT N5 — Japandi</title>
+  
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root {
+      --bg: #f4f1ea;
+      --card-bg: #ffffff;
+      --text: #2c2c2a;
+      --sub-text: #6b6a63;
+      --kana: #858379;
+      --border: #d3d1c7;
+      --border-light: #e5e2d8;
+      
+      --accent: #d97757;
+      --accent-hover: #c46445;
+      --accent-soft: #faede8;
+      
+      --ink: #3c3489;
+      --ink-soft: #eeecf6;
+      
+      --success-bg: #eaf5e1;
+      --success-border: #8bc34a;
+      --success-text: #2c5914;
+
+      --star-color: #d97706;
+      --star-bg: #fef3c7;
+      --star-border: #fcd34d;
+
+      --danger-bg: #fdeeee;
+      --danger-border: #f4b6b6;
+      --danger-text: #b83a3a;
+
+      --shadow-sm: 0 2px 6px rgba(44, 44, 42, 0.04);
+      --shadow-md: 0 4px 14px rgba(44, 44, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", -apple-system, sans-serif;
+    }
+
+    #app {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background-color: var(--bg);
+      background-image: radial-gradient(rgba(44, 44, 42, 0.04) 1px, transparent 0);
+      background-size: 16px 16px;
+    }
+
+    /* ШАПКА */
+    header {
+      padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(244, 241, 234, 0.94);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-light);
+      flex-shrink: 0;
+      z-index: 30;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .badge-n5 {
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .header-status {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--sub-text);
+      background: var(--card-bg);
+      border: 1px solid var(--border-light);
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+
+    /* ОСНОВНЫЕ ЭКРАНЫ */
+    .view {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      animation: fadeIn 0.18s ease-out;
+    }
+    .view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.99); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* ЭКРАН 1: КАРТА */
+    #viewMap {
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px 12px calc(30px + env(safe-area-inset-bottom, 0px));
+      position: relative;
+    }
+
+    .snake-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      padding: 10px 0 50px;
+      position: relative;
+    }
+
+    /* SVG ДОРОЖКА-ЗМЕЙКА */
+    #snakeSvg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .level-node-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .level-node {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.12s ease;
+      position: relative;
+    }
+    .level-node:active { transform: scale(0.92); }
+
+    .level-node.review-node {
+      background: var(--star-bg);
+      border-color: var(--star-border);
+      color: var(--star-color);
+      width: 78px;
+      height: 78px;
+      border-radius: 26px;
+    }
+
+    /* ОТКРЫТЫЙ ТЕКУЩИЙ УРОВЕНЬ — ЗЕЛЁНЫЙ */
+    .level-node.active-unlocked {
+      background: var(--success-bg);
+      border: 2px solid var(--success-border);
+      color: var(--success-text);
+      box-shadow: 0 6px 20px rgba(139, 195, 74, 0.28);
+      transform: scale(1.06);
+    }
+    .level-node.active-unlocked:active { transform: scale(0.95); }
+    .level-node.active-unlocked .node-num { color: var(--success-text); }
+
+    /* ЗАБЛОКИРОВАННЫЕ УРОВНИ — КРАСНЫЕ */
+    .level-node.locked {
+      background: var(--danger-bg);
+      border: 1.5px solid var(--danger-border);
+      color: var(--danger-text);
+      cursor: not-allowed;
+      opacity: 0.9;
+      box-shadow: none;
+    }
+    .level-node.locked .node-num {
+      color: var(--danger-text);
+      opacity: 0.85;
+    }
+    .level-node.locked::after {
+      content: '🔒';
+      font-size: 11px;
+      position: absolute;
+      top: 5px;
+      right: 6px;
+      opacity: 0.6;
+    }
+
+    .node-num {
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+    }
+    .node-progress {
+      font-size: 0.68rem;
+      font-weight: 800;
+      margin-top: 3px;
+      padding: 1px 7px;
+      border-radius: 8px;
+      background: #ffffff;
+    }
+    .active-unlocked .node-progress {
+      color: var(--success-text);
+      border: 1px solid var(--success-border);
+    }
+    .review-node .node-progress {
+      color: var(--star-color);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .pos-0 { transform: translateX(0); }
+    .pos-1 { transform: translateX(50px); }
+    .pos-2 { transform: translateX(0); }
+    .pos-3 { transform: translateX(-50px); }
+
+    /* НАВИГАЦИОННАЯ СТРОКА */
+    .session-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px 6px;
+      flex-shrink: 0;
+    }
+
+    .back-btn-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--sub-text);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+    }
+    .back-btn-pill:active { background: var(--text); color: #fff; }
+
+    .session-progress-wrap {
+      flex: 1;
+      height: 5px;
+      background: var(--border-light);
+      border-radius: 10px;
+      margin: 0 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 10px;
+      transition: width 0.25s ease;
+    }
+
+    .session-counter-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--sub-text);
+      min-width: 40px;
+      text-align: right;
+    }
+
+    /* ЭКРАН ANKI */
+    #viewAnki {
+      padding: 0 14px calc(14px + env(safe-area-inset-bottom, 0px));
+      justify-content: space-between;
+    }
+
+    .anki-toggle-mode {
+      display: flex;
+      background: #e7e3da;
+      padding: 3px;
+      border-radius: 14px;
+      margin: 2px auto 8px;
+      width: 120px;
+      gap: 3px;
+      flex-shrink: 0;
+    }
+
+    .anki-toggle-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 4px 0;
+      font-size: 1rem;
+      border-radius: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    .anki-toggle-btn.active {
+      background: var(--card-bg);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .presentation-card-anki {
+      flex: 1;
+      min-height: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .card-badge {
+      position: absolute;
+      top: 12px;
+      right: 14px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--sub-text);
+      border: 1px solid var(--border-light);
+    }
+
+    .card-question {
+      font-size: clamp(2.6rem, 11vw, 3.8rem);
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1.1;
+      margin: 2px 0;
+    }
+
+    .card-answer-block {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-light);
+      width: 100%;
+      position: relative;
+    }
+    .card-answer-block.revealed { display: flex; }
+
+    .card-reading-row {
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      min-height: 40px;
+    }
+
+    .card-reading {
+      font-size: 1.6rem;
+      color: var(--kana);
+      font-weight: 500;
+      line-height: 1.2;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .action-circle-voice-btn {
+      position: absolute;
+      right: 4px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      color: var(--text);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+    .action-circle-voice-btn:active {
+      transform: scale(0.92);
+      background: var(--accent-soft);
+      border-color: var(--accent);
+    }
+
+    .card-translation {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .anki-actions-bottom {
+      flex-shrink: 0;
+      width: 100%;
+    }
+
+    .btn-show-answer {
+      width: 100%;
+      height: 50px;
+      border-radius: 16px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(217, 119, 87, 0.25);
+      transition: all 0.15s ease;
+    }
+    .btn-show-answer:active { transform: scale(0.97); }
+
+    .anki-grade-group {
+      display: none;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .btn-grade {
+      height: 52px;
+      border-radius: 15px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0 4px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.1s ease;
+    }
+    .btn-grade:active { transform: scale(0.94); }
+    .btn-grade .grade-label {
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .btn-grade.again { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
+    .btn-grade.hard  { background: var(--star-bg); border-color: var(--star-border); color: var(--star-color); }
+    .btn-grade.good  { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+    .btn-grade.easy  { background: var(--ink-soft); border-color: #c9c3e6; color: var(--ink); }
+
+    /* ЭКРАН «СТОПКА» */
+    #viewStack {
+      padding: 0 10px calc(12px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .stack-sub-hint {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--sub-text);
+      text-align: center;
+      margin: 2px 0 8px;
+      flex-shrink: 0;
+    }
+
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 6px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .stack-tile {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      height: 100%;
+      min-height: 0;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .stack-tile:active { transform: scale(0.94); }
+
+    .stack-tile.selected {
+      background: var(--ink-soft);
+      border-color: var(--ink);
+      color: var(--ink);
+      box-shadow: 0 0 0 2px rgba(60, 52, 137, 0.2);
+    }
+
+    .stack-tile.empty-slot {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .stack-tile.merge-pulse {
+      animation: pulseGreen 0.28s ease;
+    }
+    @keyframes pulseGreen {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); background: var(--success-bg); border-color: var(--success-border); }
+    }
+
+    .stack-tile.completed-burst {
+      animation: burstOut 0.3s forwards;
+    }
+    @keyframes burstOut {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.08); background: var(--success-bg); }
+      100% { transform: scale(0.2); opacity: 0; }
+    }
+
+    .stack-tile.error {
+      background: var(--danger-bg);
+      border-color: var(--danger-border);
+      color: var(--danger-text);
+      animation: shake 0.3s;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-3px); }
+      75% { transform: translateX(3px); }
+    }
+
+    .tile-counter-badge {
+      position: absolute;
+      top: 3px;
+      right: 4px;
+      font-size: 0.6rem;
+      font-weight: 800;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      color: var(--sub-text);
+      padding: 0 4px;
+      border-radius: 6px;
+    }
+
+    /* Базовый размер для русского текста и чтения */
+    .tile-main-text {
+      font-size: clamp(0.85rem, 3.5vw, 1rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text);
+      word-break: break-word;
+      padding: 0 2px;
+    }
+
+* 1. РУССКИЙ ПЕРЕВОД (АККУРАТНЫЙ, НЕБОЛЬШОЙ) */
+    .tile-main-text {
+      font-size: clamp(0.82rem, 3.4vw, 0.95rem);
+      font-weight: 750;
+      line-height: 1.25;
+      color: var(--text);
+      word-break: break-word;
+      padding: 0 4px;
+    }
+
+    /* 2. ЕДИНЫЙ КРУПНЫЙ РАЗМЕР ДЛЯ КАNDZI, ХИРАГАНЫ И ЭМОДЗИ */
+    .tile-main-text.type-kanji,
+    .tile-main-text.type-reading,
+    .tile-main-text.type-emoji {
+      font-size: clamp(1.35rem, 5.2vw, 1.65rem);
+      font-weight: 800;
+      line-height: 1.15;
+      color: var(--text);
+    }
+
+    .tile-sub-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      justify-content: center;
+      margin-top: 2px;
+      max-width: 100%;
+    }
+
+    .chip-item {
+      font-size: 0.62rem;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: var(--accent);
+      padding: 1px 3px;
+      border-radius: 4px;
+      white-space: nowrap;
+      max-width: 70px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* МОДАЛКА ВЫБОРА */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 44, 42, 0.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: flex-end;
+      z-index: 100;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-sheet {
+      background: var(--bg);
+      width: 100%;
+      max-width: 480px;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 20px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+      border: 1px solid var(--border);
+      border-bottom: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal-sheet-handle {
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      margin: 0 auto 8px;
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    /* КНОПКИ В МОДАЛКЕ: ОБЕ НЕЙТРАЛЬНЫЕ, ОКРАШИВАЮТСЯ ТОЛЬКО ПРИ КЛИКЕ */
+    .btn-pill {
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+    .btn-pill:active {
+      background: var(--accent);
+      color: #ffffff;
+      border-color: var(--accent);
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Шапка -->
+    <header>
+      <div class="brand-wrap">
+        <span>JLPT</span>
+        <span class="badge-n5">N5</span>
+      </div>
+      <div class="header-status" id="headerWordCount">Лексика</div>
+    </header>
+
+    <!-- ЭКРАН 1: КАРТА -->
+    <div id="viewMap" class="view active">
+      <div class="snake-container" id="snakeTree">
+        <svg id="snakeSvg"></svg>
+      </div>
+    </div>
+
+    <!-- ЭКРАН 2: ANKI -->
+    <div id="viewAnki" class="view">
+      <div class="session-header">
+        <button class="back-btn-pill btn-close" onclick="showMap()">← Меню</button>
+        <div class="session-progress-wrap">
+          <div class="progress-fill" id="ankiProgress"></div>
+        </div>
+        <span class="session-counter-text" id="ankiCounter">1/20</span>
+      </div>
+
+      <div class="anki-toggle-mode">
+        <button class="anki-toggle-btn active" id="btnModeJa" onclick="setAnkiMode('ja')">🇯🇵</button>
+        <button class="anki-toggle-btn" id="btnModeRu" onclick="setAnkiMode('ru')">🇷🇺</button>
+      </div>
+
+      <div class="presentation-card-anki" id="ankiCard">
+        <div class="card-badge" id="ankiCardBadge">Новое</div>
+        <div class="card-question" id="ankiQuestion">私</div>
+        
+        <div class="card-answer-block" id="ankiAnswerBlock">
+          <div class="card-reading-row">
+            <div class="card-reading" id="ankiReading" onclick="speakCurrentWord()">わたし</div>
+            <button class="action-circle-voice-btn" id="btnVoiceAnki" onclick="speakCurrentWord()" title="Озвучить">🔊</button>
+          </div>
+          <div class="card-translation" id="ankiTranslation">я</div>
+        </div>
+      </div>
+
+      <div class="anki-actions-bottom">
+        <button class="btn-show-answer" id="btnShowAnswer" onclick="revealAnkiAnswer()">Показать ответ</button>
+
+        <div class="anki-grade-group" id="ankiGradeGroup">
+          <button class="btn-grade again" onclick="handleAnkiGrade(1)">
+            <span class="grade-label">Снова</span>
+            <span id="lblTimeAgain" style="display:none;"></span>
+          </button>
+          <button class="btn-grade hard" onclick="handleAnkiGrade(2)">
+            <span class="grade-label">Трудно</span>
+            <span id="lblTimeHard" style="display:none;"></span>
+          </button>
+          <button class="btn-grade good" onclick="handleAnkiGrade(3)">
+            <span class="grade-label">Хорошо</span>
+            <span id="lblTimeGood" style="display:none;"></span>
+          </button>
+          <button class="btn-grade easy" onclick="handleAnkiGrade(4)">
+            <span class="grade-label">Легко</span>
+            <span id="lblTimeEasy" style="display:none;"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ЭКРАН 3: СТОПКА -->
+    <div id="viewStack" class="view">
+      <div class="session-header">
+        <button class="back-btn-pill btn-close" onclick="showMap()">← Меню</button>
+        <div class="session-progress-wrap">
+          <div class="progress-fill" id="stackProgress"></div>
+        </div>
+        <span class="session-counter-text" id="stackCounter">0/20</span>
+      </div>
+      <div class="stack-sub-hint">
+        Собирайте карточки одного слова в стопку:
+      </div>
+      <div class="stack-grid" id="stackGrid"></div>
+    </div>
+
+    <!-- ВСПЛЫВАЮЩАЯ ШТОРКА ВЫБОРА РЕЖИМА -->
+    <div class="modal-backdrop" id="modeModal" onclick="closeModal(event)">
+      <div class="modal-sheet">
+        <div class="modal-sheet-handle"></div>
+        <div class="modal-title" id="modalTitle">Уровень 1</div>
+        <button class="btn-pill" onclick="launchMode('anki')">
+          <span>Anki</span>
+        </button>
+        <button class="btn-pill" onclick="launchMode('stack')">
+          <span>Стопка</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// --- 1. ПОЛНАЯ БАЗА СЛОВ (830 СЛОВ / 42 УРОВНЯ) ---
+    const allWords = [
+      // УРОВЕНЬ 1
+      { id: 1, level_id: 1, kanji: "私", reading: "わたし", translation: "я", emoji: "🙋" },
+      { id: 2, level_id: 1, kanji: "—", reading: "あなた", translation: "ты / вы", emoji: "👤" },
+      { id: 3, level_id: 1, kanji: "あの人", reading: "あのひと", translation: "тот человек", emoji: "🧑" },
+      { id: 4, level_id: 1, kanji: "あの方", reading: "あのかた", translation: "тот господин (вежливо)", emoji: "🎩" },
+      { id: 5, level_id: 1, kanji: "—", reading: "〜さん", translation: "господин / госпожа (суффикс)", emoji: "🤝" },
+      { id: 6, level_id: 1, kanji: "—", reading: "〜ちゃん", translation: "уменьшительный суффикс (к детям/друзьям)", emoji: "👶" },
+      { id: 7, level_id: 1, kanji: "〜人", reading: "〜じん", translation: "суффикс национальности", emoji: "🌍" },
+      { id: 8, level_id: 1, kanji: "先生", reading: "せんせい", translation: "учитель / преподаватель", emoji: "👨‍🏫" },
+      { id: 9, level_id: 1, kanji: "教師", reading: "きょうし", translation: "преподаватель (профессия)", emoji: "👩‍🏫" },
+      { id: 10, level_id: 1, kanji: "学生", reading: "がくせい", translation: "студент", emoji: "🎓" },
+      { id: 11, level_id: 1, kanji: "会社員", reading: "かいしゃいん", translation: "сотрудник фирмы / компании", emoji: "💼" },
+      { id: 12, level_id: 1, kanji: "社員", reading: "しゃいん", translation: "сотрудник (конкретной фирмы)", emoji: "🏢" },
+      { id: 13, level_id: 1, kanji: "銀行員", reading: "ぎんこういん", translation: "сотрудник банка", emoji: "🏦" },
+      { id: 14, level_id: 1, kanji: "医者", reading: "いしゃ", translation: "врач", emoji: "👨‍⚕️" },
+      { id: 15, level_id: 1, kanji: "研究者", reading: "けんきゅうしゃ", translation: "исследователь / ученый", emoji: "🔬" },
+      { id: 16, level_id: 1, kanji: "大学", reading: "だいがく", translation: "университет", emoji: "🏛️" },
+      { id: 17, level_id: 1, kanji: "病院", reading: "びょういん", translation: "больница", emoji: "🏥" },
+      { id: 18, level_id: 1, kanji: "—", reading: "だれ", translation: "кто", emoji: "❓" },
+      { id: 19, level_id: 1, kanji: "—", reading: "どなた", translation: "кто (вежливо)", emoji: "🧐" },
+      { id: 20, level_id: 1, kanji: "〜歳", reading: "〜さい", translation: "суффикс возраста (лет)", emoji: "🎂" },
+
+      // УРОВЕНЬ 2
+      { id: 21, level_id: 2, kanji: "何歳", reading: "なんさい", translation: "сколько лет?", emoji: "🎂" },
+      { id: 22, level_id: 2, kanji: "—", reading: "おいくつ", translation: "сколько лет? (вежливо)", emoji: "🎈" },
+      { id: 23, level_id: 2, kanji: "—", reading: "はい", translation: "да", emoji: "✅" },
+      { id: 24, level_id: 2, kanji: "—", reading: "いいえ", translation: "нет", emoji: "❌" },
+      { id: 25, level_id: 2, kanji: "—", reading: "アメリカ", translation: "Америка / США", emoji: "🇺🇸" },
+      { id: 26, level_id: 2, kanji: "—", reading: "イギリス", translation: "Англия / Великобритания", emoji: "🇬🇧" },
+      { id: 27, level_id: 2, kanji: "—", reading: "インド", translation: "Индия", emoji: "🇮🇳" },
+      { id: 28, level_id: 2, kanji: "—", reading: "インドネシア", translation: "Индонезия", emoji: "🇮🇩" },
+      { id: 29, level_id: 2, kanji: "韓国", reading: "かんこく", translation: "Южная Корея", emoji: "🇰🇷" },
+      { id: 30, level_id: 2, kanji: "—", reading: "タイ", translation: "Таиланд", emoji: "🇹🇭" },
+      { id: 31, level_id: 2, kanji: "中国", reading: "ちゅうごく", translation: "Китай", emoji: "🇨🇳" },
+      { id: 32, level_id: 2, kanji: "—", reading: "ドイツ", translation: "Германия", emoji: "🇩🇪" },
+      { id: 33, level_id: 2, kanji: "—", reading: "ブラジル", translation: "Бразилия", emoji: "🇧🇷" },
+      { id: 34, level_id: 2, kanji: "—", reading: "はじめまして", translation: "приятно познакомиться", emoji: "🤝" },
+      { id: 35, level_id: 2, kanji: "〜から来ました", reading: "〜からきました", translation: "приехал из (страны)", emoji: "✈️" },
+      { id: 36, level_id: 2, kanji: "—", reading: "どうぞよろしくおねがいします", translation: "прошу вашего расположения", emoji: "🙇" },
+      { id: 37, level_id: 2, kanji: "失礼ですが", reading: "しつれいですが", translation: "извиняюсь, но...", emoji: "🙏" },
+      { id: 38, level_id: 2, kanji: "—", reading: "これ", translation: "это (близко ко мне)", emoji: "👇" },
+      { id: 39, level_id: 2, kanji: "—", reading: "それ", translation: "это / то (близко к тебе)", emoji: "👉" },
+      { id: 40, level_id: 2, kanji: "—", reading: "あれ", translation: "то (далеко от обоих)", emoji: "👆" },
+
+      // УРОВЕНЬ 3
+      { id: 41, level_id: 3, kanji: "—", reading: "この", translation: "этот (предмет близко ко мне)", emoji: "👇" },
+      { id: 42, level_id: 3, kanji: "—", reading: "その", translation: "этот / тот (предмет у тебя)", emoji: "👉" },
+      { id: 43, level_id: 3, kanji: "—", reading: "あの", translation: "тот (предмет далеко от обоих)", emoji: "👆" },
+      { id: 44, level_id: 3, kanji: "本", reading: "ほん", translation: "книга", emoji: "📕" },
+      { id: 45, level_id: 3, kanji: "辞書", reading: "じしょ", translation: "словарь", emoji: "📖" },
+      { id: 46, level_id: 3, kanji: "雑誌", reading: "ざっし", translation: "журнал", emoji: "📓" },
+      { id: 47, level_id: 3, kanji: "新聞", reading: "しんぶん", translation: "газета", emoji: "📰" },
+      { id: 48, level_id: 3, kanji: "—", reading: "ノート", translation: "тетрадь", emoji: "📝" },
+      { id: 49, level_id: 3, kanji: "手帳", reading: "てちょう", translation: "записная книжка / блокнот", emoji: "📔" },
+      { id: 50, level_id: 3, kanji: "名刺", reading: "めいし", translation: "визитка / визитная карточка", emoji: "📇" },
+      { id: 51, level_id: 3, kanji: "—", reading: "カード", translation: "карточка (кредитная/скидочная)", emoji: "💳" },
+      { id: 52, level_id: 3, kanji: "鉛筆", reading: "えんぴつ", translation: "карандаш", emoji: "✏️" },
+      { id: 53, level_id: 3, kanji: "—", reading: "ボールペン", translation: "шариковая ручка", emoji: "🖊️" },
+      { id: 54, level_id: 3, kanji: "—", reading: "シャープペンシル", translation: "механический карандаш", emoji: "✏️" },
+      { id: 55, level_id: 3, kanji: "鍵", reading: "かぎ", translation: "ключ / ключи", emoji: "🔑" },
+      { id: 56, level_id: 3, kanji: "時計", reading: "とけい", translation: "часы", emoji: "⌚" },
+      { id: 57, level_id: 3, kanji: "傘", reading: "かさ", translation: "зонт", emoji: "☂️" },
+      { id: 58, level_id: 3, kanji: "鞄", reading: "かばん", translation: "сумка / портфель", emoji: "👜" },
+      { id: 59, level_id: 3, kanji: "—", reading: "テレビ", translation: "телевизор", emoji: "📺" },
+      { id: 60, level_id: 3, kanji: "—", reading: "ラジオ", translation: "радио", emoji: "📻" },
+
+      // УРОВЕНЬ 4
+      { id: 61, level_id: 4, kanji: "—", reading: "カメラ", translation: "фотоаппарат / камера", emoji: "📷" },
+      { id: 62, level_id: 4, kanji: "—", reading: "コンピューター", translation: "компьютер", emoji: "💻" },
+      { id: 63, level_id: 4, kanji: "車", reading: "くるま", translation: "машина / автомобиль", emoji: "🚗" },
+      { id: 64, level_id: 4, kanji: "机", reading: "つくえ", translation: "письменный стол", emoji: "🪑" },
+      { id: 65, level_id: 4, kanji: "椅子", reading: "いす", translation: "стул", emoji: "🪑" },
+      { id: 66, level_id: 4, kanji: "—", reading: "チョコレート", translation: "шоколад", emoji: "🍫" },
+      { id: 67, level_id: 4, kanji: "—", reading: "コーヒー", translation: "кофе", emoji: "☕" },
+      { id: 68, level_id: 4, kanji: "お土産", reading: "おみやげ", translation: "сувенир / гостинец", emoji: "🎁" },
+      { id: 69, level_id: 4, kanji: "英語", reading: "えいご", translation: "английский язык", emoji: "🇬🇧" },
+      { id: 70, level_id: 4, kanji: "日本語", reading: "にほんご", translation: "японский язык", emoji: "🇯🇵" },
+      { id: 71, level_id: 4, kanji: "何", reading: "なん", translation: "что", emoji: "❓" },
+      { id: 72, level_id: 4, kanji: "—", reading: "だれの", translation: "чей?", emoji: "❓" },
+      { id: 73, level_id: 4, kanji: "—", reading: "そう", translation: "так / именно так", emoji: "✅" },
+      { id: 74, level_id: 4, kanji: "—", reading: "どうぞ", translation: "пожалуйста (при предложении)", emoji: "🤝" },
+      { id: 75, level_id: 4, kanji: "—", reading: "どうもありがとうございます", translation: "большое спасибо", emoji: "🙏" },
+      { id: 76, level_id: 4, kanji: "—", reading: "そうですか", translation: "вот оно как / понятно", emoji: "💡" },
+      { id: 77, level_id: 4, kanji: "—", reading: "ここ", translation: "здесь / тут (близко ко мне)", emoji: "📍" },
+      { id: 78, level_id: 4, kanji: "—", reading: "そこ", translation: "там (у тебя / чуть дальше)", emoji: "👉" },
+      { id: 79, level_id: 4, kanji: "—", reading: "あそこ", translation: "вон там (далеко от обоих)", emoji: "👆" },
+      { id: 80, level_id: 4, kanji: "—", reading: "どこ", translation: "где? / куда?", emoji: "❓" },
+
+      // УРОВЕНЬ 5
+      { id: 81, level_id: 5, kanji: "—", reading: "こちら", translation: "здесь / в эту сторону (вежливо)", emoji: "👉" },
+      { id: 82, level_id: 5, kanji: "—", reading: "そちら", translation: "там / в ту сторону (вежливо)", emoji: "👈" },
+      { id: 83, level_id: 5, kanji: "—", reading: "あちら", translation: "вон там / в ту сторону (вежливо)", emoji: "👆" },
+      { id: 84, level_id: 5, kanji: "—", reading: "どちら", translation: "где? / в какую сторону? (вежливо)", emoji: "❓" },
+      { id: 85, level_id: 5, kanji: "教室", reading: "きょうしつ", translation: "аудитория / класс", emoji: "🏫" },
+      { id: 86, level_id: 5, kanji: "食堂", reading: "しょくどう", translation: "столовая", emoji: "🍽️" },
+      { id: 87, level_id: 5, kanji: "事務所", reading: "じむしょ", translation: "офис / контора", emoji: "🏢" },
+      { id: 88, level_id: 5, kanji: "会議室", reading: "かいぎしつ", translation: "зал совещаний / переговорная", emoji: "👥" },
+      { id: 89, level_id: 5, kanji: "受付", reading: "うけつけ", translation: "регистратура / ресепшн", emoji: "🛎️" },
+      { id: 90, level_id: 5, kanji: "—", reading: "ロビー", translation: "вестибюль / лобби", emoji: "🏨" },
+      { id: 91, level_id: 5, kanji: "部屋", reading: "へや", translation: "комната", emoji: "🚪" },
+      { id: 92, level_id: 5, kanji: "—", reading: "トイレ", translation: "туалет", emoji: "🚻" },
+      { id: 93, level_id: 5, kanji: "お手洗い", reading: "おてあらい", translation: "туалет (вежливо) / уборная", emoji: "🚻" },
+      { id: 94, level_id: 5, kanji: "階段", reading: "かいだん", translation: "лестница", emoji: "🪜" },
+      { id: 95, level_id: 5, kanji: "—", reading: "エレベーター", translation: "лифт", emoji: "🛗" },
+      { id: 96, level_id: 5, kanji: "—", reading: "エスカレーター", translation: "эскалатор", emoji: "🪜" },
+      { id: 97, level_id: 5, kanji: "自動販売機", reading: "じどうはんばいき", translation: "автомат по продаже (вендинг)", emoji: "🥤" },
+      { id: 98, level_id: 5, kanji: "電話", reading: "でんわ", translation: "телефон / телефонный звонок", emoji: "☎️" },
+      { id: 99, level_id: 5, kanji: "国", reading: "くに", translation: "страна / родина", emoji: "🌍" },
+      { id: 100, level_id: 5, kanji: "家", reading: "うち", translation: "дом (свой) / семья", emoji: "🏠" },
+
+      // УРОВЕНЬ 6
+      { id: 101, level_id: 6, kanji: "靴", reading: "くつ", translation: "обувь / туфли", emoji: "👞" },
+      { id: 102, level_id: 6, kanji: "—", reading: "ネクタイ", translation: "галстук", emoji: "👔" },
+      { id: 103, level_id: 6, kanji: "—", reading: "ワイン", translation: "вино", emoji: "🍷" },
+      { id: 104, level_id: 6, kanji: "売り場", reading: "うりば", translation: "прилавок / торговый отдел", emoji: "🏬" },
+      { id: 105, level_id: 6, kanji: "地下", reading: "ちか", translation: "подвал / подземный этаж", emoji: "🚇" },
+      { id: 106, level_id: 6, kanji: "何階", reading: "なんがい", translation: "какой этаж?", emoji: "❓" },
+      { id: 107, level_id: 6, kanji: "円", reading: "えん", translation: "иена (валюта)", emoji: "💴" },
+      { id: 108, level_id: 6, kanji: "—", reading: "いくら", translation: "сколько стоит?", emoji: "💰" },
+      { id: 109, level_id: 6, kanji: "百", reading: "ひゃく", translation: "100 / сто", emoji: "💯" },
+      { id: 110, level_id: 6, kanji: "千", reading: "せん", translation: "1000 / тысяча", emoji: "🔢" },
+      { id: 111, level_id: 6, kanji: "万", reading: "まん", translation: "10 000 / десять тысяч", emoji: "🔢" },
+      { id: 112, level_id: 6, kanji: "—", reading: "すみません", translation: "извините / прошу прощения", emoji: "🙏" },
+      { id: 113, level_id: 6, kanji: "—", reading: "どうも", translation: "спасибо (кратко)", emoji: "🤝" },
+      { id: 114, level_id: 6, kanji: "—", reading: "いらっしゃいませ", translation: "добро пожаловать", emoji: "🛎️" },
+      { id: 115, level_id: 6, kanji: "起きます", reading: "おきます", translation: "просыпаться / вставать", emoji: "⏰" },
+      { id: 116, level_id: 6, kanji: "寝ます", reading: "ねます", translation: "ложиться спать / спать", emoji: "😴" },
+      { id: 117, level_id: 6, kanji: "働きます", reading: "はたらきます", translation: "работать", emoji: "💼" },
+      { id: 118, level_id: 6, kanji: "休みます", reading: "やすみます", translation: "отдыхать", emoji: "🛌" },
+      { id: 119, level_id: 6, kanji: "勉強します", reading: "べんきょうします", translation: "заниматься / учиться", emoji: "📚" },
+      { id: 120, level_id: 6, kanji: "終わります", reading: "おわります", translation: "заканчиваться / завершаться", emoji: "🏁" },
+
+      // УРОВЕНЬ 7
+      { id: 121, level_id: 7, kanji: "—", reading: "デパート", translation: "универмаг", emoji: "🏬" },
+      { id: 122, level_id: 7, kanji: "銀行", reading: "ぎんこう", translation: "банк", emoji: "🏦" },
+      { id: 123, level_id: 7, kanji: "郵便局", reading: "ゆうびんきょく", translation: "почтовое отделение / почта", emoji: "📮" },
+      { id: 124, level_id: 7, kanji: "図書館", reading: "としょかん", translation: "библиотека", emoji: "📚" },
+      { id: 125, level_id: 7, kanji: "美術館", reading: "びじゅつかん", translation: "художественный музей / галерея", emoji: "🎨" },
+      { id: 126, level_id: 7, kanji: "番号", reading: "ばんごう", translation: "номер (телефона, дома и т.д.)", emoji: "🔢" },
+      { id: 127, level_id: 7, kanji: "今", reading: "いま", translation: "сейчас", emoji: "⏳" },
+      { id: 128, level_id: 7, kanji: "何時", reading: "なんじ", translation: "который час? / сколько времени?", emoji: "🕐" },
+      { id: 129, level_id: 7, kanji: "何分", reading: "なんぷん", translation: "сколько минут?", emoji: "⏱️" },
+      { id: 130, level_id: 7, kanji: "午前", reading: "ごぜん", translation: "утро (до полудня / a.m.)", emoji: "🌅" },
+      { id: 131, level_id: 7, kanji: "午後", reading: "ごご", translation: "день/вечер (после полудня / p.m.)", emoji: "🌇" },
+      { id: 132, level_id: 7, kanji: "朝", reading: "あさ", translation: "утро", emoji: "🌄" },
+      { id: 133, level_id: 7, kanji: "昼", reading: "ひる", translation: "день (середина дня)", emoji: "☀️" },
+      { id: 134, level_id: 7, kanji: "晩", reading: "ばん", translation: "вечер", emoji: "🌆" },
+      { id: 135, level_id: 7, kanji: "夜", reading: "よる", translation: "ночь / поздний вечер", emoji: "🌙" },
+      { id: 136, level_id: 7, kanji: "一昨日", reading: "おととい", translation: "позавчера", emoji: "📅" },
+      { id: 137, level_id: 7, kanji: "昨日", reading: "きのう", translation: "вчера", emoji: "📅" },
+      { id: 138, level_id: 7, kanji: "今日", reading: "きょう", translation: "сегодня", emoji: "📅" },
+      { id: 139, level_id: 7, kanji: "明日", reading: "あした", translation: "завтра", emoji: "📅" },
+      { id: 140, level_id: 7, kanji: "明後日", reading: "あさって", translation: "послезавтра", emoji: "📅" },
+
+      // УРОВЕНЬ 8
+      { id: 141, level_id: 8, kanji: "今朝", reading: "けさ", translation: "сегодня утром", emoji: "🌅" },
+      { id: 142, level_id: 8, kanji: "今晩", reading: "こんばん", translation: "сегодня вечером", emoji: "🌆" },
+      { id: 143, level_id: 8, kanji: "休み", reading: "やすみ", translation: "отдых / выходной", emoji: "🏖️" },
+      { id: 144, level_id: 8, kanji: "昼休み", reading: "ひるやすみ", translation: "обеденный перерыв", emoji: "🍱" },
+      { id: 145, level_id: 8, kanji: "試験", reading: "しけん", translation: "экзамен / тест", emoji: "📝" },
+      { id: 146, level_id: 8, kanji: "会議", reading: "かいぎ", translation: "совещание / собрание", emoji: "👥" },
+      { id: 147, level_id: 8, kanji: "映画", reading: "えいが", translation: "фильм / кино", emoji: "🎬" },
+      { id: 148, level_id: 8, kanji: "毎朝", reading: "まいあさ", translation: "каждое утро", emoji: "🌄" },
+      { id: 149, level_id: 8, kanji: "毎晩", reading: "まいばん", translation: "каждый вечер", emoji: "🌃" },
+      { id: 150, level_id: 8, kanji: "毎日", reading: "まいにち", translation: "каждый день", emoji: "📆" },
+      { id: 151, level_id: 8, kanji: "月曜日", reading: "げつようび", translation: "понедельник", emoji: "📅" },
+      { id: 152, level_id: 8, kanji: "火曜日", reading: "かようび", translation: "вторник", emoji: "📅" },
+      { id: 153, level_id: 8, kanji: "水曜日", reading: "すいようび", translation: "среда", emoji: "📅" },
+      { id: 154, level_id: 8, kanji: "木曜日", reading: "もくようび", translation: "четверг", emoji: "📅" },
+      { id: 155, level_id: 8, kanji: "金曜日", reading: "きんようび", translation: "пятница", emoji: "📅" },
+      { id: 156, level_id: 8, kanji: "土曜日", reading: "どようび", translation: "суббота", emoji: "📅" },
+      { id: 157, level_id: 8, kanji: "日曜日", reading: "にちようび", translation: "воскресенье", emoji: "📅" },
+      { id: 158, level_id: 8, kanji: "何曜日", reading: "なんようび", translation: "какой день недели?", emoji: "❓" },
+      { id: 159, level_id: 8, kanji: "大変ですね", reading: "たいへんですね", translation: "тяжело вам приходится", emoji: "🤝" },
+      { id: 160, level_id: 8, kanji: "行きます", reading: "いきます", translation: "идти / ехать", emoji: "🚶" },
+
+      // УРОВЕНЬ 9
+      { id: 161, level_id: 9, kanji: "来ます", reading: "きます", translation: "приходить / приезжать", emoji: "🏃" },
+      { id: 162, level_id: 9, kanji: "帰ります", reading: "かえります", translation: "возвращаться (домой)", emoji: "🏠" },
+      { id: 163, level_id: 9, kanji: "学校", reading: "がっこう", translation: "школа", emoji: "🏫" },
+      { id: 164, level_id: 9, kanji: "—", reading: "スーパー", translation: "супермаркет", emoji: "🛒" },
+      { id: 165, level_id: 9, kanji: "駅", reading: "えき", translation: "станция / вокзал", emoji: "🚉" },
+      { id: 166, level_id: 9, kanji: "飛行機", reading: "ひこうき", translation: "самолет", emoji: "✈️" },
+      { id: 167, level_id: 9, kanji: "船", reading: "ふね", translation: "корабль / судно", emoji: "🚢" },
+      { id: 168, level_id: 9, kanji: "電車", reading: "でんしゃ", translation: "поезд / электричка", emoji: "🚆" },
+      { id: 169, level_id: 9, kanji: "地下鉄", reading: "ちかてつ", translation: "метро", emoji: "🚇" },
+      { id: 170, level_id: 9, kanji: "新幹線", reading: "しんかんせん", translation: "синкансэн (скоростной поезд)", emoji: "🚄" },
+      { id: 171, level_id: 9, kanji: "—", reading: "バス", translation: "автобус", emoji: "🚌" },
+      { id: 172, level_id: 9, kanji: "—", reading: "タクシー", translation: "такси", emoji: "🚕" },
+      { id: 173, level_id: 9, kanji: "自転車", reading: "じてんしゃ", translation: "велосипед", emoji: "🚲" },
+      { id: 174, level_id: 9, kanji: "歩いて", reading: "あるいて", translation: "пешком", emoji: "🚶" },
+      { id: 175, level_id: 9, kanji: "人", reading: "ひと", translation: "человек", emoji: "🧑" },
+      { id: 176, level_id: 9, kanji: "友達", reading: "ともだち", translation: "друг", emoji: "👫" },
+      { id: 177, level_id: 9, kanji: "彼", reading: "かれ", translation: "он / парень (бойфренд)", emoji: "👨" },
+      { id: 178, level_id: 9, kanji: "彼女", reading: "かのじょ", translation: "она / девушка (подруга)", emoji: "👩" },
+      { id: 179, level_id: 9, kanji: "家族", reading: "かぞく", translation: "семья", emoji: "👨‍👩‍👧‍👦" },
+      { id: 180, level_id: 9, kanji: "一人で", reading: "ひとりで", translation: "один / самостоятельно", emoji: "👤" },
+
+      // УРОВЕНЬ 10
+      { id: 181, level_id: 10, kanji: "普通", reading: "ふつう", translation: "обычный (поезд со всеми остановками)", emoji: "🚆" },
+      { id: 182, level_id: 10, kanji: "急行", reading: "きゅうこう", translation: "экспресс (поезд)", emoji: "🚄" },
+      { id: 183, level_id: 10, kanji: "特急", reading: "とっきゅう", translation: "скорый поезд", emoji: "🚅" },
+      { id: 184, level_id: 10, kanji: "先週", reading: "せんしゅう", translation: "прошлая неделя", emoji: "📅" },
+      { id: 185, level_id: 10, kanji: "今週", reading: "こんしゅう", translation: "эта неделя", emoji: "📅" },
+      { id: 186, level_id: 10, kanji: "来週", reading: "らいしゅう", translation: "следующая неделя", emoji: "📅" },
+      { id: 187, level_id: 10, kanji: "先月", reading: "せんげつ", translation: "прошлый месяц", emoji: "📆" },
+      { id: 188, level_id: 10, kanji: "今月", reading: "こんげつ", translation: "этот месяц", emoji: "📆" },
+      { id: 189, level_id: 10, kanji: "来月", reading: "らいげつ", translation: "следующий месяц", emoji: "📆" },
+      { id: 190, level_id: 10, kanji: "去年", reading: "きょねん", translation: "прошлый год", emoji: "🗓️" },
+      { id: 191, level_id: 10, kanji: "今年", reading: "ことし", translation: "этот год", emoji: "🗓️" },
+      { id: 192, level_id: 10, kanji: "来年", reading: "らいねん", translation: "следующий год", emoji: "🗓️" },
+      { id: 193, level_id: 10, kanji: "何年", reading: "なんねん", translation: "какой год?", emoji: "❓" },
+      { id: 194, level_id: 10, kanji: "何月", reading: "なんがつ", translation: "какой месяц?", emoji: "❓" },
+      { id: 195, level_id: 10, kanji: "何日", reading: "なんにち", translation: "какой день месяца? / сколько дней?", emoji: "❓" },
+      { id: 196, level_id: 10, kanji: "—", reading: "いつ", translation: "когда?", emoji: "❓" },
+      { id: 197, level_id: 10, kanji: "誕生日", reading: "たんじょうび", translation: "день рождения", emoji: "🎂" },
+      { id: 198, level_id: 10, kanji: "一日", reading: "ついたち", translation: "1-е число месяца", emoji: "1️⃣" },
+      { id: 199, level_id: 10, kanji: "二日", reading: "ふつか", translation: "2-е число месяца / 2 дня", emoji: "2️⃣" },
+      { id: 200, level_id: 10, kanji: "三日", reading: "みっか", translation: "3-е число месяца / 3 дня", emoji: "3️⃣" },
+
+      // УРОВЕНЬ 11
+      { id: 201, level_id: 11, kanji: "四日", reading: "よっか", translation: "4-е число месяца / 4 дня", emoji: "4️⃣" },
+      { id: 202, level_id: 11, kanji: "五日", reading: "いつか", translation: "5-е число месяца / 5 дней", emoji: "5️⃣" },
+      { id: 203, level_id: 11, kanji: "六日", reading: "むいか", translation: "6-е число месяца / 6 дней", emoji: "6️⃣" },
+      { id: 204, level_id: 11, kanji: "七日", reading: "なのか", translation: "7-е число месяца / 7 дней", emoji: "7️⃣" },
+      { id: 205, level_id: 11, kanji: "八日", reading: "ようか", translation: "8-е число месяца / 8 дней", emoji: "8️⃣" },
+      { id: 206, level_id: 11, kanji: "九日", reading: "ここのか", translation: "9-е число месяца / 9 дней", emoji: "9️⃣" },
+      { id: 207, level_id: 11, kanji: "十日", reading: "とおか", translation: "10-е число месяца / 10 дней", emoji: "🔟" },
+      { id: 208, level_id: 11, kanji: "十一日", reading: "じゅういちにち", translation: "11-е число месяца / 11 дней", emoji: "🔢" },
+      { id: 209, level_id: 11, kanji: "十四日", reading: "じゅうよっか", translation: "14-е число месяца / 14 дней", emoji: "🔢" },
+      { id: 210, level_id: 11, kanji: "二十日", reading: "はつか", translation: "20-е число месяца / 20 дней", emoji: "🔢" },
+      { id: 211, level_id: 11, kanji: "二十四日", reading: "にじゅうよっか", translation: "24-е число месяца / 24 дня", emoji: "🔢" },
+      { id: 212, level_id: 11, kanji: "—", reading: "そうですね", translation: "да, это так / и вправду", emoji: "✅" },
+      { id: 213, level_id: 11, kanji: "—", reading: "どういたしまして", translation: "не за что / пожалуйста", emoji: "🤝" },
+      { id: 214, level_id: 11, kanji: "食べます", reading: "たべます", translation: "есть / кушать", emoji: "🍽️" },
+      { id: 215, level_id: 11, kanji: "飲みます", reading: "のみます", translation: "пить", emoji: "🥤" },
+      { id: 216, level_id: 11, kanji: "吸います", reading: "すいます", translation: "курить (табак) / вдыхать", emoji: "🚬" },
+      { id: 217, level_id: 11, kanji: "見ます", reading: "みます", translation: "смотреть / видеть", emoji: "👀" },
+      { id: 218, level_id: 11, kanji: "聞きます", reading: "ききます", translation: "слушать / слышать", emoji: "👂" },
+      { id: 219, level_id: 11, kanji: "読みます", reading: "よみます", translation: "читать", emoji: "📖" },
+      { id: 220, level_id: 11, kanji: "書きます", reading: "かきます", translation: "писать / рисовать", emoji: "✍️" },
+
+      // УРОВЕНЬ 12
+      { id: 221, level_id: 12, kanji: "買います", reading: "かいます", translation: "покупать", emoji: "🛍️" },
+      { id: 222, level_id: 12, kanji: "撮ります", reading: "とります", translation: "фотографировать / снимать", emoji: "📸" },
+      { id: 223, level_id: 12, kanji: "—", reading: "します", translation: "делать / совершать", emoji: "🔨" },
+      { id: 224, level_id: 12, kanji: "会います", reading: "あいます", translation: "встречать / встречаться", emoji: "🤝" },
+      { id: 225, level_id: 12, kanji: "ご飯", reading: "ごはん", translation: "еда / вареный рис", emoji: "🍚" },
+      { id: 226, level_id: 12, kanji: "朝ごはん", reading: "あさごはん", translation: "завтрак", emoji: "🍳" },
+      { id: 227, level_id: 12, kanji: "昼ごはん", reading: "ひるごはん", translation: "обед", emoji: "🍱" },
+      { id: 228, level_id: 12, kanji: "晩ごはん", reading: "ばんごはん", translation: "ужин", emoji: "🍽️" },
+      { id: 229, level_id: 12, kanji: "—", reading: "パン", translation: "хлеб", emoji: "🍞" },
+      { id: 230, level_id: 12, kanji: "卵", reading: "たまご", translation: "яйцо", emoji: "🥚" },
+      { id: 231, level_id: 12, kanji: "肉", reading: "にく", translation: "мясо", emoji: "🥩" },
+      { id: 232, level_id: 12, kanji: "魚", reading: "さかな", translation: "рыба", emoji: "🐟" },
+      { id: 233, level_id: 12, kanji: "野菜", reading: "やさい", translation: "овощи", emoji: "🥦" },
+      { id: 234, level_id: 12, kanji: "果物", reading: "くだもの", translation: "фрукты", emoji: "🍎" },
+      { id: 235, level_id: 12, kanji: "水", reading: "みず", translation: "вода", emoji: "💧" },
+      { id: 236, level_id: 12, kanji: "お茶", reading: "おちゃ", translation: "чай / зеленый чай", emoji: "🍵" },
+      { id: 237, level_id: 12, kanji: "紅茶", reading: "こうちゃ", translation: "черный чай", emoji: "🫖" },
+      { id: 238, level_id: 12, kanji: "牛乳", reading: "ぎゅうにゅう", translation: "молоко", emoji: "🥛" },
+      { id: 239, level_id: 12, kanji: "—", reading: "ジュース", translation: "сок", emoji: "🧃" },
+      { id: 240, level_id: 12, kanji: "—", reading: "ビール", translation: "пиво", emoji: "🍺" },
+
+      // УРОВЕНЬ 13
+      { id: 241, level_id: 13, kanji: "お酒", reading: "おさけ", translation: "алкоголь / саке", emoji: "🍶" },
+      { id: 242, level_id: 13, kanji: "—", reading: "たばこ", translation: "сигареты / табак", emoji: "🚬" },
+      { id: 243, level_id: 13, kanji: "手紙", reading: "てがみ", translation: "письмо", emoji: "✉️" },
+      { id: 244, level_id: 13, kanji: "—", reading: "レポート", translation: "отчет / доклад / реферат", emoji: "📄" },
+      { id: 245, level_id: 13, kanji: "写真", reading: "しゃしん", translation: "фотография", emoji: "📷" },
+      { id: 246, level_id: 13, kanji: "—", reading: "ビデオ", translation: "видео", emoji: "🎥" },
+      { id: 247, level_id: 13, kanji: "店", reading: "みせ", translation: "магазин / лавка", emoji: "🏪" },
+      { id: 248, level_id: 13, kanji: "庭", reading: "にわ", translation: "двор / сад", emoji: "🌳" },
+      { id: 249, level_id: 13, kanji: "宿題", reading: "しゅくだい", translation: "домашнее задание", emoji: "📝" },
+      { id: 250, level_id: 13, kanji: "—", reading: "テニス", translation: "теннис", emoji: "🎾" },
+      { id: 251, level_id: 13, kanji: "—", reading: "サッカー", translation: "футбол", emoji: "⚽" },
+      { id: 252, level_id: 13, kanji: "何", reading: "なに", translation: "что?", emoji: "❓" },
+      { id: 253, level_id: 13, kanji: "—", reading: "いっしょに", translation: "вместе", emoji: "👫" },
+      { id: 254, level_id: 13, kanji: "—", reading: "ちょっと", translation: "немного / чуть-чуть", emoji: "🤏" },
+      { id: 255, level_id: 13, kanji: "—", reading: "いつも", translation: "всегда / всё время", emoji: "♾️" },
+      { id: 256, level_id: 13, kanji: "—", reading: "ときどき", translation: "иногда / время от времени", emoji: "⏳" },
+      { id: 257, level_id: 13, kanji: "—", reading: "それから", translation: "после чего / затем", emoji: "➡️" },
+      { id: 258, level_id: 13, kanji: "—", reading: "ええ", translation: "да (разговорное/согласие)", emoji: "👍" },
+      { id: 259, level_id: 13, kanji: "—", reading: "いいですね", translation: "хорошо / отлично", emoji: "👌" },
+      { id: 260, level_id: 13, kanji: "—", reading: "じゃまたあした", translation: "пока, до завтра", emoji: "👋" },
+
+      // УРОВЕНЬ 14
+      { id: 261, level_id: 14, kanji: "切ります", reading: "きります", translation: "резать / нарезать", emoji: "🔪" },
+      { id: 262, level_id: 14, kanji: "送ります", reading: "おくります", translation: "посылать / отправлять", emoji: "📤" },
+      { id: 263, level_id: 14, kanji: "—", reading: "あげます", translation: "давать / дарить", emoji: "🎁" },
+      { id: 264, level_id: 14, kanji: "—", reading: "もらいます", translation: "получать / принимать", emoji: "📥" },
+      { id: 265, level_id: 14, kanji: "教えます", reading: "おしえます", translation: "обучать / преподавать", emoji: "👨‍🏫" },
+      { id: 266, level_id: 14, kanji: "習います", reading: "ならいます", translation: "обучаться / перенимать опыт", emoji: "🎓" },
+      { id: 267, level_id: 14, kanji: "貸します", reading: "かします", translation: "давать в долг / одалживать", emoji: "💸" },
+      { id: 268, level_id: 14, kanji: "借ります", reading: "かります", translation: "брать в долг / одалживать", emoji: "💳" },
+      { id: 269, level_id: 14, kanji: "かけます", reading: "かけます", translation: "звонить (по телефону)", emoji: "📞" },
+      { id: 270, level_id: 14, kanji: "手", reading: "て", translation: "рука / кисть руки", emoji: "✋" },
+      { id: 271, level_id: 14, kanji: "箸", reading: "はし", translation: "палочки для еды", emoji: "🥢" },
+      { id: 272, level_id: 14, kanji: "—", reading: "スプーン", translation: "ложка", emoji: "🥄" },
+      { id: 273, level_id: 14, kanji: "—", reading: "ナイフ", translation: "нож", emoji: "🔪" },
+      { id: 274, level_id: 14, kanji: "—", reading: "フォーク", translation: "вилка", emoji: "🍴" },
+      { id: 275, level_id: 14, kanji: "鋏", reading: "はさみ", translation: "ножницы", emoji: "✂️" },
+      { id: 276, level_id: 14, kanji: "—", reading: "パソコン", translation: "персональный компьютер", emoji: "💻" },
+      { id: 277, level_id: 14, kanji: "—", reading: "ケータイ", translation: "мобильный телефон", emoji: "📱" },
+      { id: 278, level_id: 14, kanji: "—", reading: "メール", translation: "электронная почта / e-mail", emoji: "📧" },
+      { id: 279, level_id: 14, kanji: "—", reading: "パンチ", translation: "дырокол", emoji: "📎" },
+      { id: 280, level_id: 14, kanji: "—", reading: "ホッチキス", translation: "степлер", emoji: "📎" },
+
+      // УРОВЕНЬ 15
+      { id: 281, level_id: 15, kanji: "—", reading: "セロテープ", translation: "скотч / клейкая лента", emoji: "📎" },
+      { id: 282, level_id: 15, kanji: "消しゴム", reading: "けしゴム", translation: "ластик / стирательная резинка", emoji: "✏️" },
+      { id: 283, level_id: 15, kanji: "紙", reading: "かみ", translation: "бумага", emoji: "📄" },
+      { id: 284, level_id: 15, kanji: "花", reading: "はな", translation: "цветок / цветы", emoji: "🌸" },
+      { id: 285, level_id: 15, kanji: "—", reading: "シャツ", translation: "рубашка", emoji: "👔" },
+      { id: 286, level_id: 15, kanji: "—", reading: "プレゼント", translation: "подарок", emoji: "🎁" },
+      { id: 287, level_id: 15, kanji: "荷物", reading: "にもつ", translation: "багаж / груз / посылка", emoji: "🧳" },
+      { id: 288, level_id: 15, kanji: "お金", reading: "おかね", translation: "деньги", emoji: "💰" },
+      { id: 289, level_id: 15, kanji: "切符", reading: "きっぷ", translation: "билет (на поезд/автобус)", emoji: "🎫" },
+      { id: 290, level_id: 15, kanji: "—", reading: "クリスマス", translation: "Рождество", emoji: "🎄" },
+      { id: 291, level_id: 15, kanji: "父", reading: "ちち", translation: "(мой) папа / отец", emoji: "👨" },
+      { id: 292, level_id: 15, kanji: "母", reading: "はは", translation: "(моя) мама / мать", emoji: "👩" },
+      { id: 293, level_id: 15, kanji: "お父さん", reading: "おとうさん", translation: "(чужой) отец / папа", emoji: "👨‍🦳" },
+      { id: 294, level_id: 15, kanji: "お母さん", reading: "おかあさん", translation: "(чужая) мать / мама", emoji: "👩‍🦳" },
+      { id: 295, level_id: 15, kanji: "—", reading: "もう", translation: "уже", emoji: "⏰" },
+      { id: 296, level_id: 15, kanji: "—", reading: "まだ", translation: "еще не / пока еще", emoji: "⏳" },
+      { id: 297, level_id: 15, kanji: "—", reading: "これから", translation: "с этого момента / скоро", emoji: "🔜" },
+      { id: 298, level_id: 15, kanji: "—", reading: "いらっしゃい", translation: "добро пожаловать", emoji: "🏠" },
+      { id: 299, level_id: 15, kanji: "失礼します", reading: "しつれいします", translation: "извините за беспокойство", emoji: "🙏" },
+      { id: 300, level_id: 15, kanji: "—", reading: "いかがですか", translation: "как насчет...? / не желаете ли?", emoji: "🤔" },
+
+      // УРОВЕНЬ 16
+      { id: 301, level_id: 16, kanji: "—", reading: "いただきます", translation: "приятного аппетита", emoji: "🍽️" },
+      { id: 302, level_id: 16, kanji: "—", reading: "ごちそうさまでした", translation: "спасибо за еду", emoji: "🙏" },
+      { id: 303, level_id: 16, kanji: "—", reading: "ハンサム", translation: "привлекательный / красивый", emoji: "😍" },
+      { id: 304, level_id: 16, kanji: "綺麗", reading: "きれい", translation: "красивый / чистый", emoji: "✨" },
+      { id: 305, level_id: 16, kanji: "静か", reading: "しずか", translation: "тихий / спокойный", emoji: "🤫" },
+      { id: 306, level_id: 16, kanji: "賑やか", reading: "にぎやか", translation: "оживленный / шумный", emoji: "🔊" },
+      { id: 307, level_id: 16, kanji: "有名", reading: "ゆうめい", translation: "знаменитый / известный", emoji: "⭐" },
+      { id: 308, level_id: 16, kanji: "親切", reading: "しんせつ", translation: "доброжелательный / добрый", emoji: "😊" },
+      { id: 309, level_id: 16, kanji: "元気", reading: "げんき", translation: "бодрый / здоровый", emoji: "💪" },
+      { id: 310, level_id: 16, kanji: "暇", reading: "ひま", translation: "свободный (о времени)", emoji: "🕐" },
+      { id: 311, level_id: 16, kanji: "便利", reading: "べんり", translation: "удобный", emoji: "👍" },
+      { id: 312, level_id: 16, kanji: "素敵", reading: "すてき", translation: "замечательный / восхитительный", emoji: "🌟" },
+      { id: 313, level_id: 16, kanji: "大きい", reading: "おおきい", translation: "большой", emoji: "🐘" },
+      { id: 314, level_id: 16, kanji: "小さい", reading: "ちいさい", translation: "маленький", emoji: "🐜" },
+      { id: 315, level_id: 16, kanji: "新しい", reading: "あたらしい", translation: "новый", emoji: "🆕" },
+      { id: 316, level_id: 16, kanji: "古い", reading: "ふるい", translation: "старый (о предметах)", emoji: "📦" },
+      { id: 317, level_id: 16, kanji: "良い", reading: "いい", translation: "хороший", emoji: "👍" },
+      { id: 318, level_id: 16, kanji: "悪い", reading: "わるい", translation: "плохой", emoji: "👎" },
+      { id: 319, level_id: 16, kanji: "暑い", reading: "あつい", translation: "горячий / жаркий", emoji: "🔥" },
+      { id: 320, level_id: 16, kanji: "寒い", reading: "さむい", translation: "холодный (о погоде)", emoji: "🥶" },
+
+      // УРОВЕНЬ 17
+      { id: 321, level_id: 17, kanji: "冷たい", reading: "つめたい", translation: "холодный (на ощупь)", emoji: "🧊" },
+      { id: 322, level_id: 17, kanji: "難しい", reading: "むずかしい", translation: "трудный / сложный", emoji: "😓" },
+      { id: 323, level_id: 17, kanji: "易しい", reading: "やさしい", translation: "легкий / простой / добрый", emoji: "🪶" },
+      { id: 324, level_id: 17, kanji: "高い", reading: "たかい", translation: "высокий / дорогой", emoji: "💎" },
+      { id: 325, level_id: 17, kanji: "安い", reading: "やすい", translation: "дешёвый", emoji: "💸" },
+      { id: 326, level_id: 17, kanji: "低い", reading: "ひくい", translation: "низкий", emoji: "⬇️" },
+      { id: 327, level_id: 17, kanji: "面白い", reading: "おもしろい", translation: "интересный / забавный", emoji: "😄" },
+      { id: 328, level_id: 17, kanji: "美味しい", reading: "おいしい", translation: "вкусный", emoji: "😋" },
+      { id: 329, level_id: 17, kanji: "忙しい", reading: "いそがしい", translation: "занятой (нет времени)", emoji: "⏰" },
+      { id: 330, level_id: 17, kanji: "楽しい", reading: "たのしい", translation: "веселый / радостный", emoji: "😄" },
+      { id: 331, level_id: 17, kanji: "白い", reading: "しろい", translation: "белый", emoji: "⚪" },
+      { id: 332, level_id: 17, kanji: "黒い", reading: "くろい", translation: "чёрный", emoji: "⚫" },
+      { id: 333, level_id: 17, kanji: "赤い", reading: "あかい", translation: "красный", emoji: "🔴" },
+      { id: 334, level_id: 17, kanji: "青い", reading: "あおい", translation: "синий / голубой", emoji: "🔵" },
+      { id: 335, level_id: 17, kanji: "桜", reading: "さくら", translation: "сакура / вишня", emoji: "🌸" },
+      { id: 336, level_id: 17, kanji: "山", reading: "やま", translation: "гора", emoji: "⛰️" },
+      { id: 337, level_id: 17, kanji: "町", reading: "まち", translation: "город / городок", emoji: "🏙️" },
+      { id: 338, level_id: 17, kanji: "食べ物", reading: "たべもの", translation: "еда / продукты питания", emoji: "🍽️" },
+      { id: 339, level_id: 17, kanji: "所", reading: "ところ", translation: "место", emoji: "📍" },
+      { id: 340, level_id: 17, kanji: "寮", reading: "りょう", translation: "общежитие", emoji: "🏠" },
+
+      // УРОВЕНЬ 18
+      { id: 341, level_id: 18, kanji: "—", reading: "レストラン", translation: "ресторан", emoji: "🍽️" },
+      { id: 342, level_id: 18, kanji: "生活", reading: "せいかつ", translation: "жизнь / быт", emoji: "🏡" },
+      { id: 343, level_id: 18, kanji: "仕事", reading: "しごと", translation: "работа / занятие", emoji: "💼" },
+      { id: 344, level_id: 18, kanji: "—", reading: "とても", translation: "очень", emoji: "‼️" },
+      { id: 345, level_id: 18, kanji: "—", reading: "あまり", translation: "не очень / не особо", emoji: "🤏" },
+      { id: 346, level_id: 18, kanji: "—", reading: "そして", translation: "к тому же / и / затем", emoji: "➕" },
+      { id: 347, level_id: 18, kanji: "結構です", reading: "けっこうです", translation: "нет, спасибо / достаточно", emoji: "🙅" },
+      { id: 348, level_id: 18, kanji: "分かります", reading: "わかります", translation: "понимать / знать", emoji: "🧠" },
+      { id: 349, level_id: 18, kanji: "—", reading: "あります", translation: "быть / иметься (неодуш.)", emoji: "✔️" },
+      { id: 350, level_id: 18, kanji: "好き", reading: "すき", translation: "любимый / нравящийся", emoji: "❤️" },
+      { id: 351, level_id: 18, kanji: "嫌い", reading: "きらい", translation: "нелюбимый / ненавистный", emoji: "💔" },
+      { id: 352, level_id: 18, kanji: "上手", reading: "じょうず", translation: "умелый / искусный", emoji: "🏆" },
+      { id: 353, level_id: 18, kanji: "下手", reading: "へた", translation: "неумелый / плохой", emoji: "👎" },
+      { id: 354, level_id: 18, kanji: "飲み物", reading: "のみもの", translation: "напиток / напитки", emoji: "🥤" },
+      { id: 355, level_id: 18, kanji: "料理", reading: "りょうり", translation: "блюдо / кулинария / еда", emoji: "🍽️" },
+      { id: 356, level_id: 18, kanji: "—", reading: "スポーツ", translation: "спорт", emoji: "⚽" },
+      { id: 357, level_id: 18, kanji: "野球", reading: "やきゅう", translation: "бейсбол", emoji: "⚾" },
+      { id: 358, level_id: 18, kanji: "—", reading: "ダンス", translation: "танцы / танец", emoji: "💃" },
+      { id: 359, level_id: 18, kanji: "旅行", reading: "りょこう", translation: "путешествие / поездка", emoji: "✈️" },
+      { id: 360, level_id: 18, kanji: "音楽", reading: "おんがく", translation: "музыка", emoji: "🎵" },
+
+      // УРОВЕНЬ 19
+      { id: 361, level_id: 19, kanji: "歌", reading: "うた", translation: "песня", emoji: "🎤" },
+      { id: 362, level_id: 19, kanji: "—", reading: "コンサート", translation: "концерт", emoji: "🎶" },
+      { id: 363, level_id: 19, kanji: "—", reading: "カラオケ", translation: "караоке", emoji: "🎤" },
+      { id: 364, level_id: 19, kanji: "歌舞伎", reading: "かぶき", translation: "театр Кабуки", emoji: "🎭" },
+      { id: 365, level_id: 19, kanji: "絵", reading: "え", translation: "картина / рисунок", emoji: "🎨" },
+      { id: 366, level_id: 19, kanji: "字", reading: "じ", translation: "буква / знак / почерк", emoji: "🔤" },
+      { id: 367, level_id: 19, kanji: "細かいお金", reading: "こまかいおかね", translation: "мелкие деньги / мелочь", emoji: "🪙" },
+      { id: 368, level_id: 19, kanji: "—", reading: "チケット", translation: "билет (на концерт/в кино)", emoji: "🎫" },
+      { id: 369, level_id: 19, kanji: "時間", reading: "じかん", translation: "время", emoji: "⏰" },
+      { id: 370, level_id: 19, kanji: "用事", reading: "ようじ", translation: "дело / занятость", emoji: "💼" },
+      { id: 371, level_id: 19, kanji: "約束", reading: "やくそく", translation: "обещание / договоренность", emoji: "🤝" },
+      { id: 372, level_id: 19, kanji: "—", reading: "アルバイト", translation: "подработка", emoji: "💼" },
+      { id: 373, level_id: 19, kanji: "ご主人", reading: "ごしゅじん", translation: "(чужой) муж / супруг", emoji: "👨‍🦳" },
+      { id: 374, level_id: 19, kanji: "夫", reading: "おっと", translation: "(мой) муж", emoji: "👨" },
+      { id: 375, level_id: 19, kanji: "主人", reading: "しゅじん", translation: "(мой) муж / хозяин", emoji: "👨" },
+      { id: 376, level_id: 19, kanji: "奥さん", reading: "おくさん", translation: "(чужая) жена / супруга", emoji: "👩‍🦳" },
+      { id: 377, level_id: 19, kanji: "妻", reading: "つま", translation: "(моя) жена", emoji: "👩" },
+      { id: 378, level_id: 19, kanji: "家内", reading: "かない", translation: "(моя) жена (традиц.)", emoji: "👩" },
+      { id: 379, level_id: 19, kanji: "子供", reading: "こども", translation: "ребенок / дети", emoji: "👶" },
+      { id: 380, level_id: 19, kanji: "—", reading: "よく", translation: "хорошо / часто", emoji: "👍" },
+
+      // УРОВЕНЬ 20
+      { id: 381, level_id: 20, kanji: "—", reading: "だいたい", translation: "в основном / примерно", emoji: "📊" },
+      { id: 382, level_id: 20, kanji: "—", reading: "たくさん", translation: "много", emoji: "🔢" },
+      { id: 383, level_id: 20, kanji: "少し", reading: "すこし", translation: "мало / немного", emoji: "🤏" },
+      { id: 384, level_id: 20, kanji: "全然", reading: "ぜんぜん", translation: "совсем нет (с отриц.)", emoji: "❌" },
+      { id: 385, level_id: 20, kanji: "早く", reading: "はやく", translation: "быстро / рано", emoji: "⚡" },
+      { id: 386, level_id: 20, kanji: "—", reading: "どうして", translation: "почему? / отчего?", emoji: "❓" },
+      { id: 387, level_id: 20, kanji: "残念です", reading: "ざんねんです", translation: "очень жаль / обидно", emoji: "😢" },
+      { id: 388, level_id: 20, kanji: "—", reading: "あります", translation: "быть / находиться (неодуш.)", emoji: "📍" },
+      { id: 389, level_id: 20, kanji: "—", reading: "います", translation: "быть / находиться (одуш.)", emoji: "🧑" },
+      { id: 390, level_id: 20, kanji: "色々", reading: "いろいろ", translation: "различный / разнообразный", emoji: "🔀" },
+      { id: 391, level_id: 20, kanji: "男の人", reading: "おとこのひと", translation: "мужчина", emoji: "👨" },
+      { id: 392, level_id: 20, kanji: "女の人", reading: "おんなのひと", translation: "женщина", emoji: "👩" },
+      { id: 393, level_id: 20, kanji: "男の子", reading: "おとこのこ", translation: "мальчик", emoji: "👦" },
+      { id: 394, level_id: 20, kanji: "女の子", reading: "おんなのこ", translation: "девочка", emoji: "👧" },
+      { id: 395, level_id: 20, kanji: "犬", reading: "いぬ", translation: "собака", emoji: "🐕" },
+      { id: 396, level_id: 20, kanji: "猫", reading: "ねこ", translation: "кошка / кот", emoji: "🐈" },
+      { id: 397, level_id: 20, kanji: "象", reading: "ぞう", translation: "слон", emoji: "🐘" },
+      { id: 398, level_id: 20, kanji: "木", reading: "き", translation: "дерево / древесина", emoji: "🌳" },
+      { id: 399, level_id: 20, kanji: "物", reading: "もの", translation: "вещь / предмет", emoji: "📦" },
+      { id: 400, level_id: 20, kanji: "電池", reading: "でんち", translation: "батарейка / батарейки", emoji: "🔋" },
+
+      // УРОВЕНЬ 21
+      { id: 401, level_id: 21, kanji: "箱", reading: "はこ", translation: "коробка / ящик", emoji: "📦" },
+      { id: 402, level_id: 21, kanji: "—", reading: "スイッチ", translation: "выключатель / переключатель", emoji: "🔘" },
+      { id: 403, level_id: 21, kanji: "冷蔵庫", reading: "れいぞうこ", translation: "холодильник", emoji: "🧊" },
+      { id: 404, level_id: 21, kanji: "—", reading: "テーブル", translation: "обеденный стол", emoji: "🍽️" },
+      { id: 405, level_id: 21, kanji: "—", reading: "ベッド", translation: "кровать", emoji: "🛏️" },
+      { id: 406, level_id: 21, kanji: "棚", reading: "たな", translation: "полка", emoji: "📚" },
+      { id: 407, level_id: 21, kanji: "—", reading: "ドア", translation: "дверь", emoji: "🚪" },
+      { id: 408, level_id: 21, kanji: "窓", reading: "まど", translation: "окно", emoji: "🪟" },
+      { id: 409, level_id: 21, kanji: "—", reading: "ポスト", translation: "почтовый ящик", emoji: "📮" },
+      { id: 410, level_id: 21, kanji: "—", reading: "ビル", translation: "здание / билдинг", emoji: "🏢" },
+      { id: 411, level_id: 21, kanji: "—", reading: "コンビニ", translation: "круглосуточный магазин", emoji: "🏪" },
+      { id: 412, level_id: 21, kanji: "公園", reading: "こうえん", translation: "парк", emoji: "🌳" },
+      { id: 413, level_id: 21, kanji: "喫茶店", reading: "きっさてん", translation: "кафе / кофейня", emoji: "☕" },
+      { id: 414, level_id: 21, kanji: "〜屋", reading: "〜や", translation: "магазин / лавка (суффикс)", emoji: "🏪" },
+      { id: 415, level_id: 21, kanji: "乗り場", reading: "のりば", translation: "остановка / место посадки", emoji: "🚏" },
+      { id: 416, level_id: 21, kanji: "上", reading: "うえ", translation: "верх / на / над", emoji: "⬆️" },
+      { id: 417, level_id: 21, kanji: "下", reading: "した", translation: "низ / под", emoji: "⬇️" },
+      { id: 418, level_id: 21, kanji: "前", reading: "まえ", translation: "перед / спереди", emoji: "⏩" },
+      { id: 419, level_id: 21, kanji: "後ろ", reading: "うしろ", translation: "зад / сзади / позади", emoji: "⏪" },
+      { id: 420, level_id: 21, kanji: "右", reading: "みぎ", translation: "право / справа", emoji: "➡️" },
+
+      // УРОВЕНЬ 22
+      { id: 421, level_id: 22, kanji: "左", reading: "ひだり", translation: "лево / слева", emoji: "⬅️" },
+      { id: 422, level_id: 22, kanji: "中", reading: "なか", translation: "внутри / середина", emoji: "🔲" },
+      { id: 423, level_id: 22, kanji: "外", reading: "そと", translation: "снаружи / улица", emoji: "🌆" },
+      { id: 424, level_id: 22, kanji: "隣", reading: "となり", translation: "рядом / соседний", emoji: "↔️" },
+      { id: 425, level_id: 22, kanji: "近く", reading: "ちかく", translation: "недалеко / поблизости", emoji: "📍" },
+      { id: 426, level_id: 22, kanji: "間", reading: "あいだ", translation: "между", emoji: "↔️" },
+      { id: 427, level_id: 22, kanji: "—", reading: "かかります", translation: "требоваться (время/деньги)", emoji: "⏳" },
+      { id: 428, level_id: 22, kanji: "一つ", reading: "ひとつ", translation: "один / одна штука", emoji: "1️⃣" },
+      { id: 429, level_id: 22, kanji: "二つ", reading: "ふたつ", translation: "два / две штуки", emoji: "2️⃣" },
+      { id: 430, level_id: 22, kanji: "三つ", reading: "みっつ", translation: "три / три штуки", emoji: "3️⃣" },
+      { id: 431, level_id: 22, kanji: "四つ", reading: "よっつ", translation: "четыре / четыре штуки", emoji: "4️⃣" },
+      { id: 432, level_id: 22, kanji: "五つ", reading: "いつつ", translation: "пять / пять штук", emoji: "5️⃣" },
+      { id: 433, level_id: 22, kanji: "六つ", reading: "むっつ", translation: "шесть / шесть штук", emoji: "6️⃣" },
+      { id: 434, level_id: 22, kanji: "七つ", reading: "ななつ", translation: "семь / семь штук", emoji: "7️⃣" },
+      { id: 435, level_id: 22, kanji: "八つ", reading: "やっつ", translation: "восемь / восемь штук", emoji: "8️⃣" },
+      { id: 436, level_id: 22, kanji: "九つ", reading: "ここのつ", translation: "девять / девять штук", emoji: "9️⃣" },
+      { id: 437, level_id: 22, kanji: "十", reading: "とお", translation: "десять / десять штук", emoji: "🔟" },
+      { id: 438, level_id: 22, kanji: "—", reading: "いくつ", translation: "сколько штук?", emoji: "❓" },
+      { id: 439, level_id: 22, kanji: "一人", reading: "ひとり", translation: "один человек", emoji: "👤" },
+      { id: 440, level_id: 22, kanji: "二人", reading: "ふたり", translation: "два человека", emoji: "👥" },
+
+      // УРОВЕНЬ 23
+      { id: 441, level_id: 23, kanji: "〜人", reading: "〜にん", translation: "счетный суффикс людей", emoji: "🧑" },
+      { id: 442, level_id: 23, kanji: "〜台", reading: "〜だい", translation: "счетный суффикс техники", emoji: "🚗" },
+      { id: 443, level_id: 23, kanji: "〜枚", reading: "〜まい", translation: "счетный суффикс плоских предм.", emoji: "📄" },
+      { id: 444, level_id: 23, kanji: "〜回", reading: "〜かい", translation: "счетный суффикс раз", emoji: "🔁" },
+      { id: 445, level_id: 23, kanji: "—", reading: "りんご", translation: "яблоко", emoji: "🍎" },
+      { id: 446, level_id: 23, kanji: "—", reading: "みかん", translation: "мандарин", emoji: "🍊" },
+      { id: 447, level_id: 23, kanji: "—", reading: "サンドイッチ", translation: "сэндвич / бутерброд", emoji: "🥪" },
+      { id: 448, level_id: 23, kanji: "—", reading: "アイス", translation: "мороженое", emoji: "🍦" },
+      { id: 449, level_id: 23, kanji: "切手", reading: "きって", translation: "почтовая марка", emoji: "📮" },
+      { id: 450, level_id: 23, kanji: "葉書", reading: "はがき", translation: "почтовая открытка", emoji: "💌" },
+      { id: 451, level_id: 23, kanji: "封筒", reading: "ふうとう", translation: "конверт", emoji: "✉️" },
+      { id: 452, level_id: 23, kanji: "両親", reading: "りょうしん", translation: "родители", emoji: "👨‍👩‍👧" },
+      { id: 453, level_id: 23, kanji: "兄弟", reading: "きょうだい", translation: "братья и сестры", emoji: "👫" },
+      { id: 454, level_id: 23, kanji: "兄", reading: "あに", translation: "(мой) старший брат", emoji: "👨" },
+      { id: 455, level_id: 23, kanji: "お兄さん", reading: "おにいさん", translation: "(чужой) старший брат", emoji: "👨‍🦳" },
+      { id: 456, level_id: 23, kanji: "姉", reading: "あね", translation: "(моя) старшая сестра", emoji: "👩" },
+      { id: 457, level_id: 23, kanji: "お姉さん", reading: "おねえさん", translation: "(чужая) старшая сестра", emoji: "👩‍🦳" },
+      { id: 458, level_id: 23, kanji: "弟", reading: "おとうと", translation: "(мой) младший брат", emoji: "👦" },
+      { id: 459, level_id: 23, kanji: "弟さん", reading: "おとうとさん", translation: "(чужой) младший брат", emoji: "👦" },
+      { id: 460, level_id: 23, kanji: "妹", reading: "いもうと", translation: "(моя) младшая сестра", emoji: "👧" },
+
+      // УРОВЕНЬ 24
+      { id: 461, level_id: 24, kanji: "妹さん", reading: "いもうとさん", translation: "(чужая) младшая сестра", emoji: "👧" },
+      { id: 462, level_id: 24, kanji: "外国", reading: "がいこく", translation: "заграница / другие страны", emoji: "🌍" },
+      { id: 463, level_id: 24, kanji: "留学生", reading: "りゅうがくせい", translation: "иностранный студент", emoji: "🧑‍🎓" },
+      { id: 464, level_id: 24, kanji: "—", reading: "クラス", translation: "класс / группа", emoji: "🏫" },
+      { id: 465, level_id: 24, kanji: "〜時間", reading: "〜じかん", translation: "суффикс: часов (промежуток)", emoji: "⏱️" },
+      { id: 466, level_id: 24, kanji: "〜週間", reading: "〜しゅうかん", translation: "суффикс: недель (промежуток)", emoji: "📅" },
+      { id: 467, level_id: 24, kanji: "〜か月", reading: "〜かげつ", translation: "суффикс: месяцев (промежуток)", emoji: "📆" },
+      { id: 468, level_id: 24, kanji: "〜年", reading: "〜ねん", translation: "суффикс: лет (промежуток)", emoji: "🗓️" },
+      { id: 469, level_id: 24, kanji: "—", reading: "〜ぐらい", translation: "примерно / около", emoji: "〰️" },
+      { id: 470, level_id: 24, kanji: "—", reading: "どのくらい", translation: "сколько потребуется?", emoji: "❓" },
+      { id: 471, level_id: 24, kanji: "—", reading: "みんな", translation: "все / всё вместе", emoji: "🔗" },
+      { id: 472, level_id: 24, kanji: "—", reading: "だけ", translation: "только / лишь", emoji: "☝️" },
+      { id: 473, level_id: 24, kanji: "—", reading: "かしこまりました", translation: "слушаюсь / принято", emoji: "🙇" },
+      { id: 474, level_id: 24, kanji: "—", reading: "いってらっしゃい", translation: "счастливого пути", emoji: "👋" },
+      { id: 475, level_id: 24, kanji: "—", reading: "いってきます", translation: "я пошел / ухожу", emoji: "🚶" },
+      { id: 476, level_id: 24, kanji: "簡単", reading: "かんたん", translation: "простой / несложный / легкий", emoji: "🪶" },
+      { id: 477, level_id: 24, kanji: "近い", reading: "ちかい", translation: "близкий (по расстоянию)", emoji: "📍" },
+      { id: 478, level_id: 24, kanji: "遠い", reading: "とおい", translation: "далекий", emoji: "🛣️" },
+      { id: 479, level_id: 24, kanji: "速い", reading: "はやい", translation: "быстрый / ранний", emoji: "⚡" },
+      { id: 480, level_id: 24, kanji: "遅い", reading: "おそい", translation: "медленный / поздний", emoji: "🐢" },
+
+      // УРОВЕНЬ 25
+      { id: 481, level_id: 25, kanji: "多い", reading: "おおい", translation: "многочисленный / много", emoji: "🔢" },
+      { id: 482, level_id: 25, kanji: "少ない", reading: "すくない", translation: "малочисленный / мало", emoji: "🤏" },
+      { id: 483, level_id: 25, kanji: "暖かい", reading: "あたたかい", translation: "теплый (климат / предмет)", emoji: "🌤️" },
+      { id: 484, level_id: 25, kanji: "涼しい", reading: "すずしい", translation: "прохладный (приятно)", emoji: "🌬️" },
+      { id: 485, level_id: 25, kanji: "甘い", reading: "あまい", translation: "сладкий", emoji: "🍬" },
+      { id: 486, level_id: 25, kanji: "辛い", reading: "からい", translation: "острый / пряный", emoji: "🌶️" },
+      { id: 487, level_id: 25, kanji: "重い", reading: "おもい", translation: "тяжелый (по весу)", emoji: "🏋️" },
+      { id: 488, level_id: 25, kanji: "軽い", reading: "かるい", translation: "легкий (по весу)", emoji: "🪶" },
+      { id: 489, level_id: 25, kanji: "季節", reading: "きせつ", translation: "время года / сезон", emoji: "🍂" },
+      { id: 490, level_id: 25, kanji: "春", reading: "はる", translation: "весна", emoji: "🌸" },
+      { id: 491, level_id: 25, kanji: "夏", reading: "なつ", translation: "лето", emoji: "☀️" },
+      { id: 492, level_id: 25, kanji: "秋", reading: "あき", translation: "осень", emoji: "🍁" },
+      { id: 493, level_id: 25, kanji: "冬", reading: "ふゆ", translation: "зима", emoji: "❄️" },
+      { id: 494, level_id: 25, kanji: "天気", reading: "てんき", translation: "погода", emoji: "🌦️" },
+      { id: 495, level_id: 25, kanji: "雨", reading: "あめ", translation: "дождь", emoji: "🌧️" },
+      { id: 496, level_id: 25, kanji: "雪", reading: "ゆき", translation: "снег", emoji: "❄️" },
+      { id: 497, level_id: 25, kanji: "曇り", reading: "くもり", translation: "облачная / пасмурная погода", emoji: "☁️" },
+      { id: 498, level_id: 25, kanji: "—", reading: "ホテル", translation: "отель / гостиница", emoji: "🏨" },
+      { id: 499, level_id: 25, kanji: "空港", reading: "くうこう", translation: "аэропорт", emoji: "✈️" },
+      { id: 500, level_id: 25, kanji: "海", reading: "うみ", translation: "море", emoji: "🌊" },
+
+      // УРОВЕНЬ 26
+      { id: 501, level_id: 26, kanji: "世界", reading: "せかい", translation: "мир / свет", emoji: "🌍" },
+      { id: 502, level_id: 26, kanji: "—", reading: "パーティー", translation: "вечеринка / праздник", emoji: "🎉" },
+      { id: 503, level_id: 26, kanji: "祭り", reading: "まつり", translation: "фестиваль / праздник", emoji: "🎊" },
+      { id: 504, level_id: 26, kanji: "すき焼き", reading: "すきやき", translation: "сукияки (мясное блюдо)", emoji: "🍲" },
+      { id: 505, level_id: 26, kanji: "刺身", reading: "さしみ", translation: "сасими (сырая рыба)", emoji: "🍣" },
+      { id: 506, level_id: 26, kanji: "寿司", reading: "すし", translation: "суси / суши", emoji: "🍣" },
+      { id: 507, level_id: 26, kanji: "天ぷら", reading: "てんぷら", translation: "тэмпура (в кляре)", emoji: "🍤" },
+      { id: 508, level_id: 26, kanji: "豚肉", reading: "ぶたにく", translation: "свинина", emoji: "🥓" },
+      { id: 509, level_id: 26, kanji: "牛肉", reading: "ぎゅうにく", translation: "говядина", emoji: "🥩" },
+      { id: 510, level_id: 26, kanji: "生け花", reading: "いけばな", translation: "икэбана (аранжировка цветов)", emoji: "💐" },
+      { id: 511, level_id: 26, kanji: "紅葉", reading: "もみじ", translation: "красные кленовые листья", emoji: "🍁" },
+      { id: 512, level_id: 26, kanji: "一番", reading: "いちばん", translation: "самый / номер один", emoji: "1️⃣" },
+      { id: 513, level_id: 26, kanji: "—", reading: "ずっと", translation: "гораздо / намного", emoji: "📈" },
+      { id: 514, level_id: 26, kanji: "初めて", reading: "はじめて", translation: "впервые / в первый раз", emoji: "🆕" },
+      { id: 515, level_id: 26, kanji: "—", reading: "ただいま", translation: "я дома! / я вернулся!", emoji: "🏠" },
+      { id: 516, level_id: 26, kanji: "お帰りなさい", reading: "おかえりなさい", translation: "с возвращением!", emoji: "👋" },
+      { id: 517, level_id: 26, kanji: "遊びます", reading: "あそびます", translation: "играть / развлекаться", emoji: "🎮" },
+      { id: 518, level_id: 26, kanji: "泳ぎます", reading: "およぎます", translation: "плавать", emoji: "🏊" },
+      { id: 519, level_id: 26, kanji: "迎えます", reading: "むかえます", translation: "встречать (гостей)", emoji: "🤝" },
+      { id: 520, level_id: 26, kanji: "疲れます", reading: "つかれます", translation: "уставать / утомляться", emoji: "😩" },
+
+      // УРОВЕНЬ 27
+      { id: 521, level_id: 27, kanji: "結婚します", reading: "けっこんします", translation: "жениться / выходить замуж", emoji: "💍" },
+      { id: 522, level_id: 27, kanji: "買い物します", reading: "かいものします", translation: "делать покупки", emoji: "🛍️" },
+      { id: 523, level_id: 27, kanji: "食事します", reading: "しょくじします", translation: "кушать / принимать пищу", emoji: "🍽️" },
+      { id: 524, level_id: 27, kanji: "散歩します", reading: "さんぽします", translation: "гулять / совершать прогулку", emoji: "🚶" },
+      { id: 525, level_id: 27, kanji: "大変", reading: "たいへん", translation: "трудный / тяжелый", emoji: "😖" },
+      { id: 526, level_id: 27, kanji: "欲しい", reading: "ほしい", translation: "желаемый / хотеть (вещь)", emoji: "⭐" },
+      { id: 527, level_id: 27, kanji: "広い", reading: "ひろい", translation: "широкий / просторный", emoji: "↔️" },
+      { id: 528, level_id: 27, kanji: "狭い", reading: "せまい", translation: "узкий / тесный", emoji: "↕️" },
+      { id: 529, level_id: 27, kanji: "—", reading: "プール", translation: "бассейн", emoji: "🏊" },
+      { id: 530, level_id: 27, kanji: "川", reading: "かわ", translation: "река", emoji: "🏞️" },
+      { id: 531, level_id: 27, kanji: "美術", reading: "びじゅつ", translation: "изобразительное искусство", emoji: "🎨" },
+      { id: 532, level_id: 27, kanji: "釣り", reading: "つり", translation: "рыбалка / рыбная ловля", emoji: "🎣" },
+      { id: 533, level_id: 27, kanji: "—", reading: "スキー", translation: "лыжи / катание на лыжах", emoji: "🎿" },
+      { id: 534, level_id: 27, kanji: "週末", reading: "しゅうまつ", translation: "выходные (конец недели)", emoji: "🏖️" },
+      { id: 535, level_id: 27, kanji: "正月", reading: "しょうがつ", translation: "Новый год (праздник)", emoji: "🎍" },
+      { id: 536, level_id: 27, kanji: "—", reading: "〜ごろ", translation: "примерно / около (времени)", emoji: "🕐" },
+      { id: 537, level_id: 27, kanji: "何か", reading: "なにか", translation: "что-то / что-нибудь", emoji: "❓" },
+      { id: 538, level_id: 27, kanji: "—", reading: "どこか", translation: "где-то / куда-то", emoji: "📍" },
+      { id: 539, level_id: 27, kanji: "喉が渇きました", reading: "のどがかわきました", translation: "хочу пить", emoji: "🥤" },
+      { id: 540, level_id: 27, kanji: "お腹が空きました", reading: "おなかがすきました", translation: "проголодался / хочу есть", emoji: "🍽️" },
+
+      // УРОВЕНЬ 28
+      { id: 541, level_id: 28, kanji: "点けます", reading: "つけます", translation: "включать (свет/прибор)", emoji: "💡" },
+      { id: 542, level_id: 28, kanji: "消します", reading: "けします", translation: "выключать (свет) / гасить", emoji: "🌑" },
+      { id: 543, level_id: 28, kanji: "開けます", reading: "あけます", translation: "открывать (дверь/окно)", emoji: "🔓" },
+      { id: 544, level_id: 28, kanji: "閉めます", reading: "しめます", translation: "закрывать (дверь/окно)", emoji: "🔒" },
+      { id: 545, level_id: 28, kanji: "急ぎます", reading: "いそぎます", translation: "торопиться / спешить", emoji: "🏃" },
+      { id: 546, level_id: 28, kanji: "待ちます", reading: "まちます", translation: "ждать", emoji: "⏳" },
+      { id: 547, level_id: 28, kanji: "持ちます", reading: "もちます", translation: "держать / иметь при себе", emoji: "🤲" },
+      { id: 548, level_id: 28, kanji: "取ります", reading: "とります", translation: "брать / передавать", emoji: "🤝" },
+      { id: 549, level_id: 28, kanji: "手伝います", reading: "てつだいます", translation: "помогать", emoji: "🆘" },
+      { id: 550, level_id: 28, kanji: "呼びます", reading: "よびます", translation: "звать / вызывать (такси)", emoji: "📞" },
+      { id: 551, level_id: 28, kanji: "話します", reading: "はなします", translation: "разговаривать / рассказывать", emoji: "💬" },
+      { id: 552, level_id: 28, kanji: "使います", reading: "つかいます", translation: "использовать / пользоваться", emoji: "🔧" },
+      { id: 553, level_id: 28, kanji: "止めます", reading: "とめます", translation: "останавливать (машину)", emoji: "🛑" },
+      { id: 554, level_id: 28, kanji: "見せます", reading: "みせます", translation: "показывать", emoji: "👉" },
+      { id: 555, level_id: 28, kanji: "教えます", reading: "おしえます", translation: "объяснять (адрес) / сообщать", emoji: "🗣️" },
+      { id: 556, level_id: 28, kanji: "座ります", reading: "すわります", translation: "садиться", emoji: "🪑" },
+      { id: 557, level_id: 28, kanji: "立ちます", reading: "たちます", translation: "вставать / стоять", emoji: "🧍" },
+      { id: 558, level_id: 28, kanji: "入ります", reading: "はいります", translation: "входить (в)", emoji: "🚪" },
+      { id: 559, level_id: 28, kanji: "出ます", reading: "でます", translation: "выходить (из)", emoji: "🚶" },
+      { id: 560, level_id: 28, kanji: "降ります", reading: "ふります", translation: "выпадать / идти (осадки)", emoji: "🌧️" },
+
+      // УРОВЕНЬ 29
+      { id: 561, level_id: 29, kanji: "—", reading: "コピーします", translation: "делать копии / ксерокопировать", emoji: "🖨️" },
+      { id: 562, level_id: 29, kanji: "電気", reading: "でんき", translation: "электричество / свет", emoji: "💡" },
+      { id: 563, level_id: 29, kanji: "—", reading: "エアコン", translation: "кондиционер", emoji: "❄️" },
+      { id: 564, level_id: 29, kanji: "—", reading: "パスポート", translation: "загранпаспорт", emoji: "🛂" },
+      { id: 565, level_id: 29, kanji: "名前", reading: "なまえ", translation: "имя", emoji: "📛" },
+      { id: 566, level_id: 29, kanji: "住所", reading: "じゅうしょ", translation: "адрес", emoji: "📍" },
+      { id: 567, level_id: 29, kanji: "地図", reading: "ちず", translation: "карта", emoji: "🗺️" },
+      { id: 568, level_id: 29, kanji: "塩", reading: "しお", translation: "соль", emoji: "🧂" },
+      { id: 569, level_id: 29, kanji: "砂糖", reading: "さとう", translation: "сахар", emoji: "🍬" },
+      { id: 570, level_id: 29, kanji: "問題", reading: "もんだい", translation: "вопрос / задача / проблема", emoji: "❓" },
+      { id: 571, level_id: 29, kanji: "答え", reading: "こたえ", translation: "ответ", emoji: "💬" },
+      { id: 572, level_id: 29, kanji: "〜方", reading: "〜かた", translation: "способ / манера делать что-то", emoji: "🔧" },
+      { id: 573, level_id: 29, kanji: "—", reading: "まっすぐ", translation: "прямо", emoji: "⬆️" },
+      { id: 574, level_id: 29, kanji: "—", reading: "ゆっくり", translation: "медленно / не спеша", emoji: "🐢" },
+      { id: 575, level_id: 29, kanji: "—", reading: "すぐ", translation: "сразу / немедленно", emoji: "⚡" },
+      { id: 576, level_id: 29, kanji: "—", reading: "また", translation: "снова / опять / также", emoji: "🔁" },
+      { id: 577, level_id: 29, kanji: "後で", reading: "あとで", translation: "после / позже / потом", emoji: "➡️" },
+      { id: 578, level_id: 29, kanji: "もう少し", reading: "もうすこし", translation: "еще немного", emoji: "🤏" },
+      { id: 579, level_id: 29, kanji: "置きます", reading: "おきます", translation: "класть / ставить / помещать", emoji: "📥" },
+      { id: 580, level_id: 29, kanji: "作ります", reading: "つくります", translation: "делать / производить", emoji: "🔨" },
+
+      // УРОВЕНЬ 30
+      { id: 581, level_id: 30, kanji: "売ります", reading: "うります", translation: "продавать", emoji: "💰" },
+      { id: 582, level_id: 30, kanji: "知ります", reading: "しります", translation: "знать / узнавать", emoji: "🧠" },
+      { id: 583, level_id: 30, kanji: "住みます", reading: "すみます", translation: "жить / проживать (где-то)", emoji: "🏠" },
+      { id: 584, level_id: 30, kanji: "研究します", reading: "けんきゅうします", translation: "исследовать / изучать", emoji: "🔬" },
+      { id: 585, level_id: 30, kanji: "資料", reading: "しりょう", translation: "материалы / данные / документы", emoji: "📄" },
+      { id: 586, level_id: 30, kanji: "時刻表", reading: "じこくひょう", translation: "расписание транспорта", emoji: "🕐" },
+      { id: 587, level_id: 30, kanji: "服", reading: "ふく", translation: "одежда", emoji: "👕" },
+      { id: 588, level_id: 30, kanji: "製品", reading: "せいひん", translation: "товар / продукция / изделие", emoji: "📦" },
+      { id: 589, level_id: 30, kanji: "経済", reading: "けいざい", translation: "экономика", emoji: "📈" },
+      { id: 590, level_id: 30, kanji: "市役所", reading: "しやくしょ", translation: "мэрия / администрация", emoji: "🏛️" },
+      { id: 591, level_id: 30, kanji: "高校", reading: "こうこう", translation: "старшая школа", emoji: "🏫" },
+      { id: 592, level_id: 30, kanji: "歯医者", reading: "はいしゃ", translation: "зубной врач / стоматолог", emoji: "🦷" },
+      { id: 593, level_id: 30, kanji: "独身", reading: "どくしん", translation: "холостой / не замужем", emoji: "👤" },
+      { id: 594, level_id: 30, kanji: "乗ります", reading: "のります", translation: "садиться (в транспорт)", emoji: "🚌" },
+      { id: 595, level_id: 30, kanji: "降ります", reading: "おります", translation: "выходить (из транспорта)", emoji: "🚏" },
+      { id: 596, level_id: 30, kanji: "乗り換えます", reading: "のりかえます", translation: "пересаживаться", emoji: "🔄" },
+      { id: 597, level_id: 30, kanji: "浴びます", reading: "あびます", translation: "обливаться / принимать (душ)", emoji: "🚿" },
+      { id: 598, level_id: 30, kanji: "入れます", reading: "いれます", translation: "вкладывать / вставлять / наливать", emoji: "📥" },
+      { id: 599, level_id: 30, kanji: "出します", reading: "だします", translation: "доставать / сдавать / отправлять", emoji: "📤" },
+      { id: 600, level_id: 30, kanji: "下ろします", reading: "おろします", translation: "снимать (деньги) / спускать", emoji: "🏧" },
+
+      // УРОВЕНЬ 31
+      { id: 601, level_id: 31, kanji: "入ります", reading: "はいります", translation: "поступать (в университет)", emoji: "🎓" },
+      { id: 602, level_id: 31, kanji: "出ます", reading: "でます", translation: "выпускаться (из университета)", emoji: "🎓" },
+      { id: 603, level_id: 31, kanji: "押します", reading: "おします", translation: "нажимать / давить / толкать", emoji: "🔘" },
+      { id: 604, level_id: 31, kanji: "始めます", reading: "はじめます", translation: "начинать", emoji: "▶️" },
+      { id: 605, level_id: 31, kanji: "見学します", reading: "けんがくします", translation: "посещать с экскурсией", emoji: "🏛️" },
+      { id: 606, level_id: 31, kanji: "若い", reading: "わかい", translation: "молодой", emoji: "👶" },
+      { id: 607, level_id: 31, kanji: "長い", reading: "ながい", translation: "длинный / долгий", emoji: "📏" },
+      { id: 608, level_id: 31, kanji: "短い", reading: "みじかい", translation: "короткий", emoji: "📐" },
+      { id: 609, level_id: 31, kanji: "明るい", reading: "あかるい", translation: "светлый / яркий", emoji: "🌟" },
+      { id: 610, level_id: 31, kanji: "暗い", reading: "くらい", translation: "темный / мрачный", emoji: "🌑" },
+      { id: 611, level_id: 31, kanji: "体", reading: "からだ", translation: "тело / здоровье", emoji: "💪" },
+      { id: 612, level_id: 31, kanji: "頭", reading: "あたま", translation: "голова / ум", emoji: "🧠" },
+      { id: 613, level_id: 31, kanji: "髪", reading: "かみ", translation: "волосы", emoji: "💇" },
+      { id: 614, level_id: 31, kanji: "顔", reading: "かお", translation: "лицо", emoji: "😐" },
+      { id: 615, level_id: 31, kanji: "目", reading: "め", translation: "глаз / глаза", emoji: "👁️" },
+      { id: 616, level_id: 31, kanji: "耳", reading: "みみ", translation: "ухо / уши", emoji: "👂" },
+      { id: 617, level_id: 31, kanji: "鼻", reading: "はな", translation: "нос", emoji: "👃" },
+      { id: 618, level_id: 31, kanji: "口", reading: "くち", translation: "рот", emoji: "👄" },
+      { id: 619, level_id: 31, kanji: "歯", reading: "は", translation: "зуб / зубы", emoji: "🦷" },
+      { id: 620, level_id: 31, kanji: "お腹", reading: "おなか", translation: "живот", emoji: "🫃" },
+
+      // УРОВЕНЬ 32
+      { id: 621, level_id: 32, kanji: "足", reading: "あし", translation: "нога / ноги / ступня", emoji: "🦵" },
+      { id: 622, level_id: 32, kanji: "背", reading: "せ", translation: "рост / спина", emoji: "📏" },
+      { id: 623, level_id: 32, kanji: "—", reading: "サービス", translation: "сервис / обслуживание", emoji: "🎁" },
+      { id: 624, level_id: 32, kanji: "—", reading: "ジョギング", translation: "пробежка / джоггинг", emoji: "🏃" },
+      { id: 625, level_id: 32, kanji: "—", reading: "シャワー", translation: "душ", emoji: "🚿" },
+      { id: 626, level_id: 32, kanji: "緑", reading: "みどり", translation: "зелень / зеленый цвет", emoji: "🟢" },
+      { id: 627, level_id: 32, kanji: "お寺", reading: "おてら", translation: "буддийский храм", emoji: "🛕" },
+      { id: 628, level_id: 32, kanji: "神社", reading: "じんじゃ", translation: "синтоистское святилище", emoji: "⛩️" },
+      { id: 629, level_id: 32, kanji: "〜番", reading: "〜ばん", translation: "номер (суффикс)", emoji: "🔢" },
+      { id: 630, level_id: 32, kanji: "—", reading: "どうやって", translation: "как? / каким образом?", emoji: "❓" },
+      { id: 631, level_id: 32, kanji: "—", reading: "どの", translation: "который? (из 3+)", emoji: "❓" },
+      { id: 632, level_id: 32, kanji: "—", reading: "どれ", translation: "который? (сам по себе)", emoji: "❓" },
+      { id: 633, level_id: 32, kanji: "覚えます", reading: "おぼえます", translation: "запоминать / помнить", emoji: "🧠" },
+      { id: 634, level_id: 32, kanji: "忘れます", reading: "わすれます", translation: "забывать", emoji: "💭" },
+      { id: 635, level_id: 32, kanji: "—", reading: "なくします", translation: "терять (вещь)", emoji: "🫥" },
+      { id: 636, level_id: 32, kanji: "払います", reading: "はらいます", translation: "платить / оплачивать", emoji: "💰" },
+      { id: 637, level_id: 32, kanji: "返します", reading: "かえします", translation: "возвращать (долг/вещь)", emoji: "🔙" },
+      { id: 638, level_id: 32, kanji: "出かけます", reading: "でかけます", translation: "выходить / отправляться", emoji: "🚪" },
+      { id: 639, level_id: 32, kanji: "脱ぎます", reading: "ぬぎます", translation: "снимать (одежду/обувь)", emoji: "👕" },
+      { id: 640, level_id: 32, kanji: "持って行きます", reading: "もっていきます", translation: "уносить / брать с собой", emoji: "🎒" },
+
+      // УРОВЕНЬ 33
+      { id: 641, level_id: 33, kanji: "持って来ます", reading: "もってきます", translation: "приносить / приносить с собой", emoji: "📦" },
+      { id: 642, level_id: 33, kanji: "心配します", reading: "しんぱいします", translation: "беспокоиться / волноваться", emoji: "😟" },
+      { id: 643, level_id: 33, kanji: "残業します", reading: "ざんぎょうします", translation: "работать сверхурочно", emoji: "⏰" },
+      { id: 644, level_id: 33, kanji: "出張します", reading: "しゅっちょうします", translation: "уезжать в командировку", emoji: "🧳" },
+      { id: 645, level_id: 33, kanji: "大切", reading: "たいせつ", translation: "важный / ценный", emoji: "💎" },
+      { id: 646, level_id: 33, kanji: "大丈夫", reading: "だいじょうぶ", translation: "все в порядке / нормально", emoji: "👌" },
+      { id: 647, level_id: 33, kanji: "危ない", reading: "あぶない", translation: "опасный", emoji: "⚠️" },
+      { id: 648, level_id: 33, kanji: "禁煙", reading: "きんえん", translation: "не курить / запрещено", emoji: "🚭" },
+      { id: 649, level_id: 33, kanji: "保険証", reading: "ほけんしょう", translation: "страховой полис", emoji: "📄" },
+      { id: 650, level_id: 33, kanji: "熱", reading: "ねつ", translation: "жар / температура", emoji: "🤒" },
+      { id: 651, level_id: 33, kanji: "病気", reading: "びょうき", translation: "болезнь / заболевание", emoji: "🤧" },
+      { id: 652, level_id: 33, kanji: "薬", reading: "くすり", translation: "лекарство / медикаменты", emoji: "💊" },
+      { id: 653, level_id: 33, kanji: "風呂", reading: "ふろ", translation: "ванна (японская)", emoji: "♨️" },
+      { id: 654, level_id: 33, kanji: "上着", reading: "うわぎ", translation: "верхняя одежда / куртка", emoji: "🧥" },
+      { id: 655, level_id: 33, kanji: "下着", reading: "したぎ", translation: "нижнее белье", emoji: "🩲" },
+      { id: 656, level_id: 33, kanji: "—", reading: "までに", translation: "до / к (дедлайн)", emoji: "📅" },
+      { id: 657, level_id: 33, kanji: "—", reading: "どうしましたか", translation: "что случилось? / в чем дело?", emoji: "❓" },
+      { id: 658, level_id: 33, kanji: "喉", reading: "のど", translation: "горло", emoji: "😷" },
+      { id: 659, level_id: 33, kanji: "風邪", reading: "かぜ", translation: "простуда", emoji: "🤧" },
+      { id: 660, level_id: 33, kanji: "—", reading: "それから", translation: "к тому же / еще / а также", emoji: "➕" },
+
+      // УРОВЕНЬ 34
+      { id: 661, level_id: 34, kanji: "お大事に", reading: "おだいじに", translation: "выздоравливайте!", emoji: "🙏" },
+      { id: 662, level_id: 34, kanji: "—", reading: "できます", translation: "мочь / уметь", emoji: "💪" },
+      { id: 663, level_id: 34, kanji: "洗います", reading: "あらいます", translation: "мыть / стирать / умывать", emoji: "🧼" },
+      { id: 664, level_id: 34, kanji: "弾きます", reading: "ひきます", translation: "играть (на пианино/струнных)", emoji: "🎹" },
+      { id: 665, level_id: 34, kanji: "歌います", reading: "うたいます", translation: "петь", emoji: "🎤" },
+      { id: 666, level_id: 34, kanji: "集めます", reading: "あつめます", translation: "собирать / коллекционировать", emoji: "📦" },
+      { id: 667, level_id: 34, kanji: "捨てます", reading: "すてます", translation: "выбрасывать (мусор)", emoji: "🗑️" },
+      { id: 668, level_id: 34, kanji: "換えます", reading: "かえます", translation: "менять / обменивать", emoji: "🔄" },
+      { id: 669, level_id: 34, kanji: "運転します", reading: "うんてんします", translation: "водить (машину) / управлять", emoji: "🚗" },
+      { id: 670, level_id: 34, kanji: "予約します", reading: "よやくします", translation: "заказывать / бронировать", emoji: "📞" },
+      { id: 671, level_id: 34, kanji: "—", reading: "ピアノ", translation: "пианино / фортепиано", emoji: "🎹" },
+      { id: 672, level_id: 34, kanji: "現金", reading: "げんきん", translation: "наличные деньги", emoji: "💵" },
+      { id: 673, level_id: 34, kanji: "趣味", reading: "しゅみ", translation: "хобби / увлечение", emoji: "🎨" },
+      { id: 674, level_id: 34, kanji: "日記", reading: "にっき", translation: "дневник", emoji: "📔" },
+      { id: 675, level_id: 34, kanji: "お祈り", reading: "おいのり", translation: "молитва", emoji: "🙏" },
+      { id: 676, level_id: 34, kanji: "課長", reading: "かちょう", translation: "начальник отдела", emoji: "👨‍💼" },
+      { id: 677, level_id: 34, kanji: "部長", reading: "ぶちょう", translation: "начальник департамента", emoji: "👨‍💼" },
+      { id: 678, level_id: 34, kanji: "社長", reading: "しゃちょう", translation: "президент компании", emoji: "👔" },
+      { id: 679, level_id: 34, kanji: "動物", reading: "どうぶつ", translation: "животное", emoji: "🐾" },
+      { id: 680, level_id: 34, kanji: "馬", reading: "うま", translation: "лошадь / конь", emoji: "🐴" },
+
+      // УРОВЕНЬ 35
+      { id: 681, level_id: 35, kanji: "—", reading: "インターネット", translation: "интернет", emoji: "🌐" },
+      { id: 682, level_id: 35, kanji: "特に", reading: "とくに", translation: "особенно / в частности", emoji: "⭐" },
+      { id: 683, level_id: 35, kanji: "—", reading: "なかなか", translation: "никак (с отриц.) / с трудом", emoji: "😣" },
+      { id: 684, level_id: 35, kanji: "—", reading: "ぜひ", translation: "обязательно / непременно", emoji: "❗" },
+      { id: 685, level_id: 35, kanji: "登ります", reading: "のぼります", translation: "взбираться / подниматься", emoji: "⛰️" },
+      { id: 686, level_id: 35, kanji: "泊まります", reading: "とまります", translation: "останавливаться на ночь", emoji: "🏨" },
+      { id: 687, level_id: 35, kanji: "掃除します", reading: "そうじします", translation: "делать уборку / убираться", emoji: "🧹" },
+      { id: 688, level_id: 35, kanji: "洗濯します", reading: "せんたくします", translation: "стирать (одежду)", emoji: "🧺" },
+      { id: 689, level_id: 35, kanji: "—", reading: "なります", translation: "становиться / делаться", emoji: "🔄" },
+      { id: 690, level_id: 35, kanji: "眠い", reading: "ねむい", translation: "сонный", emoji: "😴" },
+      { id: 691, level_id: 35, kanji: "強い", reading: "つよい", translation: "сильный / крепкий", emoji: "💪" },
+      { id: 692, level_id: 35, kanji: "弱い", reading: "よわい", translation: "слабый", emoji: "🫠" },
+      { id: 693, level_id: 35, kanji: "練習", reading: "れんしゅう", translation: "тренировка / практика", emoji: "🏋️" },
+      { id: 694, level_id: 35, kanji: "—", reading: "ゴルフ", translation: "гольф", emoji: "⛳" },
+      { id: 695, level_id: 35, kanji: "相撲", reading: "すもう", translation: "сумо (борьба)", emoji: "🤼" },
+      { id: 696, level_id: 35, kanji: "お茶", reading: "おちゃ", translation: "чай / чайная церемония", emoji: "🍵" },
+      { id: 697, level_id: 35, kanji: "調子", reading: "ちょうし", translation: "состояние / самочувствие", emoji: "🩺" },
+      { id: 698, level_id: 35, kanji: "一度", reading: "いちど", translation: "один раз / однажды", emoji: "1️⃣" },
+      { id: 699, level_id: 35, kanji: "一度も", reading: "いちども", translation: "ни разу / никогда (с отриц.)", emoji: "❌" },
+      { id: 700, level_id: 35, kanji: "—", reading: "だんだん", translation: "постепенно / шаг за шагом", emoji: "👣" },
+
+      // УРОВЕНЬ 36
+      { id: 701, level_id: 36, kanji: "—", reading: "もうすぐ", translation: "скоро / вот-вот", emoji: "⏳" },
+      { id: 702, level_id: 36, kanji: "—", reading: "おかげさまで", translation: "благодаря вашей заботе", emoji: "🙏" },
+      { id: 703, level_id: 36, kanji: "乾杯", reading: "かんぱい", translation: "до дна! / за здоровье!", emoji: "🍻" },
+      { id: 704, level_id: 36, kanji: "無理", reading: "むり", translation: "невозможный / чрезмерный", emoji: "🚫" },
+      { id: 705, level_id: 36, kanji: "要ります", reading: "いります", translation: "быть нужным / требоваться", emoji: "❗" },
+      { id: 706, level_id: 36, kanji: "調べます", reading: "しらべます", translation: "изучать / проверять", emoji: "🔍" },
+      { id: 707, level_id: 36, kanji: "修理します", reading: "しゅうりします", translation: "чинить / ремонтировать", emoji: "🔧" },
+      { id: 708, level_id: 36, kanji: "僕", reading: "ぼく", translation: "я (мужское, разг.)", emoji: "🙋‍♂️" },
+      { id: 709, level_id: 36, kanji: "君", reading: "きみ", translation: "ты (разг. / к близким)", emoji: "👤" },
+      { id: 710, level_id: 36, kanji: "〜君", reading: "〜くん", translation: "суффикс (к мальчикам/младшим)", emoji: "👦" },
+      { id: 711, level_id: 36, kanji: "—", reading: "うん", translation: "ага / да (разговорное)", emoji: "👍" },
+      { id: 712, level_id: 36, kanji: "—", reading: "ううん", translation: "не-а / нет (разговорное)", emoji: "👎" },
+      { id: 713, level_id: 36, kanji: "言葉", reading: "ことば", translation: "слово / речь / язык", emoji: "🗣️" },
+      { id: 714, level_id: 36, kanji: "着物", reading: "きもの", translation: "кимоно", emoji: "👘" },
+      { id: 715, level_id: 36, kanji: "—", reading: "ビザ", translation: "виза", emoji: "🛂" },
+      { id: 716, level_id: 36, kanji: "始め", reading: "はじめ", translation: "начало", emoji: "▶️" },
+      { id: 717, level_id: 36, kanji: "終わり", reading: "おわり", translation: "конец / окончание", emoji: "⏹️" },
+      { id: 718, level_id: 36, kanji: "—", reading: "こっち", translation: "сюда / здесь (разг.)", emoji: "👉" },
+      { id: 719, level_id: 36, kanji: "—", reading: "そっち", translation: "туда / там (разг.)", emoji: "👈" },
+      { id: 720, level_id: 36, kanji: "—", reading: "あっち", translation: "вон туда (разг.)", emoji: "👆" },
+
+      // УРОВЕНЬ 37
+      { id: 721, level_id: 37, kanji: "—", reading: "どっち", translation: "куда? / который из двух? (разг.)", emoji: "❓" },
+      { id: 722, level_id: 37, kanji: "—", reading: "みんなで", translation: "все вместе", emoji: "🔗" },
+      { id: 723, level_id: 37, kanji: "—", reading: "けど", translation: "но / однако (разговорное)", emoji: "↔️" },
+      { id: 724, level_id: 37, kanji: "色々", reading: "いろいろ", translation: "разное / разнообразное", emoji: "🔀" },
+      { id: 725, level_id: 37, kanji: "お腹いっぱい", reading: "おなかいっぱい", translation: "сыт / наелся", emoji: "😋" },
+      { id: 726, level_id: 37, kanji: "思います", reading: "おもいます", translation: "думать / считать / полагать", emoji: "🤔" },
+      { id: 727, level_id: 37, kanji: "言います", reading: "いいます", translation: "говорить / сказать", emoji: "💬" },
+      { id: 728, level_id: 37, kanji: "勝ちます", reading: "かちます", translation: "побеждать / выигрывать", emoji: "🏆" },
+      { id: 729, level_id: 37, kanji: "負けます", reading: "まけます", translation: "проигрывать", emoji: "😞" },
+      { id: 730, level_id: 37, kanji: "役に立ちます", reading: "やくにたちます", translation: "быть полезным", emoji: "✅" },
+      { id: 731, level_id: 37, kanji: "動きます", reading: "うごきます", translation: "двигаться / работать", emoji: "⚙️" },
+      { id: 732, level_id: 37, kanji: "—", reading: "やめます", translation: "прекращать / бросать (работу)", emoji: "🛑" },
+      { id: 733, level_id: 37, kanji: "気をつけます", reading: "きをつけます", translation: "быть осторожным", emoji: "👀" },
+      { id: 734, level_id: 37, kanji: "留学します", reading: "りゅうがくします", translation: "учиться за границей", emoji: "✈️" },
+      { id: 735, level_id: 37, kanji: "無駄", reading: "むだ", translation: "бесполезный / напрасный", emoji: "🗑️" },
+      { id: 736, level_id: 37, kanji: "不便", reading: "ふべん", translation: "неудобный", emoji: "😖" },
+      { id: 737, level_id: 37, kanji: "—", reading: "すごい", translation: "отличный / потрясающий", emoji: "🌟" },
+      { id: 738, level_id: 37, kanji: "本当", reading: "ほんとう", translation: "правда / истина", emoji: "✅" },
+      { id: 739, level_id: 37, kanji: "嘘", reading: "うそ", translation: "ложь / неправда", emoji: "❌" },
+      { id: 740, level_id: 37, kanji: "自動車", reading: "じどうしゃ", translation: "автомобиль / машина", emoji: "🚗" },
+
+      // УРОВЕНЬ 38
+      { id: 741, level_id: 38, kanji: "交通", reading: "こうつう", translation: "транспорт / дорожное движение", emoji: "🚦" },
+      { id: 742, level_id: 38, kanji: "物価", reading: "ぶっか", translation: "цены / стоимость жизни", emoji: "💹" },
+      { id: 743, level_id: 38, kanji: "放送", reading: "ほうそう", translation: "трансляция / вещание", emoji: "📡" },
+      { id: 744, level_id: 38, kanji: "—", reading: "ニュース", translation: "новости", emoji: "📰" },
+      { id: 745, level_id: 38, kanji: "—", reading: "アニメ", translation: "аниме (мультипликация)", emoji: "🎌" },
+      { id: 746, level_id: 38, kanji: "—", reading: "マンガ", translation: "манга (комиксы)", emoji: "📚" },
+      { id: 747, level_id: 38, kanji: "—", reading: "デザイン", translation: "дизайн", emoji: "🎨" },
+      { id: 748, level_id: 38, kanji: "夢", reading: "ゆめ", translation: "мечта / сон", emoji: "💭" },
+      { id: 749, level_id: 38, kanji: "天才", reading: "てんさい", translation: "гений", emoji: "🧠" },
+      { id: 750, level_id: 38, kanji: "試合", reading: "しあい", translation: "матч / соревнование / игра", emoji: "🏆" },
+      { id: 751, level_id: 38, kanji: "意見", reading: "いけん", translation: "мнение / точка зрения", emoji: "💭" },
+      { id: 752, level_id: 38, kanji: "話", reading: "はなし", translation: "разговор / рассказ / речь", emoji: "💬" },
+      { id: 753, level_id: 38, kanji: "地球", reading: "ちきゅう", translation: "Земля (планета)", emoji: "🌍" },
+      { id: 754, level_id: 38, kanji: "月", reading: "つき", translation: "Луна / месяц", emoji: "🌙" },
+      { id: 755, level_id: 38, kanji: "最近", reading: "さいきん", translation: "недавно / в последнее время", emoji: "🕐" },
+      { id: 756, level_id: 38, kanji: "—", reading: "たぶん", translation: "наверное / возможно", emoji: "🤔" },
+      { id: 757, level_id: 38, kanji: "—", reading: "きっと", translation: "обязательно / непременно", emoji: "❗" },
+      { id: 758, level_id: 38, kanji: "本当に", reading: "ほんとうに", translation: "действительно / правда", emoji: "✅" },
+      { id: 759, level_id: 38, kanji: "—", reading: "そんなに", translation: "не так уж (с отриц.)", emoji: "🤏" },
+      { id: 760, level_id: 38, kanji: "—", reading: "〜について", translation: "о / про / по поводу", emoji: "💬" },
+
+      // УРОВЕНЬ 39
+      { id: 761, level_id: 39, kanji: "久しぶり", reading: "ひさしぶり", translation: "давно не виделись!", emoji: "👋" },
+      { id: 762, level_id: 39, kanji: "—", reading: "もちろん", translation: "конечно / разумеется", emoji: "👌" },
+      { id: 763, level_id: 39, kanji: "着ます", reading: "きます", translation: "надевать (выше пояса)", emoji: "👕" },
+      { id: 764, level_id: 39, kanji: "—", reading: "はきます", translation: "надевать (ниже пояса / обувь)", emoji: "👖" },
+      { id: 765, level_id: 39, kanji: "—", reading: "かぶります", translation: "надевать (шапку/шляпу)", emoji: "🧢" },
+      { id: 766, level_id: 39, kanji: "—", reading: "かけます", translation: "надевать (очки)", emoji: "👓" },
+      { id: 767, level_id: 39, kanji: "生まれます", reading: "うまれます", translation: "рождаться / родиться", emoji: "👶" },
+      { id: 768, level_id: 39, kanji: "私たち", reading: "わたしたち", translation: "мы", emoji: "👥" },
+      { id: 769, level_id: 39, kanji: "—", reading: "コート", translation: "пальто / плащ", emoji: "🧥" },
+      { id: 770, level_id: 39, kanji: "—", reading: "セーター", translation: "свитер / джемпер", emoji: "🧶" },
+      { id: 771, level_id: 39, kanji: "—", reading: "スーツ", translation: "деловой костюм", emoji: "🤵" },
+      { id: 772, level_id: 39, kanji: "帽子", reading: "ぼうし", translation: "шляпа / шапка / кепка", emoji: "🎩" },
+      { id: 773, level_id: 39, kanji: "眼鏡", reading: "めがね", translation: "очки", emoji: "👓" },
+      { id: 774, level_id: 39, kanji: "—", reading: "ケーキ", translation: "торт / пирожное", emoji: "🍰" },
+      { id: 775, level_id: 39, kanji: "お弁当", reading: "おべんとう", translation: "бэнто (готовый обед)", emoji: "🍱" },
+      { id: 776, level_id: 39, kanji: "—", reading: "ロボット", translation: "робот", emoji: "🤖" },
+      { id: 777, level_id: 39, kanji: "都合", reading: "つごう", translation: "обстоятельства (по времени)", emoji: "📅" },
+      { id: 778, level_id: 39, kanji: "—", reading: "よく", translation: "часто", emoji: "🔁" },
+      { id: 779, level_id: 39, kanji: "—", reading: "おめでとう", translation: "поздравляю!", emoji: "🎉" },
+      { id: 780, level_id: 39, kanji: "和室", reading: "わしつ", translation: "комната в японском стиле", emoji: "🏯" },
+
+      // УРОВЕНЬ 40
+      { id: 781, level_id: 40, kanji: "押し入れ", reading: "おしいれ", translation: "стенной шкаф", emoji: "🚪" },
+      { id: 782, level_id: 40, kanji: "布団", reading: "ふとん", translation: "футон (японский матрас)", emoji: "🛏️" },
+      { id: 783, level_id: 40, kanji: "聞きます", reading: "ききます", translation: "спрашивать / задавать вопрос", emoji: "❓" },
+      { id: 784, level_id: 40, kanji: "回します", reading: "まわします", translation: "крутить / поворачивать", emoji: "🔄" },
+      { id: 785, level_id: 40, kanji: "引きます", reading: "ひきます", translation: "тянуть / дергать", emoji: "🫳" },
+      { id: 786, level_id: 40, kanji: "変えます", reading: "かえます", translation: "менять / изменять", emoji: "🔄" },
+      { id: 787, level_id: 40, kanji: "触ります", reading: "さわります", translation: "трогать / прикасаться", emoji: "🫱" },
+      { id: 788, level_id: 40, kanji: "歩きます", reading: "あるきます", translation: "ходить пешком / шагать", emoji: "🚶" },
+      { id: 789, level_id: 40, kanji: "渡ります", reading: "わたります", translation: "переходить (через мост)", emoji: "🚸" },
+      { id: 790, level_id: 40, kanji: "曲がります", reading: "まがります", translation: "поворачивать", emoji: "↩️" },
+      { id: 791, level_id: 40, kanji: "寂しい", reading: "さびしい", translation: "грустный / одинокий", emoji: "😢" },
+      { id: 792, level_id: 40, kanji: "お湯", reading: "おゆ", translation: "горячая вода / кипяток", emoji: "♨️" },
+      { id: 793, level_id: 40, kanji: "音", reading: "おと", translation: "звук / шум", emoji: "🔊" },
+      { id: 794, level_id: 40, kanji: "—", reading: "サイズ", translation: "размер", emoji: "📐" },
+      { id: 795, level_id: 40, kanji: "故障", reading: "こしょう", translation: "поломка / неисправность", emoji: "🔧" },
+      { id: 796, level_id: 40, kanji: "道", reading: "みち", translation: "дорога / путь / улица", emoji: "🛣️" },
+      { id: 797, level_id: 40, kanji: "交差点", reading: "こうさてん", translation: "перекресток", emoji: "🚦" },
+      { id: 798, level_id: 40, kanji: "信号", reading: "しんごう", translation: "светофор / сигнал", emoji: "🚦" },
+      { id: 799, level_id: 40, kanji: "角", reading: "かど", translation: "угол (улицы/комнаты)", emoji: "📐" },
+      { id: 800, level_id: 40, kanji: "橋", reading: "はし", translation: "мост", emoji: "🌉" },
+
+      // УРОВЕНЬ 41
+      { id: 801, level_id: 41, kanji: "駐車場", reading: "ちゅうしゃじょう", translation: "парковка / автостоянка", emoji: "🅿️" },
+      { id: 802, level_id: 41, kanji: "建物", reading: "たてもの", translation: "здание / строение", emoji: "🏢" },
+      { id: 803, level_id: 41, kanji: "何回も", reading: "なんかいも", translation: "много раз / неоднократно", emoji: "🔁" },
+      { id: 804, level_id: 41, kanji: "—", reading: "くれます", translation: "давать / дарить (мне)", emoji: "🎁" },
+      { id: 805, level_id: 41, kanji: "直します", reading: "なおします", translation: "исправлять / чинить", emoji: "🔧" },
+      { id: 806, level_id: 41, kanji: "連れて行きます", reading: "つれていきます", translation: "брать с собой / вести", emoji: "👫" },
+      { id: 807, level_id: 41, kanji: "連れて来ます", reading: "つれてきます", translation: "приводить с собой", emoji: "👥" },
+      { id: 808, level_id: 41, kanji: "送ります", reading: "おくります", translation: "провожать / подвозить", emoji: "🚗" },
+      { id: 809, level_id: 41, kanji: "紹介します", reading: "しょうかいします", translation: "представлять / знакомить", emoji: "🤝" },
+      { id: 810, level_id: 41, kanji: "案内します", reading: "あんないします", translation: "показывать дорогу / экскурсию", emoji: "🗺️" },
+      { id: 811, level_id: 41, kanji: "説明します", reading: "せつめいします", translation: "объяснять / разъяснять", emoji: "🗣️" },
+      { id: 812, level_id: 41, kanji: "—", reading: "おじいさん", translation: "дедушка / пожилой мужчина", emoji: "👴" },
+      { id: 813, level_id: 41, kanji: "—", reading: "おじいちゃん", translation: "дедуля / дедушка (ласково)", emoji: "👴" },
+      { id: 814, level_id: 41, kanji: "—", reading: "おばあさん", translation: "бабушка / пожилая женщина", emoji: "👵" },
+      { id: 815, level_id: 41, kanji: "—", reading: "おばあちゃん", translation: "бабуля / бабушка (ласково)", emoji: "👵" },
+      { id: 816, level_id: 41, kanji: "準備", reading: "じゅんび", translation: "подготовка / приготовления", emoji: "📋" },
+      { id: 817, level_id: 41, kanji: "引っ越し", reading: "ひっこし", translation: "переезд (на новое жилье)", emoji: "📦" },
+      { id: 818, level_id: 41, kanji: "お菓子", reading: "おかし", translation: "сладости / выпечка", emoji: "🍬" },
+      { id: 819, level_id: 41, kanji: "—", reading: "ホームステイ", translation: "проживание в семье", emoji: "🏠" },
+      { id: 820, level_id: 41, kanji: "全部", reading: "ぜんぶ", translation: "всё / целиком", emoji: "🔗" },
+
+      // УРОВЕНЬ 42
+      { id: 821, level_id: 42, kanji: "自分で", reading: "じぶんで", translation: "сам / самостоятельно", emoji: "🙋" },
+      { id: 822, level_id: 42, kanji: "考えます", reading: "かんがえます", translation: "думать / размышлять", emoji: "🤔" },
+      { id: 823, level_id: 42, kanji: "着きます", reading: "つきます", translation: "прибывать / приезжать", emoji: "🚉" },
+      { id: 824, level_id: 42, kanji: "年を取ります", reading: "としをとります", translation: "становиться старше / стареть", emoji: "👴" },
+      { id: 825, level_id: 42, kanji: "足ります", reading: "たります", translation: "хватать / быть достаточным", emoji: "✅" },
+      { id: 826, level_id: 42, kanji: "田舎", reading: "いなか", translation: "деревня / сельская местность", emoji: "🏡" },
+      { id: 827, level_id: 42, kanji: "—", reading: "チャンス", translation: "шанс / возможность", emoji: "🎲" },
+      { id: 828, level_id: 42, kanji: "億", reading: "おく", translation: "100 миллионов (100 000 000)", emoji: "💯" },
+      { id: 829, level_id: 42, kanji: "—", reading: "もし", translation: "если (в начале условия)", emoji: "❓" },
+      { id: 830, level_id: 42, kanji: "意味", reading: "いみ", translation: "смысл / значение", emoji: "💡" }
+    ];
+
+    const TOTAL_LEVELS = 42;
+    let userProgress = {};
+
+    // Сохранение в локальный кэш и в облако аккаунта Telegram
+    function saveState() {
+      const s = JSON.stringify(userProgress);
+      localStorage.setItem('japandi_srs_v13', s);
+      
+      if (window.Telegram?.WebApp?.CloudStorage) {
+        try {
+          window.Telegram.WebApp.CloudStorage.setItem('japandi_srs_v13', s, (err) => {
+            if (err) console.error("Ошибка сохранения в CloudStorage:", err);
+          });
+        } catch(e) {}
+      }
+    }
+
+    // Загрузка прогресса с аккаунта Telegram
+    function loadState(callback) {
+      try {
+        const localData = localStorage.getItem('japandi_srs_v13');
+        if (localData) userProgress = JSON.parse(localData);
+      } catch(e) {}
+
+      if (window.Telegram?.WebApp?.CloudStorage) {
+        window.Telegram.WebApp.CloudStorage.getItem('japandi_srs_v13', (err, cloudData) => {
+          if (!err && cloudData) {
+            try {
+              userProgress = JSON.parse(cloudData);
+              localStorage.setItem('japandi_srs_v13', cloudData);
+            } catch(e) {}
+          }
+          if (callback) callback();
+        });
+      } else {
+        if (callback) callback();
+      }
+    }
+
+    function getWordData(wordId) {
+      if (!userProgress[wordId]) {
+        userProgress[wordId] = {
+          reps: 0,
+          interval: 0,
+          easeFactor: 2.5,
+          dueDate: 0,
+          lapses: 0,
+          stacked: false
+        };
+      }
+      return userProgress[wordId];
+    }
+
+    function isWordMastered(wId) {
+      const p = userProgress[wId];
+      if (!p) return false;
+      const ankiDone = (p.reps >= 2 || p.interval >= 3);
+      const stackDone = Boolean(p.stacked);
+      return ankiDone || stackDone;
+    }
+
+    function getLevelWords(lvl) {
+      return allWords.filter(w => w.level_id === lvl);
+    }
+
+    function getLevelMasteredCount(lvl) {
+      return getLevelWords(lvl).filter(w => isWordMastered(w.id)).length;
+    }
+
+    function getCurrentUnlockedLevel() {
+      for (let lvl = 1; lvl <= TOTAL_LEVELS; lvl++) {
+        if (getLevelMasteredCount(lvl) < 20) return lvl;
+      }
+      return TOTAL_LEVELS;
+    }
+
+    // --- KYOKO ОЗВУЧКА ---
+    let kyokoVoice = null;
+    function getKyokoVoice() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      kyokoVoice = voices.find(v => 
+        v.name.toLowerCase().includes('kyoko') || 
+        v.name.includes('キョウコ') ||
+        v.name.includes('Kyoko')
+      );
+      if (!kyokoVoice) {
+        kyokoVoice = voices.find(v => v.lang.startsWith('ja') || v.lang === 'ja_JP');
+      }
+    }
+
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = getKyokoVoice;
+      getKyokoVoice();
+    }
+
+    function speakKyoko(text) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const clean = text.replace(/[—〜]/g, '').trim();
+      if (!clean) return;
+
+      if (!kyokoVoice) getKyokoVoice();
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = 'ja-JP';
+      u.rate = 0.9;
+      u.pitch = 1.0;
+      if (kyokoVoice) u.voice = kyokoVoice;
+      window.speechSynthesis.speak(u);
+    }
+
+    // --- КАРТА С ДОРОЖКОЙ-ЗМЕЙКОЙ ---
+    function renderMap() {
+      const tree = document.getElementById('snakeTree');
+      tree.innerHTML = '<svg id="snakeSvg"></svg>';
+
+      const currentLvl = getCurrentUnlockedLevel();
+
+      if (currentLvl > 1) {
+        const masteredTotal = allWords.filter(w => isWordMastered(w.id)).length;
+        const wrapRev = document.createElement('div');
+        wrapRev.className = `level-node-wrapper pos-0`;
+        wrapRev.innerHTML = `
+          <div class="level-node review-node" onclick="openReviewMenu()">
+            <span style="font-size: 11px; font-weight: 800; margin-top:2px;">Повтор</span>
+            <span class="node-progress">${masteredTotal}</span>
+          </div>
+        `;
+        tree.appendChild(wrapRev);
+      }
+
+      const currentDone = getLevelMasteredCount(currentLvl);
+      const wrapCur = document.createElement('div');
+      wrapCur.className = `level-node-wrapper pos-${(currentLvl - 1) % 4}`;
+      wrapCur.innerHTML = `
+        <div class="level-node active-unlocked" onclick="openLevelModal(${currentLvl})">
+          <span class="node-num">${currentLvl}</span>
+          <span class="node-progress">${currentDone}</span>
+        </div>
+      `;
+      tree.appendChild(wrapCur);
+
+      for (let lvl = currentLvl + 1; lvl <= TOTAL_LEVELS; lvl++) {
+        const wrapLock = document.createElement('div');
+        wrapLock.className = `level-node-wrapper pos-${(lvl - 1) % 4}`;
+        wrapLock.innerHTML = `
+          <div class="level-node locked">
+            <span class="node-num">${lvl}</span>
+          </div>
+        `;
+        tree.appendChild(wrapLock);
+      }
+
+      // Отрисовка дорожки-змейки
+      requestAnimationFrame(() => {
+        drawSnakePath();
+      });
+    }
+
+    function drawSnakePath() {
+      const svg = document.getElementById('snakeSvg');
+      if (!svg) return;
+      const nodes = document.querySelectorAll('.snake-container .level-node');
+      if (nodes.length < 2) return;
+
+      const container = document.getElementById('snakeTree');
+      const cRect = container.getBoundingClientRect();
+
+      let pathD = '';
+      const points = [];
+
+      nodes.forEach(node => {
+        const r = node.getBoundingClientRect();
+        const x = r.left + r.width / 2 - cRect.left;
+        const y = r.top + r.height / 2 - cRect.top;
+        points.push({ x, y });
+      });
+
+      for (let i = 0; i < points.length; i++) {
+        if (i === 0) {
+          pathD += `M ${points[i].x} ${points[i].y}`;
+        } else {
+          const p0 = points[i - 1];
+          const p1 = points[i];
+          const cy = (p0.y + p1.y) / 2;
+          pathD += ` C ${p0.x} ${cy}, ${p1.x} ${cy}, ${p1.x} ${p1.y}`;
+        }
+      }
+
+      svg.innerHTML = `
+        <path d="${pathD}" fill="none" stroke="var(--border)" stroke-width="3" stroke-dasharray="6,6" opacity="0.8" />
+      `;
+    }
+
+    let activeLevel = 1;
+    let isReviewMode = false;
+
+    function openLevelModal(lvl) {
+      activeLevel = lvl;
+      isReviewMode = false;
+      const done = getLevelMasteredCount(lvl);
+      document.getElementById('modalTitle').innerText = `Уровень ${lvl}`;
+      document.getElementById('modeModal').classList.add('open');
+    }
+
+    function openReviewMenu() {
+      activeLevel = 1;
+      isReviewMode = true;
+      document.getElementById('modalTitle').innerText = `Повторение`;
+      document.getElementById('modeModal').classList.add('open');
+    }
+
+    function closeModal(e) {
+      if (e.target.id === 'modeModal') {
+        document.getElementById('modeModal').classList.remove('open');
+      }
+    }
+
+    function switchView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function showMap() {
+      switchView('viewMap');
+      renderMap();
+    }
+
+    function launchMode(mode) {
+      document.getElementById('modeModal').classList.remove('open');
+      let pool = isReviewMode 
+        ? allWords.filter(w => isWordMastered(w.id))
+        : getLevelWords(activeLevel);
+
+      if (mode === 'anki') startAnki(pool);
+      else startStackGame(pool);
+    }
+
+    // --- 2. ANKI (SM-2) ---
+    let ankiQueue = [];
+    let currentAnkiCard = null;
+    let ankiMode = 'ja';
+    let ankiTotalCount = 0;
+
+    function setAnkiMode(m) {
+      ankiMode = m;
+      document.getElementById('btnModeJa').classList.toggle('active', m === 'ja');
+      document.getElementById('btnModeRu').classList.toggle('active', m === 'ru');
+      if (currentAnkiCard) renderAnkiCard();
+    }
+
+    function startAnki(words) {
+      ankiQueue = [...words];
+      ankiTotalCount = ankiQueue.length;
+      switchView('viewAnki');
+      nextAnkiCard();
+    }
+
+    function calculateNextInterval(srs, grade) {
+      let reps = srs.reps;
+      let interval = srs.interval;
+      let ef = srs.easeFactor || 2.5;
+
+      if (grade === 1) {
+        return { reps: 0, interval: 0, ef: Math.max(1.3, ef - 0.2), text: "< 1 мин", days: 0 };
+      } else if (grade === 2) {
+        const nextInt = interval === 0 ? 1 : Math.max(1, Math.round(interval * 1.2));
+        return { reps: reps + 1, interval: nextInt, ef: Math.max(1.3, ef - 0.15), text: `${nextInt} дн`, days: nextInt };
+      } else if (grade === 3) {
+        let nextInt = reps === 0 ? 1 : (reps === 1 ? 3 : Math.round(interval * ef));
+        return { reps: reps + 1, interval: nextInt, ef: ef, text: `${nextInt} дн`, days: nextInt };
+      } else {
+        let nextInt = reps === 0 ? 3 : (reps === 1 ? 6 : Math.round(interval * ef * 1.3));
+        return { reps: reps + 1, interval: nextInt, ef: ef + 0.15, text: `${nextInt} дн`, days: nextInt };
+      }
+    }
+
+    function nextAnkiCard() {
+      if (ankiQueue.length === 0) {
+        alert('🎉 Отлично! Сессия Anki завершена.');
+        showMap();
+        return;
+      }
+
+      currentAnkiCard = ankiQueue.shift();
+      renderAnkiCard();
+    }
+
+    function renderAnkiCard() {
+      const w = currentAnkiCard;
+      const srs = getWordData(w.id);
+
+      document.getElementById('ankiAnswerBlock').classList.remove('revealed');
+      document.getElementById('btnShowAnswer').style.display = 'block';
+      document.getElementById('ankiGradeGroup').style.display = 'none';
+
+      const badge = document.getElementById('ankiCardBadge');
+      if (isWordMastered(w.id)) {
+        badge.innerText = `Изучено ✨`;
+        badge.style.background = 'var(--ink-soft)';
+        badge.style.color = 'var(--ink)';
+      } else if (srs.reps === 0) {
+        badge.innerText = 'Новое';
+        badge.style.background = 'var(--success-bg)';
+        badge.style.color = 'var(--success-text)';
+      } else {
+        badge.innerText = `Изучение (${srs.interval}д)`;
+        badge.style.background = 'var(--star-bg)';
+        badge.style.color = 'var(--star-color)';
+      }
+
+      if (ankiMode === 'ja') {
+        document.getElementById('ankiQuestion').innerText = w.kanji !== '—' ? w.kanji : w.reading;
+        document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? w.reading : '');
+        document.getElementById('ankiTranslation').innerText = w.translation;
+      } else {
+        document.getElementById('ankiQuestion').innerText = w.translation;
+        document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? `${w.kanji} (${w.reading})` : w.reading);
+        document.getElementById('ankiTranslation').innerText = '';
+      }
+
+      const done = ankiTotalCount - ankiQueue.length;
+      document.getElementById('ankiProgress').style.width = `${(done / ankiTotalCount) * 100}%`;
+      document.getElementById('ankiCounter').innerText = `${done}/${ankiTotalCount}`;
+
+      const resAgain = calculateNextInterval(srs, 1);
+      const resHard = calculateNextInterval(srs, 2);
+      const resGood = calculateNextInterval(srs, 3);
+      const resEasy = calculateNextInterval(srs, 4);
+
+      if (document.getElementById('lblTimeAgain')) document.getElementById('lblTimeAgain').innerText = resAgain.text;
+      if (document.getElementById('lblTimeHard')) document.getElementById('lblTimeHard').innerText = resHard.text;
+      if (document.getElementById('lblTimeGood')) document.getElementById('lblTimeGood').innerText = resGood.text;
+      if (document.getElementById('lblTimeEasy')) document.getElementById('lblTimeEasy').innerText = resEasy.text;
+    }
+
+    function revealAnkiAnswer() {
+      document.getElementById('ankiAnswerBlock').classList.add('revealed');
+      document.getElementById('btnShowAnswer').style.display = 'none';
+      document.getElementById('ankiGradeGroup').style.display = 'grid';
+      speakCurrentWord();
+    }
+
+    function speakCurrentWord() {
+      if (currentAnkiCard) speakKyoko(currentAnkiCard.reading);
+    }
+
+    function handleAnkiGrade(grade) {
+      const w = currentAnkiCard;
+      const srs = getWordData(w.id);
+      const res = calculateNextInterval(srs, grade);
+
+      srs.reps = res.reps;
+      srs.interval = res.interval;
+      srs.easeFactor = res.ef;
+      srs.dueDate = Date.now() + (res.days * 24 * 60 * 60 * 1000);
+
+      if (grade === 1) {
+        srs.lapses = (srs.lapses || 0) + 1;
+        ankiQueue.push(w);
+      }
+
+      saveState();
+      nextAnkiCard();
+    }
+
+    // --- 3. ИГРА «СТОПКА» ---
+    let upcomingPiecesQueue = [];
+    let boardSlots = new Array(12).fill(null);
+    let selectedSlotIdx = null;
+    let stackTotalWords = 0;
+    let stackDoneWords = 0;
+
+    function getWordComponents(word) {
+      const list = [];
+      if (word.kanji && word.kanji !== '—') {
+        list.push({ wordId: word.id, type: 'kanji', text: word.kanji, speech: word.reading });
+      }
+      list.push({ wordId: word.id, type: 'reading', text: word.reading, speech: word.reading });
+      list.push({ wordId: word.id, type: 'translation', text: word.translation, speech: word.reading });
+      if (word.emoji) {
+        list.push({ wordId: word.id, type: 'emoji', text: word.emoji, speech: word.reading });
+      }
+
+      return {
+        wordId: word.id,
+        totalItems: list.length,
+        items: list
+      };
+    }
+
+    function startStackGame(words) {
+      stackTotalWords = words.length;
+      stackDoneWords = 0;
+      upcomingPiecesQueue = [];
+      boardSlots = new Array(12).fill(null);
+      selectedSlotIdx = null;
+
+      words.forEach(w => {
+        const def = getWordComponents(w);
+        def.items.forEach(it => {
+          upcomingPiecesQueue.push({
+            wordId: def.wordId,
+            totalNeeded: def.totalItems,
+            items: [it]
+          });
+        });
+      });
+
+      for (let i = 0; i < 12; i++) {
+        if (upcomingPiecesQueue.length > 0) {
+          boardSlots[i] = upcomingPiecesQueue.shift();
+        }
+      }
+
+      boardSlots.sort(() => Math.random() - 0.5);
+
+      switchView('viewStack');
+      renderStackBoard();
+      updateStackProgress();
+    }
+
+    function fillEmptySlots() {
+      for (let i = 0; i < 12; i++) {
+        if (boardSlots[i] === null && upcomingPiecesQueue.length > 0) {
+          boardSlots[i] = upcomingPiecesQueue.shift();
+        }
+      }
+    }
+
+    function updateStackProgress() {
+      const pct = stackTotalWords > 0 ? (stackDoneWords / stackTotalWords) * 100 : 0;
+      document.getElementById('stackProgress').style.width = `${pct}%`;
+      document.getElementById('stackCounter').innerText = `${stackDoneWords}/${stackTotalWords}`;
+    }
+
+    function renderStackBoard() {
+      const grid = document.getElementById('stackGrid');
+      grid.innerHTML = '';
+
+      boardSlots.forEach((stack, idx) => {
+        const el = document.createElement('div');
+        el.className = 'stack-tile';
+        el.dataset.slot = idx;
+
+        if (!stack) {
+          el.classList.add('empty-slot');
+          grid.appendChild(el);
+          return;
+        }
+
+        if (selectedSlotIdx === idx) el.classList.add('selected');
+
+        const isStack = stack.items.length > 1;
+        const mainItem = stack.items[stack.items.length - 1];
+
+        let chipsHtml = '';
+        if (isStack) {
+          chipsHtml = `<div class="tile-sub-chips">` + 
+            stack.items.slice(0, -1).map(it => `<span class="chip-item">${it.text}</span>`).join('') +
+            `</div>`;
+        }
+
+        el.innerHTML = `
+          <div class="tile-counter-badge">${stack.items.length}/${stack.totalNeeded}</div>
+         <div class="tile-main-text type-${mainItem.type}">${mainItem.text}</div>
+          ${chipsHtml}
+        `;
+
+        el.onclick = () => onSlotClick(idx, el);
+        grid.appendChild(el);
+      });
+    }
+
+    function onSlotClick(clickedIdx, el) {
+      if (!boardSlots[clickedIdx]) return;
+
+      if (selectedSlotIdx === null) {
+        selectedSlotIdx = clickedIdx;
+        renderStackBoard();
+        return;
+      }
+
+      if (selectedSlotIdx === clickedIdx) {
+        selectedSlotIdx = null;
+        renderStackBoard();
+        return;
+      }
+
+      const firstIdx = selectedSlotIdx;
+      const targetIdx = clickedIdx;
+
+      const firstStack = boardSlots[firstIdx];
+      const targetStack = boardSlots[targetIdx];
+
+      if (firstStack.wordId === targetStack.wordId) {
+        targetStack.items.push(...firstStack.items);
+        boardSlots[firstIdx] = null;
+        selectedSlotIdx = null;
+
+        const word = allWords.find(w => w.id === targetStack.wordId);
+        if (word) speakKyoko(word.reading);
+
+        if (targetStack.items.length >= targetStack.totalNeeded) {
+          const p = getWordData(targetStack.wordId);
+          p.stacked = true;
+          saveState();
+          stackDoneWords++;
+          updateStackProgress();
+
+          renderStackBoard();
+          const targetEl = document.querySelector(`.stack-tile[data-slot="${targetIdx}"]`);
+          if (targetEl) targetEl.classList.add('completed-burst');
+
+          setTimeout(() => {
+            boardSlots[targetIdx] = null;
+            fillEmptySlots();
+            renderStackBoard();
+
+            const hasAny = boardSlots.some(s => s !== null);
+            if (!hasAny && upcomingPiecesQueue.length === 0) {
+              setTimeout(() => {
+                alert('🎉 Превосходно! Все стопки собраны!');
+                showMap();
+              }, 300);
+            }
+          }, 300);
+        } else {
+          fillEmptySlots();
+          renderStackBoard();
+
+          const targetEl = document.querySelector(`.stack-tile[data-slot="${targetIdx}"]`);
+          if (targetEl) targetEl.classList.add('merge-pulse');
+        }
+      } else {
+        const firstEl = document.querySelector(`.stack-tile[data-slot="${firstIdx}"]`);
+        const secondEl = el;
+
+        if (firstEl) firstEl.classList.add('error');
+        if (secondEl) secondEl.classList.add('error');
+
+        selectedSlotIdx = null;
+        setTimeout(() => {
+          renderStackBoard();
+        }, 320);
+      }
+    }
+
+// Инициализация
+    loadState(() => {
+      renderMap();
+    });
+  </script>
+</body>
+</html>
