@@ -2039,42 +2039,66 @@
       return TOTAL_LEVELS;
     }
 
-    // --- ОЗВУЧКА KYOKO ---
-    let kyokoVoice = null;
-    function getKyokoVoice() {
+    // --- УНИВЕРСАЛЬНАЯ ОЗВУЧКА (ANDROID + IOS + PC) ---
+    let cachedJapaneseVoice = null;
+
+    function initJapaneseVoice() {
       if (!('speechSynthesis' in window)) return;
       const voices = window.speechSynthesis.getVoices();
-      kyokoVoice = voices.find(v => 
-        v.name.toLowerCase().includes('kyoko') || 
-        v.name.includes('キョウコ') ||
-        v.name.includes('Kyoko')
-      );
-      if (!kyokoVoice) {
-        kyokoVoice = voices.find(v => v.lang.toLowerCase().includes('ja'));
+      if (!voices || voices.length === 0) return;
+
+      // 1. Для iOS / macOS ищем Kyoko
+      let v = voices.find(v => v.name.toLowerCase().includes('kyoko') || v.name.includes('キョウコ'));
+
+      // 2. Для Android ищем движок Google Japanese или любой голос ja-JP / ja_JP
+      if (!v) {
+        v = voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.toLowerCase().startsWith('ja'));
       }
+
+      cachedJapaneseVoice = v || null;
     }
 
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = getKyokoVoice;
-      getKyokoVoice();
+      window.speechSynthesis.onvoiceschanged = initJapaneseVoice;
+      initJapaneseVoice();
     }
 
     function speakKyoko(text) {
       if (!('speechSynthesis' in window)) return;
-      const clean = text.replace(/[—〜]/g, '').trim();
+
+      const clean = text.replace(/[—〜\-_]/g, '').trim();
       if (!clean) return;
 
-      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-      if (!kyokoVoice) getKyokoVoice();
+      // Оживляем синтезатор на Android (будим поток)
+      try {
+        window.speechSynthesis.cancel(); // сбрасываем зависшие очереди
+        if (window.speechSynthesis.paused) {
+          window.speechSynthesis.resume();
+        }
+      } catch (e) {}
 
-      const u = new SpeechSynthesisUtterance(clean);
-      u.lang = 'ja-JP';
-      u.rate = 0.9;
-      u.pitch = 1.0;
-      if (kyokoVoice) u.voice = kyokoVoice;
-      window.speechSynthesis.speak(u);
+      if (!cachedJapaneseVoice) {
+        initJapaneseVoice();
+      }
+
+      const utterance = new SpeechSynthesisUtterance(clean);
+      utterance.lang = 'ja-JP';
+      utterance.rate = 0.9;
+      utterance.pitch = 1.0;
+
+      if (cachedJapaneseVoice) {
+        utterance.voice = cachedJapaneseVoice;
+      }
+
+      // Небольшая задержка в 10мс решает баг выгрузки WebView на многих смартфонах Xiaomi/Samsung
+      setTimeout(() => {
+        try {
+          window.speechSynthesis.speak(utterance);
+        } catch (err) {
+          console.error('TTS Speak error:', err);
+        }
+      }, 10);
     }
-
     // --- РЕНДЕР КАРТЫ ---
     function renderMap() {
       const tree = document.getElementById('snakeTree');
