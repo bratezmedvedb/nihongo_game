@@ -2405,14 +2405,17 @@ const graduatedCount = ankiGraduatedIds.size;
       document.getElementById('ankiProgress').style.width = `${pct}%`;
       document.getElementById('ankiCounter').innerText = `${graduatedCount}/${ankiTotalBatchSize}`;
 
-      // Озвучка слова
-      speakCurrentWord();
+   // Тихо кэшируем звук в память (без проигрывания)
+      if (currentAnkiCard) {
+        preloadCurrentAudio(currentAnkiCard.id);
+      }
     }
 
 function revealAnkiAnswer() {
   document.getElementById('ankiAnswerBlock').classList.add('revealed');
   document.getElementById('btnShowAnswer').style.display = 'none';
   document.getElementById('ankiGradeGroup').style.display = 'grid';
+  // Воспроизводим звук только при показе ответа:
   speakCurrentWord();
 }
 
