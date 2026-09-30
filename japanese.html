@@ -2030,7 +2030,7 @@
       }
     }
 
-    function loadState(callback) {
+   function loadState(callback) {
       try {
         const local = localStorage.getItem('japandi_backup_data');
         if (local) userProgress = JSON.parse(local);
@@ -2038,6 +2038,11 @@
         userProgress = {};
       }
 
+      // 1. СРАЗУ рисуем экран, чтобы не было белого/пустого экрана
+      renderMap();
+      if (callback) callback();
+
+      // 2. В фоновом режиме подтягиваем данные из облака Telegram
       if (window.Telegram?.WebApp?.CloudStorage) {
         window.Telegram.WebApp.CloudStorage.getItems(TG_KEYS, (err, res) => {
           if (!err && res) {
@@ -2048,12 +2053,10 @@
             try {
               localStorage.setItem('japandi_backup_data', JSON.stringify(userProgress));
             } catch(e) {}
+            // Обновляем экран, если из облака пришли свежие данные
+            renderMap();
           }
-          if (callback) callback();
-          renderMap();
         });
-      } else {
-        if (callback) callback();
       }
     }
 
@@ -2065,7 +2068,7 @@
       }
       return userProgress[wordId];
     }
-
+    
     function isWordMastered(wId) {
       const p = userProgress[wId];
       if (!p) return false;
@@ -2423,13 +2426,14 @@
       const pct = ankiTotalBatchSize > 0 ? (graduatedCount / ankiTotalBatchSize) * 100 : 0;
       document.getElementById('ankiProgress').style.width = `${pct}%`;
       document.getElementById('ankiCounter').innerText = `${graduatedCount}/${ankiTotalBatchSize}`;
-
-    function revealAnkiAnswer() {
-      document.getElementById('ankiAnswerBlock').classList.add('revealed');
-      document.getElementById('btnShowAnswer').style.display = 'none';
-      document.getElementById('ankiGradeGroup').style.display = 'grid';
-      speakCurrentWord();
     }
+
+function revealAnkiAnswer() {
+  document.getElementById('ankiAnswerBlock').classList.add('revealed');
+  document.getElementById('btnShowAnswer').style.display = 'none';
+  document.getElementById('ankiGradeGroup').style.display = 'grid';
+  speakCurrentWord();
+}
 
   function speakCurrentWord() {
       if (currentAnkiCard) speakKyoko(currentAnkiCard.id);
@@ -2723,10 +2727,9 @@
       }
     }
 
-    // Инициализация игры
-    loadState(() => {
-      renderMap();
-    });
+// Инициализация игры
+    loadState();
+    renderMap();
   </script>
 </body>
 </html>
