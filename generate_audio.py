@@ -5,7 +5,7 @@ import requests
 
 VOICEVOX_URL = "http://127.0.0.1:50021"
 
-SPEAKER_ID = 59
+SPEAKER_ID = 118
 
 OUTPUT_DIR = "audio"
 os.makedirs(OUTPUT_DIR, exist_ok=True)

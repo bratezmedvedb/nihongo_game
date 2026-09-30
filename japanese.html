@@ -777,13 +777,14 @@
       justify-content: center;
     }
 
-    /* 1. КАНДЗИ (ЕЩЕ КРУПНЕЕ И МОЩНЕЕ) */
+/* ЕЩЕ БОЛЕЕ МОЩНЫЕ И КРУПНЫЕ КАНДЗИ */
     .tile-main-text.type-kanji {
-      font-size: clamp(2.0rem, 8.5vw, 2.7rem);
-      letter-spacing: -1px;
+      font-size: clamp(2.4rem, 9.5vw, 3.2rem) !important;
+      font-weight: 900;
+      letter-spacing: -1.5px;
     }
     body.desktop-device .tile-main-text.type-kanji {
-      font-size: 4.6rem;
+      font-size: 5.4rem !important;
       letter-spacing: -2px;
     }
 
@@ -2451,8 +2452,8 @@
       nextAnkiCard();
     }
 
-    // =========================================================================
-    // --- 3. ИГРА «СТОПКА» (БЕЗ ЭМОДЗИ + ВОЛНЫ ПО 12 ШТУК) ---
+    /// =========================================================================
+    // --- 3. ИГРА «СТОПКА» (ИСПРАВЛЕНА СБОРКА + КРУПНЫЕ КАНДЗИ) ---
     // =========================================================================
     let stackWaves = [];
     let currentWaveIndex = 0;
@@ -2464,10 +2465,10 @@
     function getWordComponents(word) {
       const list = [];
       if (word.kanji && word.kanji !== '—') {
-        list.push({ wordId: word.id, type: 'kanji', text: word.kanji, speech: word.reading });
+        list.push({ wordId: word.id, type: 'kanji', text: word.kanji });
       }
-      list.push({ wordId: word.id, type: 'reading', text: word.reading, speech: word.reading });
-      list.push({ wordId: word.id, type: 'translation', text: word.translation, speech: word.reading });
+      list.push({ wordId: word.id, type: 'reading', text: word.reading });
+      list.push({ wordId: word.id, type: 'translation', text: word.translation });
 
       return {
         wordId: word.id,
@@ -2483,7 +2484,6 @@
       currentWaveIndex = 0;
       selectedSlotIdx = null;
 
-      // Формируем цельные волны по 12 карточек
       let currentWavePieces = [];
       const shuffledWords = [...words].sort(() => Math.random() - 0.5);
 
@@ -2532,8 +2532,9 @@
       document.getElementById('stackCounter').innerText = `${stackDoneWords}/${stackTotalWords}`;
     }
 
-   function renderStackBoard() {
+    function renderStackBoard() {
       const grid = document.getElementById('stackGrid');
+      if (!grid) return;
       grid.innerHTML = '';
 
       boardSlots.forEach((stack, idx) => {
@@ -2552,16 +2553,15 @@
         const isStack = stack.items.length > 1;
         const mainItem = stack.items[stack.items.length - 1];
 
-        // Мягкий расчет: уменьшаем ТОЛЬКО если реально не влезает
         const textLen = mainItem.text.length;
         let sizeClass = '';
 
         if (mainItem.type === 'translation') {
-          if (textLen > 24) sizeClass = 'size-xs';      // Только для огромных предложений
-          else if (textLen > 14) sizeClass = 'size-sm'; // Для длинных фраз из 3-4 слов
+          if (textLen > 24) sizeClass = 'size-xs';
+          else if (textLen > 14) sizeClass = 'size-sm';
         } else if (mainItem.type === 'reading') {
-          if (textLen > 10) sizeClass = 'size-xs';      // Длинные грамматические конструкции
-          else if (textLen > 7) sizeClass = 'size-sm';  // Слова длиннее 7 знаков
+          if (textLen > 10) sizeClass = 'size-xs';
+          else if (textLen > 7) sizeClass = 'size-sm';
         } else if (mainItem.type === 'kanji') {
           if (textLen > 6) sizeClass = 'size-sm';
         }
@@ -2587,24 +2587,40 @@
     function onSlotClick(clickedIdx, el) {
       if (!boardSlots[clickedIdx]) return;
 
+      // 1. ПЕРВЫЙ КЛИК (ВЫБОР КАРТОЧКИ) — ВОТ ЭТО БЫЛО ПРОПУЩЕНО!
+      if (selectedSlotIdx === null) {
+        selectedSlotIdx = clickedIdx;
+        renderStackBoard();
+        return;
+      }
+
+      // 2. Клик по той же карточке (снятие выделения)
       if (selectedSlotIdx === clickedIdx) {
         selectedSlotIdx = null;
         renderStackBoard();
         return;
       }
 
+      // 3. ВТОРОЙ КЛИК (ПОПЫТКА ОБЪЕДИНЕНИЯ)
       const firstIdx = selectedSlotIdx;
       const targetIdx = clickedIdx;
 
       const firstStack = boardSlots[firstIdx];
       const targetStack = boardSlots[targetIdx];
 
+      if (!firstStack || !targetStack) {
+        selectedSlotIdx = null;
+        renderStackBoard();
+        return;
+      }
+
+      // ПРОВЕРКА НА СОВПАДЕНИЕ
       if (firstStack.wordId === targetStack.wordId) {
         targetStack.items.push(...firstStack.items);
-        boardSlots[firstIdx] = null; // Освобождаем слот (остается пустым до конца волны)
+        boardSlots[firstIdx] = null;
         selectedSlotIdx = null;
 
-   if (targetStack.wordId) speakKyoko(targetStack.wordId);
+        if (targetStack.wordId) speakKyoko(targetStack.wordId);
 
         if (targetStack.items.length >= targetStack.totalNeeded) {
           const p = getWordData(targetStack.wordId);
@@ -2621,11 +2637,9 @@
             boardSlots[targetIdx] = null;
             renderStackBoard();
 
-            // Проверяем: решились ли ВСЕ 12 карточек в текущей волне?
             const isWaveCleared = boardSlots.every(s => s === null);
             if (isWaveCleared) {
               if (currentWaveIndex + 1 < stackWaves.length) {
-                // Загружаем следующие 12 штук!
                 setTimeout(() => {
                   loadWave(currentWaveIndex + 1);
                 }, 200);
@@ -2643,6 +2657,7 @@
           if (targetEl) targetEl.classList.add('merge-pulse');
         }
       } else {
+        // Ошибка (карточки не подошли)
         const firstEl = document.querySelector(`.stack-tile[data-slot="${firstIdx}"]`);
         const secondEl = el;
 
