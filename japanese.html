@@ -33,7 +33,6 @@
     }
   </script>
 <style>
-    <style>
     :root {
       --bg: #f4f1ea;
       --card-bg: #ffffff;
@@ -103,7 +102,7 @@
       width: 100% !important;
     }
 
-    /* ШАПКА */
+    /* ШАПКА ОПУЩЕНА ПОД КНОПКИ ТЕЛЕГРАМА */
     .session-header {
       display: flex;
       align-items: center;
@@ -190,36 +189,31 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    /* ==========================================================================
-       ЭКРАН 1: КАРТА (ИСПРАВЛЕНА ПРОКРУТКА)
-       ========================================================================== */
+    /* ЭКРАН 1: КАРТА */
     #viewMap {
-      flex: 1;
-      height: 100%;
-      overflow-y: auto !important;
+      overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: calc(46px + env(safe-area-inset-top, 0px)) 12px calc(50px + env(safe-area-inset-bottom, 0px));
+      padding: calc(46px + env(safe-area-inset-top, 0px)) 12px calc(30px + env(safe-area-inset-bottom, 0px));
       position: relative;
     }
 
     body.desktop-device #viewMap {
-      padding: calc(52px + env(safe-area-inset-top, 0px)) 24px 80px;
+      padding: calc(52px + env(safe-area-inset-top, 0px)) 24px 60px;
     }
 
     .snake-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 26px;
-      padding: 10px 0 80px;
+      gap: 24px;
+      padding: 10px 0 50px;
       position: relative;
-      min-height: 100%;
     }
 
     body.desktop-device .snake-container {
-      gap: 38px;
-      padding: 20px 0 100px;
+      gap: 36px;
+      padding: 20px 0 80px;
     }
 
     #snakeSvg {
@@ -354,9 +348,7 @@
     body.desktop-device .pos-1 { transform: translateX(180px); }
     body.desktop-device .pos-3 { transform: translateX(-180px); }
 
-    /* ==========================================================================
-       ЭКРАН 2: ANKI (ЛИЦЕВАЯ СТОРОНА ГИГАНТСКАЯ, ПЕРЕВОД АККУРАТНЫЙ)
-       ========================================================================== */
+    /* ЭКРАН 2: ANKI (СЛОВО НА ВЕСЬ ЭКРАН) */
     #viewAnki {
       padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
       justify-content: space-between;
@@ -455,7 +447,6 @@
       border-radius: 14px;
     }
 
-    /* ЛИЦЕВАЯ СТОРОНА КАРТОЧКИ (ВОПРОС) ВСЕГДА КРУПНЫЙ */
     .card-question {
       font-weight: 900;
       color: var(--text);
@@ -470,13 +461,12 @@
       justify-content: center;
     }
 
-    /* ОБОРОТНАЯ СТОРОНА (ОТВЕТ) — АККУРАТНЫЙ И КОМПАКТНЫЙ РАЗМЕР */
     .card-answer-block {
       display: none;
       flex-direction: column;
       align-items: center;
-      margin-top: 12px;
-      padding-top: 12px;
+      margin-top: 14px;
+      padding-top: 14px;
       border-top: 1px solid var(--border-light);
       width: 100%;
       position: relative;
@@ -484,8 +474,8 @@
     .card-answer-block.revealed { display: flex; }
 
     body.desktop-device .card-answer-block {
-      margin-top: 16px;
-      padding-top: 16px;
+      margin-top: 20px;
+      padding-top: 20px;
     }
 
     .card-reading-row {
@@ -494,12 +484,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 4px;
-      min-height: 38px;
+      margin-bottom: 6px;
+      min-height: 44px;
     }
 
     .card-reading {
-      font-size: clamp(1.3rem, 4vw, 1.8rem);
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
       color: var(--kana);
       font-weight: 600;
       line-height: 1.2;
@@ -509,15 +499,15 @@
     }
 
     body.desktop-device .card-reading {
-      font-size: 2.2rem;
-      padding: 0 60px;
+      font-size: 3.2rem;
+      padding: 0 70px;
     }
 
     .action-circle-voice-btn {
       position: absolute;
       right: 8px;
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       border: 1px solid var(--border);
       background: var(--bg);
@@ -538,20 +528,20 @@
 
     body.desktop-device .action-circle-voice-btn {
       right: 20px;
-      width: 50px;
-      height: 50px;
-      font-size: 1.35rem;
+      width: 58px;
+      height: 58px;
+      font-size: 1.5rem;
     }
 
     .card-translation {
-      font-size: clamp(1.1rem, 3.2vw, 1.45rem);
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
       font-weight: 750;
       color: var(--ink);
     }
 
     body.desktop-device .card-translation {
-      font-size: 1.9rem;
-      margin-top: 4px;
+      font-size: 2.5rem;
+      margin-top: 6px;
     }
 
     .anki-actions-bottom {
@@ -624,9 +614,7 @@
     .btn-grade.good  { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
     .btn-grade.easy  { background: var(--ink-soft); border-color: #c9c3e6; color: var(--ink); }
 
-    /* ==========================================================================
-       ЭКРАН 3: СТОПКА (КАНДЗИ ОГРОМНЫЕ, РУССКИЙ АККУРАТНЫЙ)
-       ========================================================================== */
+    /* ЭКРАН 3: СТОПКА (НА ВЕСЬ ЭКРАН 16:9) */
     #viewStack {
       padding: 0 12px calc(14px + env(safe-area-inset-bottom, 0px));
       width: 100%;
@@ -665,6 +653,7 @@
       height: 100%;
     }
 
+    /* Растянутая на 100% высоты сетка на ПК */
     body.desktop-device .stack-grid {
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(3, 1fr);
@@ -760,46 +749,43 @@
       border-radius: 10px;
     }
 
-    /* 1. БОЛЬШИЕ КАНДЗИ И ХИРАГАНА В СТОПКЕ */
-    .tile-main-text.type-kanji,
-    .tile-main-text.type-reading {
-      font-weight: 900;
-      line-height: 1.1;
-      font-size: clamp(1.5rem, 6.2vw, 2.3rem);
-      letter-spacing: -0.5px;
+    /* ЕДИНЫЙ КРУПНЫЙ ШРИФТ ДЛЯ ВСЕХ КАРТОЧЕК В СТОПКЕ */
+    .tile-main-text {
+      font-weight: 850;
+      line-height: 1.15;
+      color: var(--text);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      padding: 0 4px;
+      width: 100%;
+      text-align: center;
+      transition: font-size 0.1s ease;
+      font-size: clamp(1.3rem, 5.2vw, 1.85rem);
     }
 
-    body.desktop-device .tile-main-text.type-kanji,
-    body.desktop-device .tile-main-text.type-reading {
-      font-size: 3.8rem;
+    body.desktop-device .tile-main-text {
+      font-size: 3.2rem;
+      line-height: 1.15;
     }
 
-    /* 2. АККУРАТНЫЙ РУССКИЙ ПЕРЕВОД */
-    .tile-main-text.type-translation {
-      font-weight: 750;
-      line-height: 1.2;
-      font-size: clamp(0.85rem, 3.4vw, 1.1rem);
-    }
-
-    body.desktop-device .tile-main-text.type-translation {
-      font-size: 1.85rem;
-    }
-
-    /* 3. УМЕНЬШЕНИЕ ТОЛЬКО ДЛЯ ДЛИННЫХ ФРАЗ */
+    /* УМЕНЬШЕНИЕ ТОЛЬКО ДЛЯ ДЛИННЫХ ФРАЗ */
     .tile-main-text.size-sm {
-      font-size: clamp(0.78rem, 2.9vw, 0.95rem) !important;
+      font-size: clamp(0.95rem, 3.8vw, 1.3rem) !important;
       line-height: 1.15;
     }
     body.desktop-device .tile-main-text.size-sm {
-      font-size: 1.45rem !important;
+      font-size: 2.1rem !important;
+      line-height: 1.15;
     }
 
     .tile-main-text.size-xs {
-      font-size: clamp(0.68rem, 2.5vw, 0.82rem) !important;
-      line-height: 1.08;
+      font-size: clamp(0.78rem, 2.9vw, 1.0rem) !important;
+      line-height: 1.1;
     }
     body.desktop-device .tile-main-text.size-xs {
-      font-size: 1.15rem !important;
+      font-size: 1.55rem !important;
+      line-height: 1.1;
     }
 
     .tile-sub-chips {
@@ -831,7 +817,7 @@
       max-width: 180px;
     }
 
-    /* МОДАЛЬНОЕ ОКНО */
+    /* МОДАЛЬНОЕ ОКНО ВЫБОРА РЕЖИМА */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -2053,97 +2039,42 @@
       return TOTAL_LEVELS;
     }
 
-    / =========================================================================
-    // --- НАДЁЖНЫЙ ГИБРИДНЫЙ МОДУЛЬ ОЗВУЧКИ (ANDROID + IOS + PC) ---
-    // =========================================================================
-    let cachedJapaneseVoice = null;
-    let ttsAudioPlayer = null;
-
-    function initJapaneseVoice() {
+    // --- ОЗВУЧКА KYOKO ---
+    let kyokoVoice = null;
+    function getKyokoVoice() {
       if (!('speechSynthesis' in window)) return;
       const voices = window.speechSynthesis.getVoices();
-      if (!voices || voices.length === 0) return;
-
-      // 1. Для iOS / Mac
-      let v = voices.find(v => v.name.toLowerCase().includes('kyoko') || v.name.includes('キョウコ'));
-      // 2. Для Android / Windows
-      if (!v) {
-        v = voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.toLowerCase().startsWith('ja'));
+      kyokoVoice = voices.find(v => 
+        v.name.toLowerCase().includes('kyoko') || 
+        v.name.includes('キョウコ') ||
+        v.name.includes('Kyoko')
+      );
+      if (!kyokoVoice) {
+        kyokoVoice = voices.find(v => v.lang.toLowerCase().includes('ja'));
       }
-      cachedJapaneseVoice = v || null;
     }
 
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = initJapaneseVoice;
-      initJapaneseVoice();
-    }
-
-    // Резервное воспроизведение через онлайн-поток, если Android WebView заглушил SpeechSynthesis
-    function playFallbackAudio(cleanText) {
-      try {
-        if (!ttsAudioPlayer) {
-          ttsAudioPlayer = new Audio();
-        }
-        const encoded = encodeURIComponent(cleanText);
-        // Бесплатный скоростной CDN-поток Google TTS японского языка
-        const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=ja&client=tw-ob&q=${encoded}`;
-        
-        ttsAudioPlayer.src = audioUrl;
-        ttsAudioPlayer.playbackRate = 0.95;
-        ttsAudioPlayer.play().catch(() => {});
-      } catch (e) {
-        console.error('Audio fallback error:', e);
-      }
+      window.speechSynthesis.onvoiceschanged = getKyokoVoice;
+      getKyokoVoice();
     }
 
     function speakKyoko(text) {
-      const clean = text.replace(/[—〜\-_]/g, '').trim();
+      if (!('speechSynthesis' in window)) return;
+      const clean = text.replace(/[—〜]/g, '').trim();
       if (!clean) return;
 
-      // Проверяем доступность Web Speech API
-      const hasSpeechSynth = ('speechSynthesis' in window) && (typeof SpeechSynthesisUtterance !== 'undefined');
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+      if (!kyokoVoice) getKyokoVoice();
 
-      if (hasSpeechSynth) {
-        try {
-          window.speechSynthesis.cancel();
-          if (window.speechSynthesis.paused) {
-            window.speechSynthesis.resume();
-          }
-
-          if (!cachedJapaneseVoice) {
-            initJapaneseVoice();
-          }
-
-          const utterance = new SpeechSynthesisUtterance(clean);
-          utterance.lang = 'ja-JP';
-          utterance.rate = 0.9;
-          utterance.pitch = 1.0;
-
-          if (cachedJapaneseVoice) {
-            utterance.voice = cachedJapaneseVoice;
-          }
-
-          let didSpeak = false;
-          utterance.onstart = () => { didSpeak = true; };
-
-          // Если за 250мс Android WebView так и не начал воспроизводить звук — включаем резервный аудиопоток
-          setTimeout(() => {
-            if (!didSpeak) {
-              playFallbackAudio(clean);
-            }
-          }, 250);
-
-          window.speechSynthesis.speak(utterance);
-          return;
-        } catch (err) {
-          playFallbackAudio(clean);
-          return;
-        }
-      }
-
-      // Если в системе вообще нет Web Speech API
-      playFallbackAudio(clean);
+      const u = new SpeechSynthesisUtterance(clean);
+      u.lang = 'ja-JP';
+      u.rate = 0.9;
+      u.pitch = 1.0;
+      if (kyokoVoice) u.voice = kyokoVoice;
+      window.speechSynthesis.speak(u);
     }
+
     // --- РЕНДЕР КАРТЫ ---
     function renderMap() {
       const tree = document.getElementById('snakeTree');
@@ -2402,22 +2333,18 @@
 
       qEl.innerText = qText;
 
-      // ОГРОМНЫЙ ШРИФТ ДЛЯ ЛИЦЕВОЙ СТОРОНЫ (С УМНЫМ МАСШТАБОМ ДЛЯ ПК И СМАРТФОНОВ)
-      const isDesktop = document.body.classList.contains('desktop-device');
+      // ДИНАМИЧЕСКИЙ РАСЧЕТ ШРИФТА (В 3 РАЗА БОЛЬШЕ ДЛЯ КОРОТКИХ СЛОВ)
       const len = qText.length;
-
-      if (isDesktop) {
-        if (len <= 2) qEl.style.fontSize = '14rem';
-        else if (len <= 4) qEl.style.fontSize = '10.5rem';
-        else if (len <= 7) qEl.style.fontSize = '7.5rem';
-        else if (len <= 12) qEl.style.fontSize = '5.0rem';
-        else qEl.style.fontSize = '3.6rem';
+      if (len <= 2) {
+        qEl.style.fontSize = 'clamp(4.8rem, 20vw, 7.5rem)';
+      } else if (len <= 4) {
+        qEl.style.fontSize = 'clamp(3.6rem, 14vw, 5.4rem)';
+      } else if (len <= 7) {
+        qEl.style.fontSize = 'clamp(2.6rem, 10vw, 4.0rem)';
+      } else if (len <= 11) {
+        qEl.style.fontSize = 'clamp(2.0rem, 7.5vw, 3.0rem)';
       } else {
-        if (len <= 2) qEl.style.fontSize = 'clamp(5.5rem, 25vw, 8.0rem)';
-        else if (len <= 4) qEl.style.fontSize = 'clamp(4.2rem, 18vw, 6.0rem)';
-        else if (len <= 7) qEl.style.fontSize = 'clamp(2.8rem, 12vw, 4.2rem)';
-        else if (len <= 12) qEl.style.fontSize = 'clamp(2.0rem, 8vw, 3.0rem)';
-        else qEl.style.fontSize = 'clamp(1.5rem, 6vw, 2.2rem)';
+        qEl.style.fontSize = 'clamp(1.5rem, 5.5vw, 2.2rem)';
       }
 
       const graduatedCount = ankiGraduatedIds.size;
