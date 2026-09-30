@@ -2423,7 +2423,6 @@
       const pct = ankiTotalBatchSize > 0 ? (graduatedCount / ankiTotalBatchSize) * 100 : 0;
       document.getElementById('ankiProgress').style.width = `${pct}%`;
       document.getElementById('ankiCounter').innerText = `${graduatedCount}/${ankiTotalBatchSize}`;
-    }
 
     function revealAnkiAnswer() {
       document.getElementById('ankiAnswerBlock').classList.add('revealed');
