@@ -32,8 +32,8 @@
       }
     }
   </script>
-
-  <style>
+  
+   <style>
     :root {
       --bg: #f4f1ea;
       --card-bg: #ffffff;
@@ -96,51 +96,87 @@
       background-color: var(--bg);
       background-image: radial-gradient(rgba(44, 44, 42, 0.04) 1px, transparent 0);
       background-size: 16px 16px;
-      transition: max-width 0.2s ease;
     }
 
-    /* АДАПТАЦИЯ ДЛЯ ПК / ДЕСКТОП */
+    /* ==========================================================================
+       ГЛОБАЛЬНАЯ АДАПТАЦИЯ ВСЕЙ ИГРЫ ДЛЯ ПК (16:9 ШИРОКИЙ ФОРМАТ)
+       ========================================================================== */
     body.desktop-device #app {
-      max-width: 1000px;
-      border-left: none;
-      border-right: none;
-      box-shadow: none;
+      max-width: 100% !important;
+      width: 100% !important;
     }
 
-    /* НАВИГАЦИОННАЯ СТРОКА (СМЕЩЕНА НА 90px ВНИЗ) */
-    .main-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: calc(40px + env(safe-area-inset-top, 0px)) 16px 12px;
-      flex-shrink: 0;
-    }
-
-/* НАВИГАЦИОННАЯ СТРОКА ВНУТРИ ИГРЫ (АККУРАТНЫЙ МИКРО-ОТСТУП) */
+    /* НАВИГАЦИОННАЯ СТРОКА (ОПУЩЕНА ПОД КНОПКИ TELEGRAM) */
     .session-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 8px;
+      padding: calc(44px + env(safe-area-inset-top, 0px)) 16px 8px;
       flex-shrink: 0;
+      width: 100%;
     }
 
-    .brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1.15rem;
-      font-weight: 800;
-      color: var(--text);
+    body.desktop-device .session-header {
+      padding: calc(48px + env(safe-area-inset-top, 0px)) 36px 16px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    .badge-n5 {
-      background: var(--accent);
-      color: #fff;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 0.75rem;
+    .back-btn-pill {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      color: var(--sub-text);
+      font-size: 0.85rem;
       font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      z-index: 10;
+      transition: all 0.12s ease;
+    }
+    .back-btn-pill:active { background: var(--text); color: #fff; }
+
+    body.desktop-device .back-btn-pill {
+      font-size: 1.05rem;
+      padding: 10px 22px;
+      border-radius: 16px;
+    }
+
+    .session-progress-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 10px;
+      margin: 0 12px;
+      overflow: hidden;
+    }
+
+    body.desktop-device .session-progress-wrap {
+      height: 10px;
+      margin: 0 24px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 10px;
+      transition: width 0.25s ease;
+    }
+
+    .session-counter-text {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--sub-text);
+      min-width: 45px;
+      text-align: right;
+    }
+
+    body.desktop-device .session-counter-text {
+      font-size: 1.15rem;
+      min-width: 65px;
     }
 
     /* ОСНОВНЫЕ ЭКРАНЫ */
@@ -160,13 +196,19 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    /* ЭКРАН 1: КАРТА */
+    /* ==========================================================================
+       ЭКРАН 1: КАРТА (ПК + МОБИЛКА)
+       ========================================================================== */
     #viewMap {
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: calc(16px + env(safe-area-inset-top, 0px)) 12px calc(30px + env(safe-area-inset-bottom, 0px));
+      padding: calc(44px + env(safe-area-inset-top, 0px)) 12px calc(30px + env(safe-area-inset-bottom, 0px));
       position: relative;
+    }
+
+    body.desktop-device #viewMap {
+      padding: calc(52px + env(safe-area-inset-top, 0px)) 24px 60px;
     }
 
     .snake-container {
@@ -176,6 +218,11 @@
       gap: 24px;
       padding: 10px 0 50px;
       position: relative;
+    }
+
+    body.desktop-device .snake-container {
+      gap: 36px;
+      padding: 20px 0 80px;
     }
 
     #snakeSvg {
@@ -213,6 +260,14 @@
     }
     .level-node:active { transform: scale(0.92); }
 
+    /* Крупные кнопки уровней на ПК */
+    body.desktop-device .level-node {
+      width: 96px;
+      height: 96px;
+      border-radius: 30px;
+      border-width: 2px;
+    }
+
     .level-node.review-node {
       background: var(--star-bg);
       border-color: var(--star-border);
@@ -220,6 +275,11 @@
       width: 78px;
       height: 78px;
       border-radius: 26px;
+    }
+    body.desktop-device .level-node.review-node {
+      width: 104px;
+      height: 104px;
+      border-radius: 32px;
     }
 
     .level-node.active-unlocked {
@@ -252,6 +312,11 @@
       right: 6px;
       opacity: 0.6;
     }
+    body.desktop-device .level-node.locked::after {
+      font-size: 14px;
+      top: 8px;
+      right: 8px;
+    }
 
     .node-num {
       font-size: 1.3rem;
@@ -259,6 +324,10 @@
       line-height: 1;
       color: var(--text);
     }
+    body.desktop-device .node-num {
+      font-size: 1.7rem;
+    }
+
     .node-progress {
       font-size: 0.68rem;
       font-weight: 800;
@@ -267,6 +336,13 @@
       border-radius: 8px;
       background: #ffffff;
     }
+    body.desktop-device .node-progress {
+      font-size: 0.85rem;
+      padding: 2px 10px;
+      border-radius: 10px;
+      margin-top: 5px;
+    }
+
     .active-unlocked .node-progress {
       color: var(--success-text);
       border: 1px solid var(--success-border);
@@ -281,52 +357,23 @@
     .pos-2 { transform: translateX(0); }
     .pos-3 { transform: translateX(-50px); }
 
-    body.desktop-device .pos-1 { transform: translateX(90px); }
-    body.desktop-device .pos-3 { transform: translateX(-90px); }
+    /* Размашистая змейка на мониторах */
+    body.desktop-device .pos-1 { transform: translateX(180px); }
+    body.desktop-device .pos-3 { transform: translateX(-180px); }
 
-    .back-btn-pill {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      color: var(--sub-text);
-      font-size: 0.85rem;
-      font-weight: 700;
-      padding: 7px 14px;
-      border-radius: 14px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-    }
-    .back-btn-pill:active { background: var(--text); color: #fff; }
-
-    .session-progress-wrap {
-      flex: 1;
-      height: 6px;
-      background: var(--border-light);
-      border-radius: 10px;
-      margin: 0 12px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--accent);
-      border-radius: 10px;
-      transition: width 0.25s ease;
-    }
-
-    .session-counter-text {
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--sub-text);
-      min-width: 45px;
-      text-align: right;
-    }
-
-    /* ЭКРАН ANKI */
+    /* ==========================================================================
+       ЭКРАН 2: ANKI (ПК + МОБИЛКА)
+       ========================================================================== */
     #viewAnki {
       padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
       justify-content: space-between;
+      width: 100%;
+    }
+
+    body.desktop-device #viewAnki {
+      padding: 0 40px calc(24px + env(safe-area-inset-bottom, 0px));
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
     .anki-toggle-mode {
@@ -338,6 +385,13 @@
       width: 120px;
       gap: 3px;
       flex-shrink: 0;
+    }
+
+    body.desktop-device .anki-toggle-mode {
+      width: 150px;
+      padding: 4px;
+      border-radius: 16px;
+      margin-bottom: 16px;
     }
 
     .anki-toggle-btn {
@@ -357,15 +411,17 @@
       background: var(--card-bg);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     }
+    body.desktop-device .anki-toggle-btn {
+      padding: 8px 0;
+      font-size: 1.25rem;
+    }
 
     .presentation-card-anki {
       flex: 1;
       min-height: 0;
       width: 100%;
-      max-width: 600px;
-      margin: 0 auto 14px;
       background: var(--card-bg);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: 26px;
       padding: 24px 18px;
       display: flex;
@@ -375,6 +431,13 @@
       text-align: center;
       box-shadow: var(--shadow-md);
       position: relative;
+      margin-bottom: 14px;
+    }
+
+    body.desktop-device .presentation-card-anki {
+      border-radius: 36px;
+      padding: 40px 32px;
+      margin-bottom: 24px;
     }
 
     .card-badge {
@@ -390,7 +453,14 @@
       border: 1px solid var(--border-light);
     }
 
-    /* УВЕЛИЧЕННЫЙ В 3 РАЗА ШРИФТ ДЛЯ ANKI С АДАПТАЦИЕЙ */
+    body.desktop-device .card-badge {
+      top: 20px;
+      right: 24px;
+      font-size: 0.95rem;
+      padding: 5px 14px;
+      border-radius: 12px;
+    }
+
     .card-question {
       font-weight: 850;
       color: var(--text);
@@ -400,6 +470,10 @@
       word-break: break-word;
       overflow-wrap: break-word;
       transition: font-size 0.15s ease;
+    }
+
+    body.desktop-device .card-question {
+      margin: 16px 0;
     }
 
     .card-answer-block {
@@ -413,6 +487,11 @@
       position: relative;
     }
     .card-answer-block.revealed { display: flex; }
+
+    body.desktop-device .card-answer-block {
+      margin-top: 24px;
+      padding-top: 24px;
+    }
 
     .card-reading-row {
       position: relative;
@@ -432,6 +511,11 @@
       text-align: center;
       cursor: pointer;
       padding: 0 40px;
+    }
+
+    body.desktop-device .card-reading {
+      font-size: 3rem;
+      padding: 0 60px;
     }
 
     .action-circle-voice-btn {
@@ -457,17 +541,27 @@
       border-color: var(--accent);
     }
 
+    body.desktop-device .action-circle-voice-btn {
+      right: 20px;
+      width: 54px;
+      height: 54px;
+      font-size: 1.4rem;
+    }
+
     .card-translation {
       font-size: clamp(1.2rem, 4vw, 1.6rem);
       font-weight: 750;
       color: var(--ink);
     }
 
+    body.desktop-device .card-translation {
+      font-size: 2.2rem;
+      margin-top: 6px;
+    }
+
     .anki-actions-bottom {
       flex-shrink: 0;
       width: 100%;
-      max-width: 600px;
-      margin: 0 auto;
     }
 
     .btn-show-answer {
@@ -485,10 +579,20 @@
     }
     .btn-show-answer:active { transform: scale(0.97); }
 
+    body.desktop-device .btn-show-answer {
+      height: 64px;
+      font-size: 1.25rem;
+      border-radius: 20px;
+    }
+
     .anki-grade-group {
       display: none;
       grid-template-columns: repeat(4, 1fr);
       gap: 8px;
+    }
+
+    body.desktop-device .anki-grade-group {
+      gap: 16px;
     }
 
     .btn-grade {
@@ -510,14 +614,30 @@
       font-weight: 800;
     }
 
+    body.desktop-device .btn-grade {
+      height: 64px;
+      border-radius: 20px;
+    }
+    body.desktop-device .btn-grade .grade-label {
+      font-size: 1.15rem;
+    }
+
     .btn-grade.again { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
     .btn-grade.hard  { background: var(--star-bg); border-color: var(--star-border); color: var(--star-color); }
     .btn-grade.good  { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
     .btn-grade.easy  { background: var(--ink-soft); border-color: #c9c3e6; color: var(--ink); }
 
-    /* ЭКРАН «СТОПКА» */
+    /* ==========================================================================
+       ЭКРАН 3: СТОПКА (ПК 16:9 + МОБИЛКА)
+       ========================================================================== */
     #viewStack {
       padding: 0 12px calc(14px + env(safe-area-inset-bottom, 0px));
+      width: 100%;
+    }
+
+    body.desktop-device #viewStack {
+      padding: 0 36px calc(24px + env(safe-area-inset-bottom, 0px));
+      max-width: 100%;
     }
 
     .stack-sub-hint {
@@ -529,6 +649,11 @@
       flex-shrink: 0;
     }
 
+    body.desktop-device .stack-sub-hint {
+      font-size: 1.1rem;
+      margin-bottom: 14px;
+    }
+
     .stack-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -536,15 +661,14 @@
       gap: 8px;
       flex: 1;
       min-height: 0;
+      width: 100%;
     }
 
+    /* Растянутая на 16:9 сетка на ПК */
     body.desktop-device .stack-grid {
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(3, 1fr);
-      gap: 12px;
-      max-width: 760px;
-      margin: 0 auto;
-      width: 100%;
+      gap: 16px;
     }
 
     .stack-tile {
@@ -566,6 +690,12 @@
       overflow: hidden;
     }
     .stack-tile:active { transform: scale(0.94); }
+
+    body.desktop-device .stack-tile {
+      border-radius: 24px;
+      border-width: 2px;
+      padding: 12px;
+    }
 
     .stack-tile.selected {
       background: var(--ink-soft);
@@ -621,21 +751,60 @@
       border-radius: 6px;
     }
 
+    body.desktop-device .tile-counter-badge {
+      top: 8px;
+      right: 10px;
+      font-size: 0.85rem;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
     .tile-main-text {
-      font-size: clamp(0.85rem, 3.4vw, 1.05rem);
-      font-weight: 750;
-      line-height: 1.25;
+      font-weight: 800;
+      line-height: 1.15;
       color: var(--text);
       word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
       padding: 0 4px;
+      width: 100%;
+      text-align: center;
+      transition: font-size 0.1s ease;
     }
 
     .tile-main-text.type-kanji,
     .tile-main-text.type-reading {
-      font-size: clamp(1.35rem, 5.2vw, 1.85rem);
-      font-weight: 800;
-      line-height: 1.15;
-      color: var(--text);
+      font-size: clamp(1.4rem, 5.5vw, 2.1rem);
+      letter-spacing: -0.5px;
+    }
+
+    .tile-main-text.type-translation {
+      font-size: clamp(0.95rem, 3.8vw, 1.25rem);
+    }
+
+    .tile-main-text.size-sm {
+      font-size: clamp(0.78rem, 2.9vw, 0.92rem) !important;
+      line-height: 1.12;
+    }
+    .tile-main-text.size-xs {
+      font-size: clamp(0.68rem, 2.5vw, 0.82rem) !important;
+      line-height: 1.08;
+      letter-spacing: -0.3px;
+    }
+
+    /* Крупные шрифты плиток на ПК */
+    body.desktop-device .tile-main-text.type-kanji,
+    body.desktop-device .tile-main-text.type-reading {
+      font-size: 2.8rem;
+    }
+    body.desktop-device .tile-main-text.type-translation {
+      font-size: 1.6rem;
+    }
+    body.desktop-device .tile-main-text.size-sm {
+      font-size: 1.25rem !important;
+    }
+    body.desktop-device .tile-main-text.size-xs {
+      font-size: 1.05rem !important;
     }
 
     .tile-sub-chips {
@@ -660,7 +829,16 @@
       text-overflow: ellipsis;
     }
 
-    /* МОДАЛКА ВЫБОРА */
+    body.desktop-device .chip-item {
+      font-size: 0.85rem;
+      padding: 3px 8px;
+      border-radius: 8px;
+      max-width: 160px;
+    }
+
+    /* ==========================================================================
+       МОДАЛЬНОЕ ОКНО
+       ========================================================================== */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -673,6 +851,10 @@
       z-index: 100;
     }
     .modal-backdrop.open { display: flex; }
+
+    body.desktop-device .modal-backdrop {
+      align-items: center;
+    }
 
     .modal-sheet {
       background: var(--bg);
@@ -689,10 +871,11 @@
     }
 
     body.desktop-device .modal-sheet {
-      max-width: 520px;
-      margin-bottom: 24px;
-      border-radius: 24px;
+      max-width: 500px;
+      border-radius: 28px;
       border-bottom: 1px solid var(--border);
+      padding: 28px 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
     }
 
     .modal-sheet-handle {
@@ -708,6 +891,10 @@
       font-weight: 800;
       text-align: center;
       margin-bottom: 6px;
+    }
+    body.desktop-device .modal-title {
+      font-size: 1.4rem;
+      margin-bottom: 12px;
     }
 
     .btn-pill {
@@ -730,6 +917,12 @@
       color: #ffffff;
       border-color: var(--accent);
       transform: scale(0.97);
+    }
+
+    body.desktop-device .btn-pill {
+      height: 60px;
+      font-size: 1.15rem;
+      border-radius: 18px;
     }
   </style>
 </head>
@@ -2364,6 +2557,19 @@
         const isStack = stack.items.length > 1;
         const mainItem = stack.items[stack.items.length - 1];
 
+        // Авто-подбор размера шрифта в зависимости от длины текста
+        const textLen = mainItem.text.length;
+        let sizeClass = '';
+
+        if (mainItem.type === 'translation') {
+          if (textLen > 18) sizeClass = 'size-xs';      // Для самых длинных переводов
+          else if (textLen > 11) sizeClass = 'size-sm'; // Для средних фраз
+        } else {
+          // Для японских слов (кандзи / кана)
+          if (textLen > 7) sizeClass = 'size-xs';
+          else if (textLen > 4) sizeClass = 'size-sm';
+        }
+
         let chipsHtml = '';
         if (isStack) {
           chipsHtml = `<div class="tile-sub-chips">` + 
@@ -2373,7 +2579,7 @@
 
         el.innerHTML = `
           <div class="tile-counter-badge">${stack.items.length}/${stack.totalNeeded}</div>
-          <div class="tile-main-text type-${mainItem.type}">${mainItem.text}</div>
+          <div class="tile-main-text type-${mainItem.type} ${sizeClass}">${mainItem.text}</div>
           ${chipsHtml}
         `;
 
@@ -2384,12 +2590,6 @@
 
     function onSlotClick(clickedIdx, el) {
       if (!boardSlots[clickedIdx]) return;
-
-      if (selectedSlotIdx === null) {
-        selectedSlotIdx = clickedIdx;
-        renderStackBoard();
-        return;
-      }
 
       if (selectedSlotIdx === clickedIdx) {
         selectedSlotIdx = null;
