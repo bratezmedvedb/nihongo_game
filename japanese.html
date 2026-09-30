@@ -32,8 +32,7 @@
       }
     }
   </script>
-  
-   <style>
+<style>
     :root {
       --bg: #f4f1ea;
       --card-bg: #ffffff;
@@ -98,28 +97,24 @@
       background-size: 16px 16px;
     }
 
-    /* ==========================================================================
-       ГЛОБАЛЬНАЯ АДАПТАЦИЯ ВСЕЙ ИГРЫ ДЛЯ ПК (16:9 ШИРОКИЙ ФОРМАТ)
-       ========================================================================== */
     body.desktop-device #app {
       max-width: 100% !important;
       width: 100% !important;
     }
 
-    /* НАВИГАЦИОННАЯ СТРОКА (ОПУЩЕНА ПОД КНОПКИ TELEGRAM) */
+    /* ШАПКА ОПУЩЕНА ПОД КНОПКИ ТЕЛЕГРАМА */
     .session-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: calc(44px + env(safe-area-inset-top, 0px)) 16px 8px;
+      padding: calc(46px + env(safe-area-inset-top, 0px)) 16px 8px;
       flex-shrink: 0;
       width: 100%;
     }
 
     body.desktop-device .session-header {
-      padding: calc(48px + env(safe-area-inset-top, 0px)) 36px 16px;
-      max-width: 1400px;
-      margin: 0 auto;
+      padding: calc(48px + env(safe-area-inset-top, 0px)) 36px 12px;
+      max-width: 100%;
     }
 
     .back-btn-pill {
@@ -134,12 +129,11 @@
       display: inline-flex;
       align-items: center;
       z-index: 10;
-      transition: all 0.12s ease;
     }
     .back-btn-pill:active { background: var(--text); color: #fff; }
 
     body.desktop-device .back-btn-pill {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       padding: 10px 22px;
       border-radius: 16px;
     }
@@ -175,11 +169,10 @@
     }
 
     body.desktop-device .session-counter-text {
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       min-width: 65px;
     }
 
-    /* ОСНОВНЫЕ ЭКРАНЫ */
     .view {
       display: none;
       flex: 1;
@@ -196,14 +189,12 @@
       to { opacity: 1; transform: scale(1); }
     }
 
-    /* ==========================================================================
-       ЭКРАН 1: КАРТА (ПК + МОБИЛКА)
-       ========================================================================== */
+    /* ЭКРАН 1: КАРТА */
     #viewMap {
       overflow-y: auto;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: calc(44px + env(safe-area-inset-top, 0px)) 12px calc(30px + env(safe-area-inset-bottom, 0px));
+      padding: calc(46px + env(safe-area-inset-top, 0px)) 12px calc(30px + env(safe-area-inset-bottom, 0px));
       position: relative;
     }
 
@@ -260,7 +251,6 @@
     }
     .level-node:active { transform: scale(0.92); }
 
-    /* Крупные кнопки уровней на ПК */
     body.desktop-device .level-node {
       width: 96px;
       height: 96px;
@@ -324,9 +314,7 @@
       line-height: 1;
       color: var(--text);
     }
-    body.desktop-device .node-num {
-      font-size: 1.7rem;
-    }
+    body.desktop-device .node-num { font-size: 1.7rem; }
 
     .node-progress {
       font-size: 0.68rem;
@@ -357,22 +345,20 @@
     .pos-2 { transform: translateX(0); }
     .pos-3 { transform: translateX(-50px); }
 
-    /* Размашистая змейка на мониторах */
     body.desktop-device .pos-1 { transform: translateX(180px); }
     body.desktop-device .pos-3 { transform: translateX(-180px); }
 
-    /* ==========================================================================
-       ЭКРАН 2: ANKI (ПК + МОБИЛКА)
-       ========================================================================== */
+    /* ЭКРАН 2: ANKI (СЛОВО НА ВЕСЬ ЭКРАН) */
     #viewAnki {
       padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
       justify-content: space-between;
       width: 100%;
+      height: 100%;
     }
 
     body.desktop-device #viewAnki {
       padding: 0 40px calc(24px + env(safe-area-inset-bottom, 0px));
-      max-width: 1200px;
+      max-width: 100% !important;
       margin: 0 auto;
     }
 
@@ -381,17 +367,17 @@
       background: #e7e3da;
       padding: 3px;
       border-radius: 14px;
-      margin: 0 auto 10px;
+      margin: 0 auto 8px;
       width: 120px;
       gap: 3px;
       flex-shrink: 0;
     }
 
     body.desktop-device .anki-toggle-mode {
-      width: 150px;
-      padding: 4px;
-      border-radius: 16px;
-      margin-bottom: 16px;
+      width: 160px;
+      padding: 5px;
+      border-radius: 18px;
+      margin-bottom: 12px;
     }
 
     .anki-toggle-btn {
@@ -413,7 +399,7 @@
     }
     body.desktop-device .anki-toggle-btn {
       padding: 8px 0;
-      font-size: 1.25rem;
+      font-size: 1.3rem;
     }
 
     .presentation-card-anki {
@@ -436,8 +422,8 @@
 
     body.desktop-device .presentation-card-anki {
       border-radius: 36px;
-      padding: 40px 32px;
-      margin-bottom: 24px;
+      padding: 30px 40px;
+      margin-bottom: 20px;
     }
 
     .card-badge {
@@ -456,32 +442,31 @@
     body.desktop-device .card-badge {
       top: 20px;
       right: 24px;
-      font-size: 0.95rem;
-      padding: 5px 14px;
-      border-radius: 12px;
+      font-size: 1.05rem;
+      padding: 6px 16px;
+      border-radius: 14px;
     }
 
     .card-question {
-      font-weight: 850;
+      font-weight: 900;
       color: var(--text);
-      line-height: 1.15;
-      margin: 6px 0;
+      line-height: 1.1;
+      margin: auto 0;
       width: 100%;
       word-break: break-word;
       overflow-wrap: break-word;
       transition: font-size 0.15s ease;
-    }
-
-    body.desktop-device .card-question {
-      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card-answer-block {
       display: none;
       flex-direction: column;
       align-items: center;
-      margin-top: 16px;
-      padding-top: 16px;
+      margin-top: 14px;
+      padding-top: 14px;
       border-top: 1px solid var(--border-light);
       width: 100%;
       position: relative;
@@ -489,8 +474,8 @@
     .card-answer-block.revealed { display: flex; }
 
     body.desktop-device .card-answer-block {
-      margin-top: 24px;
-      padding-top: 24px;
+      margin-top: 20px;
+      padding-top: 20px;
     }
 
     .card-reading-row {
@@ -499,12 +484,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       min-height: 44px;
     }
 
     .card-reading {
-      font-size: clamp(1.6rem, 5vw, 2.2rem);
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
       color: var(--kana);
       font-weight: 600;
       line-height: 1.2;
@@ -514,8 +499,8 @@
     }
 
     body.desktop-device .card-reading {
-      font-size: 3rem;
-      padding: 0 60px;
+      font-size: 3.2rem;
+      padding: 0 70px;
     }
 
     .action-circle-voice-btn {
@@ -543,34 +528,36 @@
 
     body.desktop-device .action-circle-voice-btn {
       right: 20px;
-      width: 54px;
-      height: 54px;
-      font-size: 1.4rem;
+      width: 58px;
+      height: 58px;
+      font-size: 1.5rem;
     }
 
     .card-translation {
-      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-size: clamp(1.3rem, 4vw, 1.8rem);
       font-weight: 750;
       color: var(--ink);
     }
 
     body.desktop-device .card-translation {
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       margin-top: 6px;
     }
 
     .anki-actions-bottom {
       flex-shrink: 0;
       width: 100%;
+      max-width: 1000px;
+      margin: 0 auto;
     }
 
     .btn-show-answer {
       width: 100%;
-      height: 52px;
+      height: 54px;
       border-radius: 16px;
       background: var(--accent);
       color: #fff;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 800;
       border: none;
       cursor: pointer;
@@ -580,9 +567,9 @@
     .btn-show-answer:active { transform: scale(0.97); }
 
     body.desktop-device .btn-show-answer {
-      height: 64px;
-      font-size: 1.25rem;
-      border-radius: 20px;
+      height: 70px;
+      font-size: 1.35rem;
+      border-radius: 22px;
     }
 
     .anki-grade-group {
@@ -610,16 +597,16 @@
     }
     .btn-grade:active { transform: scale(0.94); }
     .btn-grade .grade-label {
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       font-weight: 800;
     }
 
     body.desktop-device .btn-grade {
-      height: 64px;
-      border-radius: 20px;
+      height: 70px;
+      border-radius: 22px;
     }
     body.desktop-device .btn-grade .grade-label {
-      font-size: 1.15rem;
+      font-size: 1.25rem;
     }
 
     .btn-grade.again { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-text); }
@@ -627,17 +614,18 @@
     .btn-grade.good  { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
     .btn-grade.easy  { background: var(--ink-soft); border-color: #c9c3e6; color: var(--ink); }
 
-    /* ==========================================================================
-       ЭКРАН 3: СТОПКА (ПК 16:9 + МОБИЛКА)
-       ========================================================================== */
+    /* ЭКРАН 3: СТОПКА (НА ВЕСЬ ЭКРАН 16:9) */
     #viewStack {
       padding: 0 12px calc(14px + env(safe-area-inset-bottom, 0px));
       width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     body.desktop-device #viewStack {
       padding: 0 36px calc(24px + env(safe-area-inset-bottom, 0px));
-      max-width: 100%;
+      max-width: 100% !important;
     }
 
     .stack-sub-hint {
@@ -650,7 +638,7 @@
     }
 
     body.desktop-device .stack-sub-hint {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       margin-bottom: 14px;
     }
 
@@ -662,9 +650,10 @@
       flex: 1;
       min-height: 0;
       width: 100%;
+      height: 100%;
     }
 
-    /* Растянутая на 16:9 сетка на ПК */
+    /* Растянутая на 100% высоты сетка на ПК */
     body.desktop-device .stack-grid {
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(3, 1fr);
@@ -675,7 +664,8 @@
       background: var(--card-bg);
       border: 1.5px solid var(--border);
       border-radius: 16px;
-      height: 100%;
+      height: 100% !important;
+      width: 100% !important;
       min-height: 0;
       padding: 6px;
       display: flex;
@@ -694,7 +684,7 @@
     body.desktop-device .stack-tile {
       border-radius: 24px;
       border-width: 2px;
-      padding: 12px;
+      padding: 16px;
     }
 
     .stack-tile.selected {
@@ -752,15 +742,16 @@
     }
 
     body.desktop-device .tile-counter-badge {
-      top: 8px;
-      right: 10px;
-      font-size: 0.85rem;
-      padding: 3px 8px;
-      border-radius: 8px;
+      top: 10px;
+      right: 12px;
+      font-size: 0.95rem;
+      padding: 4px 10px;
+      border-radius: 10px;
     }
 
+    /* ЕДИНЫЙ КРУПНЫЙ ШРИФТ ДЛЯ ВСЕХ КАРТОЧЕК В СТОПКЕ */
     .tile-main-text {
-      font-weight: 800;
+      font-weight: 850;
       line-height: 1.15;
       color: var(--text);
       word-break: break-word;
@@ -770,41 +761,31 @@
       width: 100%;
       text-align: center;
       transition: font-size 0.1s ease;
+      font-size: clamp(1.3rem, 5.2vw, 1.85rem);
     }
 
-    .tile-main-text.type-kanji,
-    .tile-main-text.type-reading {
-      font-size: clamp(1.4rem, 5.5vw, 2.1rem);
-      letter-spacing: -0.5px;
+    body.desktop-device .tile-main-text {
+      font-size: 3.2rem;
+      line-height: 1.15;
     }
 
-    .tile-main-text.type-translation {
-      font-size: clamp(0.95rem, 3.8vw, 1.25rem);
-    }
-
+    /* УМЕНЬШЕНИЕ ТОЛЬКО ДЛЯ ДЛИННЫХ ФРАЗ */
     .tile-main-text.size-sm {
-      font-size: clamp(0.78rem, 2.9vw, 0.92rem) !important;
-      line-height: 1.12;
-    }
-    .tile-main-text.size-xs {
-      font-size: clamp(0.68rem, 2.5vw, 0.82rem) !important;
-      line-height: 1.08;
-      letter-spacing: -0.3px;
-    }
-
-    /* Крупные шрифты плиток на ПК */
-    body.desktop-device .tile-main-text.type-kanji,
-    body.desktop-device .tile-main-text.type-reading {
-      font-size: 2.8rem;
-    }
-    body.desktop-device .tile-main-text.type-translation {
-      font-size: 1.6rem;
+      font-size: clamp(0.95rem, 3.8vw, 1.3rem) !important;
+      line-height: 1.15;
     }
     body.desktop-device .tile-main-text.size-sm {
-      font-size: 1.25rem !important;
+      font-size: 2.1rem !important;
+      line-height: 1.15;
+    }
+
+    .tile-main-text.size-xs {
+      font-size: clamp(0.78rem, 2.9vw, 1.0rem) !important;
+      line-height: 1.1;
     }
     body.desktop-device .tile-main-text.size-xs {
-      font-size: 1.05rem !important;
+      font-size: 1.55rem !important;
+      line-height: 1.1;
     }
 
     .tile-sub-chips {
@@ -830,15 +811,13 @@
     }
 
     body.desktop-device .chip-item {
-      font-size: 0.85rem;
-      padding: 3px 8px;
+      font-size: 0.95rem;
+      padding: 4px 10px;
       border-radius: 8px;
-      max-width: 160px;
+      max-width: 180px;
     }
 
-    /* ==========================================================================
-       МОДАЛЬНОЕ ОКНО
-       ========================================================================== */
+    /* МОДАЛЬНОЕ ОКНО ВЫБОРА РЕЖИМА */
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -852,9 +831,7 @@
     }
     .modal-backdrop.open { display: flex; }
 
-    body.desktop-device .modal-backdrop {
-      align-items: center;
-    }
+    body.desktop-device .modal-backdrop { align-items: center; }
 
     .modal-sheet {
       background: var(--bg);
