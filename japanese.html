@@ -2053,64 +2053,21 @@
     }
 
    // =========================================================================
-    // --- УНИВЕРСАЛЬНЫЙ МОДУЛЬ ОЗВУЧКИ (APPLE KYOKO + ANDROID AUDIO STREAM) ---
+    // --- ПЛЕЕР СТУДИЙНОЙ ОЗВУЧКИ VOICEVOX (РАБОТАЕТ НА ВСЕХ УСТРОЙСТВАХ) ---
     // =========================================================================
-    let androidAudio = new Audio();
-    const isAndroidDevice = /Android/i.test(navigator.userAgent);
+    const sfxAudio = new Audio();
 
-    function speakKyoko(text) {
-      const clean = text.replace(/[—〜\-_]/g, '').trim();
-      if (!clean) return;
-
-      // 1. ДЛЯ ANDROID (ОБХОДИМ БЛОКИРОВКУ TELEGRAM ЧЕРЕЗ АУДИО-ПОТОК)
-      if (isAndroidDevice) {
-        try {
-          const encodedText = encodeURIComponent(clean);
-          // Надежный скоростной аудио-поток чистого японского произношения
-          androidAudio.src = `https://dict.youdao.com/dictvoice?audio=${encodedText}&le=jap`;
-          androidAudio.playbackRate = 0.9;
-          
-          const playPromise = androidAudio.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(e => {
-              console.log('Audio autoplay prevented:', e);
-            });
-          }
-        } catch (e) {
-          console.error('Android Audio error:', e);
-        }
-        return;
+    function speakKyoko(wordId) {
+      if (!wordId) return;
+      try {
+        sfxAudio.pause();
+        sfxAudio.currentTime = 0;
+        // Воспроизводим локальный файл из папки audio (например, audio/1.mp3)
+        sfxAudio.src = `audio/${wordId}.mp3`;
+        sfxAudio.play().catch(e => console.log('Audio error:', e));
+      } catch (e) {
+        console.error('Playback error:', e);
       }
-
-      // 2. ДЛЯ IPHONE, MAC И WINDOWS (ИДЕАЛЬНЫЙ ГОЛОС KYOKO ЧЕРЕЗ СИНТЕЗАТОР)
-      if ('speechSynthesis' in window) {
-        try {
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.resume();
-
-          const utterance = new SpeechSynthesisUtterance(clean);
-          utterance.lang = 'ja-JP';
-          utterance.rate = 0.9;
-          utterance.pitch = 1.0;
-
-          const voices = window.speechSynthesis.getVoices();
-          if (voices && voices.length > 0) {
-            const kyoko = voices.find(v => v.name.toLowerCase().includes('kyoko') || v.name.includes('キョウコ'));
-            if (kyoko) utterance.voice = kyoko;
-          }
-
-          window.speechSynthesis.speak(utterance);
-        } catch (e) {
-          console.error('iOS Speech error:', e);
-        }
-      }
-    }
-
-    // Предзагрузка голосов для Apple
-    if (!isAndroidDevice && 'speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
     }
     
     // --- РЕНДЕР КАРТЫ ---
@@ -2398,8 +2355,8 @@
       speakCurrentWord();
     }
 
-    function speakCurrentWord() {
-      if (currentAnkiCard) speakKyoko(currentAnkiCard.reading);
+  function speakCurrentWord() {
+      if (currentAnkiCard) speakKyoko(currentAnkiCard.id);
     }
 
     function handleAnkiGrade(grade) {
@@ -2623,8 +2580,7 @@
         boardSlots[firstIdx] = null; // Освобождаем слот (остается пустым до конца волны)
         selectedSlotIdx = null;
 
-        const word = allWords.find(w => w.id === targetStack.wordId);
-        if (word) speakKyoko(word.reading);
+   if (targetStack.wordId) speakKyoko(targetStack.wordId);
 
         if (targetStack.items.length >= targetStack.totalNeeded) {
           const p = getWordData(targetStack.wordId);
