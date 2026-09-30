@@ -2090,44 +2090,25 @@
     }
 
    // =========================================================================
-    // --- ПРОФЕССИОНАЛЬНЫЙ ПЛЕЕР (МГНОВЕННЫЙ СТАРТ С 0.00 СЕКУНДЫ БЕЗ ОБРЕЗКИ) ---
+    // --- ЧИСТЫЙ МГНОВЕННЫЙ ПЛЕЕР (БЕЗ ТАЙМАУТОВ И БЛОКИРОВОК) ---
     // =========================================================================
-    const sfx = new Audio();
-    sfx.preload = 'auto';
+    const player = new Audio();
 
-    // Функция мгновенного воспроизведения
     function speakKyoko(wordId) {
       if (!wordId) return;
 
       try {
-        const path = `audio/${wordId}.mp3`;
+        player.pause();
+        player.src = `audio/${wordId}.mp3`;
+        player.currentTime = 0;
         
-        // Если этот файл уже загружен — просто перематываем в начало и играем
-        if (sfx.src.endsWith(path)) {
-          sfx.currentTime = 0;
-          sfx.play().catch(() => {});
-          return;
-        }
-
-        // Если новый файл — назначаем и мгновенно запускаем с начала
-        sfx.src = path;
-        sfx.currentTime = 0;
-        
-        const playPromise = sfx.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {});
+        const p = player.play();
+        if (p !== undefined) {
+          p.catch(() => {});
         }
       } catch (e) {
         console.error('Audio play error:', e);
       }
-    }
-
-    // Предзагрузка аудио следующей карточки в Anki, чтобы звук был мгновенным
-    function preloadWordAudio(wordId) {
-      if (!wordId) return;
-      const preloader = new Audio();
-      preloader.src = `audio/${wordId}.mp3`;
-      preloader.preload = 'auto';
     }
     // --- РЕНДЕР КАРТЫ ---
     function renderMap() {
