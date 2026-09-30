@@ -2090,25 +2090,39 @@
     }
 
    // =========================================================================
-    // --- ЧИСТЫЙ МГНОВЕННЫЙ ПЛЕЕР (БЕЗ ТАЙМАУТОВ И БЛОКИРОВОК) ---
+    // --- ПЛЕЕР С МГНОВЕННОЙ ПРЕДЗАГРУЗКОЙ (0ms РЕАКЦИЯ НА КЛИК) ---
     // =========================================================================
-    const player = new Audio();
+    const activeAudio = new Audio();
+    activeAudio.preload = 'auto';
 
+    // Функция мгновенного воспроизведения
     function speakKyoko(wordId) {
       if (!wordId) return;
 
       try {
-        player.pause();
-        player.src = `audio/${wordId}.mp3`;
-        player.currentTime = 0;
-        
-        const p = player.play();
-        if (p !== undefined) {
-          p.catch(() => {});
+        const expectedSrc = `audio/${wordId}.mp3`;
+
+        // Если файл УЖЕ предзагружен в память — просто запускаем с 0 секунды
+        if (activeAudio.src.includes(expectedSrc)) {
+          activeAudio.currentTime = 0;
+          activeAudio.play().catch(() => {});
+          return;
         }
+
+        // Если не был предзагружен (например, при клике в стопке) — загружаем и играем
+        activeAudio.src = expectedSrc;
+        activeAudio.currentTime = 0;
+        activeAudio.play().catch(() => {});
       } catch (e) {
-        console.error('Audio play error:', e);
+        console.error('Audio error:', e);
       }
+    }
+
+    // Предзагрузка аудиофайла в память заранее
+    function preloadCurrentAudio(wordId) {
+      if (!wordId) return;
+      activeAudio.src = `audio/${wordId}.mp3`;
+      activeAudio.load(); // Телефон сразу скачивает файл в оперативку
     }
     // --- РЕНДЕР КАРТЫ ---
     function renderMap() {
@@ -2327,46 +2341,69 @@
     }
 
     function renderAnkiCard() {
-      const w = currentAnkiCard;
-      const srs = initCardSRS(w.id);
+  const w = currentAnkiCard;
+  const srs = initCardSRS(w.id);
 
-      document.getElementById('ankiAnswerBlock').classList.remove('revealed');
-      document.getElementById('btnShowAnswer').style.display = 'block';
-      document.getElementById('ankiGradeGroup').style.display = 'none';
+  document.getElementById('ankiAnswerBlock').classList.remove('revealed');
+  document.getElementById('btnShowAnswer').style.display = 'block';
+  document.getElementById('ankiGradeGroup').style.display = 'none';
 
-      const badge = document.getElementById('ankiCardBadge');
-      if (srs.state === CARD_STATE.NEW) {
-        badge.innerText = 'Новое';
-        badge.style.background = 'var(--success-bg)';
-        badge.style.color = 'var(--success-text)';
-      } else if (srs.state === CARD_STATE.LEARNING) {
-        badge.innerText = `Шаг ${srs.step + 1}/${ANKI_CONFIG.learningSteps.length}`;
-        badge.style.background = 'var(--star-bg)';
-        badge.style.color = 'var(--star-color)';
-      } else if (srs.state === CARD_STATE.RELEARNING) {
-        badge.innerText = 'Повтор';
-        badge.style.background = 'var(--danger-bg)';
-        badge.style.color = 'var(--danger-text)';
-      } else {
-        badge.innerText = `Интервал: ${srs.interval}д`;
-        badge.style.background = 'var(--ink-soft)';
-        badge.style.color = 'var(--ink)';
-      }
+  const badge = document.getElementById('ankiCardBadge');
+  if (srs.state === CARD_STATE.NEW) {
+    badge.innerText = 'Новое';
+    badge.style.background = 'var(--success-bg)';
+    badge.style.color = 'var(--success-text)';
+  } else if (srs.state === CARD_STATE.LEARNING) {
+    badge.innerText = `Шаг ${srs.step + 1}/${ANKI_CONFIG.learningSteps.length}`;
+    badge.style.background = 'var(--star-bg)';
+    badge.style.color = 'var(--star-color)';
+  } else if (srs.state === CARD_STATE.RELEARNING) {
+    badge.innerText = 'Повтор';
+    badge.style.background = 'var(--danger-bg)';
+    badge.style.color = 'var(--danger-text)';
+  } else {
+    badge.innerText = `Интервал: ${srs.interval}д`;
+    badge.style.background = 'var(--ink-soft)';
+    badge.style.color = 'var(--ink)';
+  }
 
-      const qEl = document.getElementById('ankiQuestion');
-      let qText = '';
+  const qEl = document.getElementById('ankiQuestion');
+  let qText = '';
 
-      if (ankiMode === 'ja') {
-        qText = w.kanji !== '—' ? w.kanji : w.reading;
-        document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? w.reading : '');
-        document.getElementById('ankiTranslation').innerText = w.translation;
-      } else {
-        qText = w.translation;
-        document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? `${w.kanji} (${w.reading})` : w.reading);
-        document.getElementById('ankiTranslation').innerText = '';
-      }
+  if (ankiMode === 'ja') {
+    qText = w.kanji !== '—' ? w.kanji : w.reading;
+    document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? w.reading : '');
+    document.getElementById('ankiTranslation').innerText = w.translation;
+  } else {
+    qText = w.translation;
+    document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? `${w.kanji} (${w.reading})` : w.reading);
+    document.getElementById('ankiTranslation').innerText = '';
+  }
 
-      qEl.innerText = qText;
+  qEl.innerText = qText;
+
+  // Динамический расчет шрифта
+  const len = qText.length;
+  if (len <= 2) {
+    qEl.style.fontSize = 'clamp(4.8rem, 20vw, 7.5rem)';
+  } else if (len <= 4) {
+    qEl.style.fontSize = 'clamp(3.6rem, 14vw, 5.4rem)';
+  } else if (len <= 7) {
+    qEl.style.fontSize = 'clamp(2.6rem, 10vw, 4.0rem)';
+  } else if (len <= 11) {
+    qEl.style.fontSize = 'clamp(2.0rem, 7.5vw, 3.0rem)';
+  } else {
+    qEl.style.fontSize = 'clamp(1.5rem, 5.5vw, 2.2rem)';
+  }
+
+  const graduatedCount = ankiGraduatedIds.size;
+  const pct = ankiTotalBatchSize > 0 ? (graduatedCount / ankiTotalBatchSize) * 100 : 0;
+  document.getElementById('ankiProgress').style.width = `${pct}%`;
+  document.getElementById('ankiCounter').innerText = `${graduatedCount}/${ankiTotalBatchSize}`;
+
+  // Мгновенное автовоспроизведение звука при показе карточки
+  speakCurrentWord();
+}
 
       // ДИНАМИЧЕСКИЙ РАСЧЕТ ШРИФТА (В 3 РАЗА БОЛЬШЕ ДЛЯ КОРОТКИХ СЛОВ)
       const len = qText.length;
