@@ -107,7 +107,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: calc(46px + env(safe-area-inset-top, 0px)) 16px 8px;
+      /* ВОТ ЭТА СТРОЧКА ЗАМЕНЕНА: */
+      padding: max(75px, calc(20px + env(safe-area-inset-top, 0px))) 16px 8px;
       flex-shrink: 0;
       width: 100%;
     }
@@ -151,7 +152,6 @@
       height: 10px;
       margin: 0 24px;
     }
-
     .progress-fill {
       height: 100%;
       width: 0%;
@@ -198,7 +198,8 @@
       overflow-y: auto !important;
       overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
-      padding: calc(46px + env(safe-area-inset-top, 0px)) 12px calc(50px + env(safe-area-inset-bottom, 0px));
+      /* Исправленный отступ, чтобы на Android кнопки не перекрывали верх карты */
+      padding: max(75px, calc(20px + env(safe-area-inset-top, 0px))) 12px calc(60px + env(safe-area-inset-bottom, 0px));
       position: relative;
     }
 
@@ -456,7 +457,7 @@
 
     /* ЛИЦЕВАЯ СТОРОНА КАРТОЧКИ (ВОПРОС) ВСЕГДА КРУПНЫЙ */
     .card-question {
-      font-weight: 900;
+      font-weight: 700;
       color: var(--text);
       line-height: 1.1;
       margin: auto 0;
@@ -780,7 +781,7 @@
 /* ЕЩЕ БОЛЕЕ МОЩНЫЕ И КРУПНЫЕ КАНДЗИ */
     .tile-main-text.type-kanji {
       font-size: clamp(2.4rem, 9.5vw, 3.2rem) !important;
-      font-weight: 900;
+      font-weight: 700;
       letter-spacing: -1.5px;
     }
     body.desktop-device .tile-main-text.type-kanji {
@@ -797,14 +798,17 @@
       font-size: 3.8rem;
     }
 
-    /* 3. РУССКИЙ ПЕРЕВОД (СТАБИЛЬНЫЙ СРЕДНИЙ РАЗМЕР) */
+ /* 2. УВЕЛИЧЕННЫЙ РУССКИЙ ПЕРЕВОД */
     .tile-main-text.type-translation {
-      font-size: clamp(0.92rem, 3.8vw, 1.15rem);
-      font-weight: 750;
-      line-height: 1.2;
+      font-weight: 800;
+      line-height: 1.18;
+      /* Увеличен размер: минимум 1.15rem, стандарт 4.8vw, максимум 1.45rem */
+      font-size: clamp(1.15rem, 4.8vw, 1.45rem);
     }
+
+    /* На ПК делаем его еще крупнее и выразительнее */
     body.desktop-device .tile-main-text.type-translation {
-      font-size: 1.95rem;
+      font-size: 2.35rem;
     }
 
     /* 4. УМЕНЬШЕНИЕ ТОЛЬКО ДЛЯ ОЧЕНЬ ДЛИННЫХ ФРАЗ */
@@ -2077,20 +2081,65 @@
     }
 
    // =========================================================================
-    // --- ПЛЕЕР СТУДИЙНОЙ ОЗВУЧКИ VOICEVOX (РАБОТАЕТ НА ВСЕХ УСТРОЙСТВАХ) ---
+    // --- УСИЛЕННЫЙ МГНОВЕННЫЙ ПЛЕЕР (БЕЗ ЗАДЕРЖКИ + ГРОМКОСТЬ +45%) ---
     // =========================================================================
+    let audioCtx = null;
+    let gainNode = null;
     const sfxAudio = new Audio();
+    sfxAudio.preload = 'auto'; // Принудительная быстрая подгрузка в память
+
+    function initAudioBooster() {
+      if (audioCtx) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtx = new AudioContext();
+          const source = audioCtx.createMediaElementSource(sfxAudio);
+          gainNode = audioCtx.createGain();
+
+          // КОЭФФИЦИЕНТ ГРОМКОСТИ: 1.45 (+45% громкости выше максимума)
+          gainNode.gain.value = 1.45;
+
+          source.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+        }
+      } catch (e) {
+        console.log('Web Audio booster not supported, using standard audio');
+      }
+    }
+
+    // Разблокируем аудиоконтекст при первом касании экрана
+    window.addEventListener('touchstart', () => {
+      initAudioBooster();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }, { once: true, passive: true });
+
+    window.addEventListener('click', () => {
+      initAudioBooster();
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }, { once: true, passive: true });
 
     function speakKyoko(wordId) {
       if (!wordId) return;
+
+      initAudioBooster();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
       try {
         sfxAudio.pause();
-        sfxAudio.currentTime = 0;
-        // Воспроизводим локальный файл из папки audio (например, audio/1.mp3)
         sfxAudio.src = `audio/${wordId}.mp3`;
-        sfxAudio.play().catch(e => console.log('Audio error:', e));
+        
+        // Срезаем начальную тишину файла для моментального старта речи
+        sfxAudio.currentTime = 0.04; 
+
+        const playPromise = sfxAudio.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
       } catch (e) {
-        console.error('Playback error:', e);
+        console.error('Audio error:', e);
       }
     }
     
