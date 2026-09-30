@@ -102,15 +102,20 @@
       width: 100% !important;
     }
 
-    /* ШАПКА */
+/* ШАПКА */
     .session-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      /* ВОТ ЭТА СТРОЧКА ЗАМЕНЕНА: */
-      padding: max(75px, calc(20px + env(safe-area-inset-top, 0px))) 16px 8px;
+      /* ИДЕАЛЬНЫЙ ОТСТУП ДЛЯ IPHONE ПОД DYNAMIC ISLAND */
+      padding: calc(44px + env(safe-area-inset-top, 0px)) 16px 8px;
       flex-shrink: 0;
       width: 100%;
+    }
+
+    /* НА ANDROID ПРИНУДИТЕЛЬНО ОПУСКАЕМ НА 75px НИЖЕ ПЛАШКИ */
+    body.is-android .session-header {
+      padding: 75px 16px 8px !important;
     }
 
     body.desktop-device .session-header {
@@ -152,6 +157,7 @@
       height: 10px;
       margin: 0 24px;
     }
+
     .progress-fill {
       height: 100%;
       width: 0%;
@@ -190,23 +196,26 @@
     }
 
     /* ==========================================================================
-       ЭКРАН 1: КАРТА (ИСПРАВЛЕНА ПРОКРУТКА)
+       ЭКРАН 1: КАРТА (ИСПРАВЛЕНА ПРОКРУТКА + РАЗДЕЛЬНЫЕ ОТСТУПЫ)
        ========================================================================== */
     #viewMap {
-      flex: 1;
-      height: 100%;
-      overflow-y: auto !important;
-      overflow-x: hidden;
+      flex: 1 1 auto !important;
+      height: 100% !important;
+      min-height: 0 !important;
+      overflow-y: scroll !important;
+      overflow-x: hidden !important;
       -webkit-overflow-scrolling: touch;
-      /* Исправленный отступ, чтобы на Android кнопки не перекрывали верх карты */
-      padding: max(75px, calc(20px + env(safe-area-inset-top, 0px))) 12px calc(60px + env(safe-area-inset-bottom, 0px));
+      padding: calc(44px + env(safe-area-inset-top, 0px)) 12px calc(60px + env(safe-area-inset-bottom, 0px));
       position: relative;
+    }
+
+    body.is-android #viewMap {
+      padding: 75px 12px calc(60px + env(safe-area-inset-bottom, 0px)) !important;
     }
 
     body.desktop-device #viewMap {
       padding: calc(52px + env(safe-area-inset-top, 0px)) 24px 80px;
     }
-
     .snake-container {
       display: flex;
       flex-direction: column;
@@ -2081,68 +2090,30 @@
     }
 
    // =========================================================================
-    // --- УСИЛЕННЫЙ МГНОВЕННЫЙ ПЛЕЕР (БЕЗ ЗАДЕРЖКИ + ГРОМКОСТЬ +45%) ---
+    // --- СВЕРХСКОРОСТНОЙ ПЛЕЕР (МГНОВЕННЫЙ СТАРТ 0ms) ---
     // =========================================================================
-    let audioCtx = null;
-    let gainNode = null;
-    const sfxAudio = new Audio();
-    sfxAudio.preload = 'auto'; // Принудительная быстрая подгрузка в память
-
-    function initAudioBooster() {
-      if (audioCtx) return;
-      try {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if (AudioContext) {
-          audioCtx = new AudioContext();
-          const source = audioCtx.createMediaElementSource(sfxAudio);
-          gainNode = audioCtx.createGain();
-
-          // КОЭФФИЦИЕНТ ГРОМКОСТИ: 1.45 (+45% громкости выше максимума)
-          gainNode.gain.value = 1.45;
-
-          source.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-        }
-      } catch (e) {
-        console.log('Web Audio booster not supported, using standard audio');
-      }
-    }
-
-    // Разблокируем аудиоконтекст при первом касании экрана
-    window.addEventListener('touchstart', () => {
-      initAudioBooster();
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true, passive: true });
-
-    window.addEventListener('click', () => {
-      initAudioBooster();
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true, passive: true });
+    const audioPool = new Audio();
+    audioPool.preload = 'auto';
 
     function speakKyoko(wordId) {
       if (!wordId) return;
 
-      initAudioBooster();
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-
       try {
-        sfxAudio.pause();
-        sfxAudio.src = `audio/${wordId}.mp3`;
+        audioPool.pause();
+        audioPool.src = `audio/${wordId}.mp3`;
         
-        // Срезаем начальную тишину файла для моментального старта речи
-        sfxAudio.currentTime = 0.04; 
+        // Как только файл готов — моментально срезаем паузу и играем голос
+        audioPool.oncanplay = function() {
+          audioPool.currentTime = 0.35;
+          audioPool.play().catch(() => {});
+          audioPool.oncanplay = null;
+        };
 
-        const playPromise = sfxAudio.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {});
-        }
+        audioPool.load();
       } catch (e) {
         console.error('Audio error:', e);
       }
     }
-    
     // --- РЕНДЕР КАРТЫ ---
     function renderMap() {
       const tree = document.getElementById('snakeTree');
