@@ -2104,7 +2104,7 @@
         
         // Как только файл готов — моментально срезаем паузу и играем голос
         audioPool.oncanplay = function() {
-          audioPool.currentTime = 0.35;
+          audioPool.currentTime = 0.18;
           audioPool.play().catch(() => {});
           audioPool.oncanplay = null;
         };
