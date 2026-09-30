@@ -8,7 +8,7 @@
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   
-<!-- Проверка доступа и Авто-раскрытие -->
+  <!-- Проверка доступа и Авто-раскрытие -->
   <script>
     const ALLOWED_USERS = [370567050, 669192721]; // Ваши Telegram ID
 
@@ -18,9 +18,7 @@
 
       const userId = tg.initDataUnsafe?.user?.id;
 
-      // Проверяем, есть ли пользователь в белом списке
       if (!ALLOWED_USERS.includes(userId)) {
-        // Если это чужой человек — блокируем экран сразу после загрузки
         document.addEventListener("DOMContentLoaded", () => {
           document.body.style.cssText = "display:flex; justify-content:center; align-items:center; height:100vh; flex-direction:column; font-family:sans-serif; background:#121212; color:#fff; margin:0; padding:20px; text-align:center;";
           document.body.innerHTML = `
@@ -29,14 +27,9 @@
           `;
         });
       } else {
-        // Если это ВЫ — применяем все нужные настройки игры
         tg.expand();
-        if (tg.requestFullscreen) {
-          tg.requestFullscreen();
-        }
-        if (tg.disableVerticalSwipes) {
-          tg.disableVerticalSwipes();
-        }
+        if (tg.requestFullscreen) tg.requestFullscreen();
+        if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
       }
     }
   </script>
@@ -89,7 +82,7 @@
       overflow: hidden;
       background-color: var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
     }
 
     #app {
@@ -104,23 +97,39 @@
       background-color: var(--bg);
       background-image: radial-gradient(rgba(44, 44, 42, 0.04) 1px, transparent 0);
       background-size: 16px 16px;
+      transition: max-width 0.2s ease;
     }
 
-/* НАВИГАЦИОННАЯ СТРОКА */
+    /* АДАПТАЦИЯ ДЛЯ ПК / ДЕСКТОП */
+    body.desktop-device #app {
+      max-width: 820px;
+      border-left: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      box-shadow: 0 0 30px rgba(0,0,0,0.04);
+    }
+
+    /* НАВИГАЦИОННАЯ СТРОКА (СМЕЩЕНА НА 90px ВНИЗ) */
+    .main-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(90px + env(safe-area-inset-top, 0px)) 16px 12px;
+      flex-shrink: 0;
+    }
+
     .session-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: calc(52px + env(safe-area-inset-top, 0px)) 14px 10px;
+      padding: calc(90px + env(safe-area-inset-top, 0px)) 16px 12px;
       flex-shrink: 0;
     }
-
 
     .brand-wrap {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 1rem;
+      gap: 8px;
+      font-size: 1.15rem;
       font-weight: 800;
       color: var(--text);
     }
@@ -128,20 +137,10 @@
     .badge-n5 {
       background: var(--accent);
       color: #fff;
-      padding: 2px 7px;
+      padding: 3px 8px;
       border-radius: 10px;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
-    }
-
-    .header-status {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--sub-text);
-      background: var(--card-bg);
-      border: 1px solid var(--border-light);
-      padding: 3px 10px;
-      border-radius: 12px;
     }
 
     /* ОСНОВНЫЕ ЭКРАНЫ */
@@ -179,7 +178,6 @@
       position: relative;
     }
 
-    /* SVG ДОРОЖКА-ЗМЕЙКА */
     #snakeSvg {
       position: absolute;
       top: 0;
@@ -199,9 +197,9 @@
     }
 
     .level-node {
-      width: 72px;
-      height: 72px;
-      border-radius: 22px;
+      width: 74px;
+      height: 74px;
+      border-radius: 24px;
       background: var(--card-bg);
       border: 1.5px solid var(--border);
       display: flex;
@@ -224,7 +222,6 @@
       border-radius: 26px;
     }
 
-    /* ОТКРЫТЫЙ ТЕКУЩИЙ УРОВЕНЬ — ЗЕЛЁНЫЙ */
     .level-node.active-unlocked {
       background: var(--success-bg);
       border: 2px solid var(--success-border);
@@ -235,7 +232,6 @@
     .level-node.active-unlocked:active { transform: scale(0.95); }
     .level-node.active-unlocked .node-num { color: var(--success-text); }
 
-    /* ЗАБЛОКИРОВАННЫЕ УРОВНИ — КРАСНЫЕ */
     .level-node.locked {
       background: var(--danger-bg);
       border: 1.5px solid var(--danger-border);
@@ -258,7 +254,7 @@
     }
 
     .node-num {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       font-weight: 800;
       line-height: 1;
       color: var(--text);
@@ -285,22 +281,16 @@
     .pos-2 { transform: translateX(0); }
     .pos-3 { transform: translateX(-50px); }
 
-    /* НАВИГАЦИОННАЯ СТРОКА */
-    .session-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px 6px;
-      flex-shrink: 0;
-    }
+    body.desktop-device .pos-1 { transform: translateX(90px); }
+    body.desktop-device .pos-3 { transform: translateX(-90px); }
 
     .back-btn-pill {
       background: var(--card-bg);
       border: 1px solid var(--border);
       color: var(--sub-text);
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 700;
-      padding: 6px 12px;
+      padding: 7px 14px;
       border-radius: 14px;
       cursor: pointer;
       display: inline-flex;
@@ -310,10 +300,10 @@
 
     .session-progress-wrap {
       flex: 1;
-      height: 5px;
+      height: 6px;
       background: var(--border-light);
       border-radius: 10px;
-      margin: 0 10px;
+      margin: 0 12px;
       overflow: hidden;
     }
 
@@ -326,16 +316,16 @@
     }
 
     .session-counter-text {
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 700;
       color: var(--sub-text);
-      min-width: 40px;
+      min-width: 45px;
       text-align: right;
     }
 
     /* ЭКРАН ANKI */
     #viewAnki {
-      padding: 0 14px calc(14px + env(safe-area-inset-bottom, 0px));
+      padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
       justify-content: space-between;
     }
 
@@ -344,7 +334,7 @@
       background: #e7e3da;
       padding: 3px;
       border-radius: 14px;
-      margin: 2px auto 8px;
+      margin: 0 auto 10px;
       width: 120px;
       gap: 3px;
       flex-shrink: 0;
@@ -354,7 +344,7 @@
       flex: 1;
       border: none;
       background: transparent;
-      padding: 4px 0;
+      padding: 5px 0;
       font-size: 1rem;
       border-radius: 11px;
       cursor: pointer;
@@ -371,10 +361,13 @@
     .presentation-card-anki {
       flex: 1;
       min-height: 0;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto 14px;
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 20px 16px;
+      border-radius: 26px;
+      padding: 24px 18px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -382,36 +375,39 @@
       text-align: center;
       box-shadow: var(--shadow-md);
       position: relative;
-      margin-bottom: 12px;
     }
 
     .card-badge {
       position: absolute;
-      top: 12px;
-      right: 14px;
-      font-size: 0.7rem;
+      top: 14px;
+      right: 16px;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 3px 10px;
       border-radius: 10px;
       background: var(--bg);
       color: var(--sub-text);
       border: 1px solid var(--border-light);
     }
 
+    /* УВЕЛИЧЕННЫЙ В 3 РАЗА ШРИФТ ДЛЯ ANKI С АДАПТАЦИЕЙ */
     .card-question {
-      font-size: clamp(2.6rem, 11vw, 3.8rem);
-      font-weight: 800;
+      font-weight: 850;
       color: var(--text);
-      line-height: 1.1;
-      margin: 2px 0;
+      line-height: 1.15;
+      margin: 6px 0;
+      width: 100%;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      transition: font-size 0.15s ease;
     }
 
     .card-answer-block {
       display: none;
       flex-direction: column;
       align-items: center;
-      margin-top: 14px;
-      padding-top: 14px;
+      margin-top: 16px;
+      padding-top: 16px;
       border-top: 1px solid var(--border-light);
       width: 100%;
       position: relative;
@@ -425,30 +421,31 @@
       align-items: center;
       justify-content: center;
       margin-bottom: 8px;
-      min-height: 40px;
+      min-height: 44px;
     }
 
     .card-reading {
-      font-size: 1.6rem;
+      font-size: clamp(1.6rem, 5vw, 2.2rem);
       color: var(--kana);
-      font-weight: 500;
+      font-weight: 600;
       line-height: 1.2;
       text-align: center;
       cursor: pointer;
+      padding: 0 40px;
     }
 
     .action-circle-voice-btn {
       position: absolute;
-      right: 4px;
-      width: 38px;
-      height: 38px;
+      right: 8px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       border: 1px solid var(--border);
       background: var(--bg);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      font-size: 1.1rem;
       cursor: pointer;
       color: var(--text);
       box-shadow: var(--shadow-sm);
@@ -461,23 +458,25 @@
     }
 
     .card-translation {
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      font-weight: 750;
       color: var(--ink);
     }
 
     .anki-actions-bottom {
       flex-shrink: 0;
       width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
     .btn-show-answer {
       width: 100%;
-      height: 50px;
+      height: 52px;
       border-radius: 16px;
       background: var(--accent);
       color: #fff;
-      font-size: 0.95rem;
+      font-size: 1rem;
       font-weight: 800;
       border: none;
       cursor: pointer;
@@ -489,12 +488,12 @@
     .anki-grade-group {
       display: none;
       grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      gap: 8px;
     }
 
     .btn-grade {
-      height: 52px;
-      border-radius: 15px;
+      height: 54px;
+      border-radius: 16px;
       border: 1px solid var(--border);
       background: var(--card-bg);
       display: flex;
@@ -507,7 +506,7 @@
     }
     .btn-grade:active { transform: scale(0.94); }
     .btn-grade .grade-label {
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       font-weight: 800;
     }
 
@@ -518,15 +517,15 @@
 
     /* ЭКРАН «СТОПКА» */
     #viewStack {
-      padding: 0 10px calc(12px + env(safe-area-inset-bottom, 0px));
+      padding: 0 12px calc(14px + env(safe-area-inset-bottom, 0px));
     }
 
     .stack-sub-hint {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 600;
       color: var(--sub-text);
       text-align: center;
-      margin: 2px 0 8px;
+      margin: 2px 0 10px;
       flex-shrink: 0;
     }
 
@@ -534,18 +533,27 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       grid-template-rows: repeat(4, 1fr);
-      gap: 6px;
+      gap: 8px;
       flex: 1;
       min-height: 0;
     }
 
+    body.desktop-device .stack-grid {
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 760px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
     .stack-tile {
       background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
       height: 100%;
       min-height: 0;
-      padding: 4px;
+      padding: 6px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -563,7 +571,7 @@
       background: var(--ink-soft);
       border-color: var(--ink);
       color: var(--ink);
-      box-shadow: 0 0 0 2px rgba(60, 52, 137, 0.2);
+      box-shadow: 0 0 0 2px rgba(60, 52, 137, 0.25);
     }
 
     .stack-tile.empty-slot {
@@ -602,30 +610,19 @@
 
     .tile-counter-badge {
       position: absolute;
-      top: 3px;
-      right: 4px;
-      font-size: 0.6rem;
+      top: 4px;
+      right: 5px;
+      font-size: 0.62rem;
       font-weight: 800;
       background: var(--bg);
       border: 1px solid var(--border-light);
       color: var(--sub-text);
-      padding: 0 4px;
+      padding: 1px 5px;
       border-radius: 6px;
     }
 
-    /* Базовый размер для русского текста и чтения */
     .tile-main-text {
-      font-size: clamp(0.85rem, 3.5vw, 1rem);
-      font-weight: 800;
-      line-height: 1.2;
-      color: var(--text);
-      word-break: break-word;
-      padding: 0 2px;
-    }
-
-* 1. РУССКИЙ ПЕРЕВОД (АККУРАТНЫЙ, НЕБОЛЬШОЙ) */
-    .tile-main-text {
-      font-size: clamp(0.82rem, 3.4vw, 0.95rem);
+      font-size: clamp(0.85rem, 3.4vw, 1.05rem);
       font-weight: 750;
       line-height: 1.25;
       color: var(--text);
@@ -633,11 +630,9 @@
       padding: 0 4px;
     }
 
-    /* 2. ЕДИНЫЙ КРУПНЫЙ РАЗМЕР ДЛЯ КАNDZI, ХИРАГАНЫ И ЭМОДЗИ */
     .tile-main-text.type-kanji,
-    .tile-main-text.type-reading,
-    .tile-main-text.type-emoji {
-      font-size: clamp(1.35rem, 5.2vw, 1.65rem);
+    .tile-main-text.type-reading {
+      font-size: clamp(1.35rem, 5.2vw, 1.85rem);
       font-weight: 800;
       line-height: 1.15;
       color: var(--text);
@@ -646,21 +641,21 @@
     .tile-sub-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 2px;
+      gap: 3px;
       justify-content: center;
-      margin-top: 2px;
+      margin-top: 4px;
       max-width: 100%;
     }
 
     .chip-item {
-      font-size: 0.62rem;
+      font-size: 0.65rem;
       font-weight: 700;
       background: var(--accent-soft);
       color: var(--accent);
-      padding: 1px 3px;
-      border-radius: 4px;
+      padding: 1px 4px;
+      border-radius: 5px;
       white-space: nowrap;
-      max-width: 70px;
+      max-width: 80px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
@@ -693,6 +688,13 @@
       gap: 10px;
     }
 
+    body.desktop-device .modal-sheet {
+      max-width: 520px;
+      margin-bottom: 24px;
+      border-radius: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
     .modal-sheet-handle {
       width: 36px;
       height: 4px;
@@ -708,7 +710,6 @@
       margin-bottom: 6px;
     }
 
-    /* КНОПКИ В МОДАЛКЕ: ОБЕ НЕЙТРАЛЬНЫЕ, ОКРАШИВАЮТСЯ ТОЛЬКО ПРИ КЛИКЕ */
     .btn-pill {
       height: 52px;
       border-radius: 16px;
@@ -734,8 +735,8 @@
 </head>
 <body>
   <div id="app">
-    <!-- Шапка -->
-    <header>
+    <!-- Шапка (смещена на 90px вниз) -->
+    <header class="main-header">
       <div class="brand-wrap">
         <span>JLPT</span>
         <span class="badge-n5">N5</span>
@@ -783,19 +784,15 @@
         <div class="anki-grade-group" id="ankiGradeGroup">
           <button class="btn-grade again" onclick="handleAnkiGrade(1)">
             <span class="grade-label">Снова</span>
-            <span id="lblTimeAgain" style="display:none;"></span>
           </button>
           <button class="btn-grade hard" onclick="handleAnkiGrade(2)">
             <span class="grade-label">Трудно</span>
-            <span id="lblTimeHard" style="display:none;"></span>
           </button>
           <button class="btn-grade good" onclick="handleAnkiGrade(3)">
             <span class="grade-label">Хорошо</span>
-            <span id="lblTimeGood" style="display:none;"></span>
           </button>
           <button class="btn-grade easy" onclick="handleAnkiGrade(4)">
             <span class="grade-label">Легко</span>
-            <span id="lblTimeEasy" style="display:none;"></span>
           </button>
         </div>
       </div>
@@ -832,6 +829,21 @@
   </div>
 
   <script>
+    // ОПРЕДЕЛЕНИЕ ПК / ТЕЛЕФОНА
+    function checkDevicePlatform() {
+      const platform = window.Telegram?.WebApp?.platform || '';
+      const isDesktopPlatform = ['tdesktop', 'macos', 'web', 'weba', 'webk'].includes(platform);
+      const isWideScreen = window.innerWidth >= 768;
+
+      if (isDesktopPlatform || isWideScreen) {
+        document.body.classList.add('desktop-device');
+      } else {
+        document.body.classList.remove('desktop-device');
+      }
+    }
+    window.addEventListener('resize', checkDevicePlatform);
+    checkDevicePlatform();
+
 // --- 1. ПОЛНАЯ БАЗА СЛОВ (830 СЛОВ / 42 УРОВНЯ) ---
     const allWords = [
       // УРОВЕНЬ 1
@@ -1749,10 +1761,10 @@
       { id: 830, level_id: 42, kanji: "意味", reading: "いみ", translation: "смысл / значение", emoji: "💡" }
     ];
 
-    const TOTAL_LEVELS = 42;
+   const TOTAL_LEVELS = 42;
     let userProgress = {};
 
-    // --- ПОСТОЯННОЕ ОБЛАЧНОЕ СОХРАНЕНИЕ В СЕРВЕРА TELEGRAM (НЕ УДАЛЯЕТСЯ ПРИ ОЧИСТКЕ КЭША) ---
+    // --- ОБЛАЧНОЕ СОХРАНЕНИЕ ---
     const TG_KEYS = ['tg_p1', 'tg_p2', 'tg_p3'];
 
     function packChunk(minId, maxId) {
@@ -1791,12 +1803,10 @@
     }
 
     function saveState() {
-      // 1. Быстрая копия на устройстве
       try {
         localStorage.setItem('japandi_backup_data', JSON.stringify(userProgress));
       } catch(e) {}
 
-      // 2. Вечное сохранение на серверах Telegram
       if (window.Telegram?.WebApp?.CloudStorage) {
         const p1 = packChunk(1, 300);
         const p2 = packChunk(301, 600);
@@ -1827,7 +1837,6 @@
               localStorage.setItem('japandi_backup_data', JSON.stringify(userProgress));
             } catch(e) {}
           }
-
           if (callback) callback();
           renderMap();
         });
@@ -1839,12 +1848,7 @@
     function getWordData(wordId) {
       if (!userProgress[wordId]) {
         userProgress[wordId] = {
-          reps: 0,
-          interval: 0,
-          easeFactor: 2.5,
-          dueDate: 0,
-          lapses: 0,
-          stacked: false
+          reps: 0, interval: 0, easeFactor: 2.5, dueDate: 0, lapses: 0, stacked: false
         };
       }
       return userProgress[wordId];
@@ -1872,7 +1876,8 @@
       }
       return TOTAL_LEVELS;
     }
-       // --- KYOKO ОЗВУЧКА ---
+
+    // --- ОЗВУЧКА KYOKO ---
     let kyokoVoice = null;
     function getKyokoVoice() {
       if (!('speechSynthesis' in window)) return;
@@ -1894,14 +1899,10 @@
 
     function speakKyoko(text) {
       if (!('speechSynthesis' in window)) return;
-      
       const clean = text.replace(/[—〜]/g, '').trim();
       if (!clean) return;
 
-      if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
-      }
-
+      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
       if (!kyokoVoice) getKyokoVoice();
 
       const u = new SpeechSynthesisUtterance(clean);
@@ -1909,11 +1910,10 @@
       u.rate = 0.9;
       u.pitch = 1.0;
       if (kyokoVoice) u.voice = kyokoVoice;
-
       window.speechSynthesis.speak(u);
     }
 
-    // --- КАРТА С ДОРОЖКОЙ-ЗМЕЙКОЙ ---
+    // --- РЕНДЕР КАРТЫ ---
     function renderMap() {
       const tree = document.getElementById('snakeTree');
       tree.innerHTML = '<svg id="snakeSvg"></svg>';
@@ -1955,7 +1955,6 @@
         tree.appendChild(wrapLock);
       }
 
-      // Отрисовка дорожки-змейки
       requestAnimationFrame(() => {
         drawSnakePath();
       });
@@ -2002,7 +2001,6 @@
     function openLevelModal(lvl) {
       activeLevel = lvl;
       isReviewMode = false;
-      const done = getLevelMasteredCount(lvl);
       document.getElementById('modalTitle').innerText = `Уровень ${lvl}`;
       document.getElementById('modeModal').classList.add('open');
     }
@@ -2034,15 +2032,10 @@
       document.getElementById('modeModal').classList.remove('open');
       
       let pool = [];
-
       if (isReviewMode) {
-        // В режиме повторения берем все выученные слова
         pool = allWords.filter(w => isWordMastered(w.id));
       } else {
-        // Берем ТОЛЬКО те слова, которые вы еще НЕ выучили
         const unlearned = getLevelWords(activeLevel).filter(w => !isWordMastered(w.id));
-
-        // Если уровень уже пройден на 20/20, но вы зашли повторить — отдаем все 20
         pool = unlearned.length > 0 ? unlearned : getLevelWords(activeLevel);
       }
 
@@ -2054,26 +2047,21 @@
       if (mode === 'anki') startAnki(pool);
       else startStackGame(pool);
     }
-    // =========================================================================
-    // --- 2. ОФИЦИАЛЬНЫЙ ДВИЖОК ANKI (V3 / SM-2 + УМНОЕ ПОВТОРЕНИЕ) ---
-    // =========================================================================
 
+    // =========================================================================
+    // --- 2. ANKI (УВЕЛИЧЕННЫЙ В 3 РАЗА ШРИФТ + АВТО-МАСШТАБ) ---
+    // =========================================================================
     const ANKI_CONFIG = {
-      learningSteps: [1, 10],   // Шаги заучивания: 1м, 10м
-      graduatingInterval: 1,    // Дней после выпуска
-      easyInterval: 4,          // Дней при "Легко"
-      startingEase: 2.50,       // Стартовый фактор легкости (250%)
-      minEase: 1.30,            // Минимальный фактор (130%)
-      easyBonus: 1.30,          // Бонус кнопки "Легко"
-      hardIntervalFactor: 1.20  // Множитель кнопки "Трудно"
+      learningSteps: [1, 10],
+      graduatingInterval: 1,
+      easyInterval: 4,
+      startingEase: 2.50,
+      minEase: 1.30,
+      easyBonus: 1.30,
+      hardIntervalFactor: 1.20
     };
 
-    const CARD_STATE = {
-      NEW: 0,
-      LEARNING: 1,
-      REVIEW: 2,
-      RELEARNING: 3
-    };
+    const CARD_STATE = { NEW: 0, LEARNING: 1, REVIEW: 2, RELEARNING: 3 };
 
     let ankiQueue = [];
     let currentAnkiCard = null;
@@ -2114,27 +2102,12 @@
       });
 
       if (isReviewMode) {
-        // В режиме "Повтор": Сложные и горящие слова идут ПЕРВЫМИ, легкие — в самом конце
         ankiQueue = [...words].sort((a, b) => {
           const srsA = initCardSRS(a.id);
           const srsB = initCardSRS(b.id);
-
-          const dueA = (srsA.dueDate || 0) <= now ? 1 : 0;
-          const dueB = (srsB.dueDate || 0) <= now ? 1 : 0;
-          if (dueB !== dueA) return dueB - dueA;
-
-          const lapsesA = srsA.lapses || 0;
-          const lapsesB = srsB.lapses || 0;
-          if (lapsesB !== lapsesA) return lapsesB - lapsesA;
-
-          const easeA = srsA.easeFactor || 2.50;
-          const easeB = srsB.easeFactor || 2.50;
-          if (easeA !== easeB) return easeA - easeB;
-
           return (srsA.interval || 0) - (srsB.interval || 0);
         });
       } else {
-        // В обычном уровне карточки перемешиваются
         ankiQueue = [...words].sort(() => Math.random() - 0.5);
       }
 
@@ -2183,14 +2156,33 @@
         badge.style.color = 'var(--ink)';
       }
 
+      const qEl = document.getElementById('ankiQuestion');
+      let qText = '';
+
       if (ankiMode === 'ja') {
-        document.getElementById('ankiQuestion').innerText = w.kanji !== '—' ? w.kanji : w.reading;
+        qText = w.kanji !== '—' ? w.kanji : w.reading;
         document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? w.reading : '');
         document.getElementById('ankiTranslation').innerText = w.translation;
       } else {
-        document.getElementById('ankiQuestion').innerText = w.translation;
+        qText = w.translation;
         document.getElementById('ankiReading').innerText = (w.kanji !== '—' ? `${w.kanji} (${w.reading})` : w.reading);
         document.getElementById('ankiTranslation').innerText = '';
+      }
+
+      qEl.innerText = qText;
+
+      // ДИНАМИЧЕСКИЙ РАСЧЕТ ШРИФТА (В 3 РАЗА БОЛЬШЕ ДЛЯ КОРОТКИХ СЛОВ)
+      const len = qText.length;
+      if (len <= 2) {
+        qEl.style.fontSize = 'clamp(4.8rem, 20vw, 7.5rem)';
+      } else if (len <= 4) {
+        qEl.style.fontSize = 'clamp(3.6rem, 14vw, 5.4rem)';
+      } else if (len <= 7) {
+        qEl.style.fontSize = 'clamp(2.6rem, 10vw, 4.0rem)';
+      } else if (len <= 11) {
+        qEl.style.fontSize = 'clamp(2.0rem, 7.5vw, 3.0rem)';
+      } else {
+        qEl.style.fontSize = 'clamp(1.5rem, 5.5vw, 2.2rem)';
       }
 
       const graduatedCount = ankiGraduatedIds.size;
@@ -2218,7 +2210,6 @@
       srs.reps = (srs.reps || 0) + 1;
 
       if (grade === 1) {
-        // [СНОВА] — Сброс карточки на 1-й шаг заучивания + штраф к легкости
         srs.lapses = (srs.lapses || 0) + 1;
         srs.easeFactor = Math.max(ANKI_CONFIG.minEase, srs.easeFactor - 0.20);
         srs.state = CARD_STATE.LEARNING;
@@ -2229,11 +2220,8 @@
 
         const pos = Math.min(ankiQueue.length, 1 + Math.floor(Math.random() * 2));
         ankiQueue.splice(pos, 0, w);
-
       } else if (grade === 2) {
-        // [ТРУДНО] — Штраф к легкости (-0.15), повторить позже в сессии
         srs.easeFactor = Math.max(ANKI_CONFIG.minEase, srs.easeFactor - 0.15);
-
         if (srs.state === CARD_STATE.REVIEW) {
           srs.interval = Math.max(1, Math.round(srs.interval * ANKI_CONFIG.hardIntervalFactor));
           srs.dueDate = now + (srs.interval * 86400000);
@@ -2243,9 +2231,7 @@
           const pos = Math.min(ankiQueue.length, 3 + Math.floor(Math.random() * 2));
           ankiQueue.splice(pos, 0, w);
         }
-
       } else if (grade === 3) {
-        // [ХОРОШО]
         if (srs.state === CARD_STATE.REVIEW) {
           srs.interval = Math.max(srs.interval + 1, Math.round(srs.interval * srs.easeFactor));
           srs.dueDate = now + (srs.interval * 86400000);
@@ -2254,7 +2240,6 @@
         } else {
           const nextStep = (srs.step || 0) + 1;
           if (nextStep >= ANKI_CONFIG.learningSteps.length) {
-            // Выпуск в память
             srs.state = CARD_STATE.REVIEW;
             srs.step = 0;
             srs.interval = ANKI_CONFIG.graduatingInterval;
@@ -2262,16 +2247,13 @@
             srs.ankiMastered = true;
             ankiGraduatedIds.add(w.id);
           } else {
-            // Шаг закрепления (спросит еще раз через 5-7 карточек)
             srs.state = CARD_STATE.LEARNING;
             srs.step = nextStep;
             const pos = Math.min(ankiQueue.length, 5 + Math.floor(Math.random() * 2));
             ankiQueue.splice(pos, 0, w);
           }
         }
-
       } else if (grade === 4) {
-        // [ЛЕГКО] — Мгновенный выпуск карточки
         srs.easeFactor = srs.easeFactor + 0.15;
         if (srs.state === CARD_STATE.REVIEW) {
           srs.interval = Math.max(srs.interval + 2, Math.round(srs.interval * srs.easeFactor * ANKI_CONFIG.easyBonus));
@@ -2288,8 +2270,12 @@
       saveState();
       nextAnkiCard();
     }
-    // --- 3. ИГРА «СТОПКА» ---
-    let upcomingPiecesQueue = [];
+
+    // =========================================================================
+    // --- 3. ИГРА «СТОПКА» (БЕЗ ЭМОДЗИ + ВОЛНЫ ПО 12 ШТУК) ---
+    // =========================================================================
+    let stackWaves = [];
+    let currentWaveIndex = 0;
     let boardSlots = new Array(12).fill(null);
     let selectedSlotIdx = null;
     let stackTotalWords = 0;
@@ -2302,13 +2288,10 @@
       }
       list.push({ wordId: word.id, type: 'reading', text: word.reading, speech: word.reading });
       list.push({ wordId: word.id, type: 'translation', text: word.translation, speech: word.reading });
-      if (word.emoji) {
-        list.push({ wordId: word.id, type: 'emoji', text: word.emoji, speech: word.reading });
-      }
 
       return {
         wordId: word.id,
-        totalItems: list.length,
+        totalNeeded: list.length,
         items: list
       };
     }
@@ -2316,40 +2299,51 @@
     function startStackGame(words) {
       stackTotalWords = words.length;
       stackDoneWords = 0;
-      upcomingPiecesQueue = [];
-      boardSlots = new Array(12).fill(null);
+      stackWaves = [];
+      currentWaveIndex = 0;
       selectedSlotIdx = null;
 
-      words.forEach(w => {
+      // Формируем цельные волны по 12 карточек
+      let currentWavePieces = [];
+      const shuffledWords = [...words].sort(() => Math.random() - 0.5);
+
+      shuffledWords.forEach(w => {
         const def = getWordComponents(w);
-        def.items.forEach(it => {
-          upcomingPiecesQueue.push({
-            wordId: def.wordId,
-            totalNeeded: def.totalItems,
-            items: [it]
-          });
-        });
+        const pieces = def.items.map(it => ({
+          wordId: def.wordId,
+          totalNeeded: def.totalNeeded,
+          items: [it]
+        }));
+
+        if (currentWavePieces.length + pieces.length > 12) {
+          stackWaves.push(currentWavePieces);
+          currentWavePieces = [];
+        }
+        currentWavePieces.push(...pieces);
       });
 
-      for (let i = 0; i < 12; i++) {
-        if (upcomingPiecesQueue.length > 0) {
-          boardSlots[i] = upcomingPiecesQueue.shift();
-        }
+      if (currentWavePieces.length > 0) {
+        stackWaves.push(currentWavePieces);
       }
 
-      boardSlots.sort(() => Math.random() - 0.5);
-
       switchView('viewStack');
-      renderStackBoard();
+      loadWave(0);
       updateStackProgress();
     }
 
-    function fillEmptySlots() {
-      for (let i = 0; i < 12; i++) {
-        if (boardSlots[i] === null && upcomingPiecesQueue.length > 0) {
-          boardSlots[i] = upcomingPiecesQueue.shift();
+    function loadWave(waveIdx) {
+      currentWaveIndex = waveIdx;
+      selectedSlotIdx = null;
+      boardSlots = new Array(12).fill(null);
+
+      if (waveIdx < stackWaves.length) {
+        const wavePieces = [...stackWaves[waveIdx]].sort(() => Math.random() - 0.5);
+        for (let i = 0; i < wavePieces.length; i++) {
+          boardSlots[i] = wavePieces[i];
         }
       }
+
+      renderStackBoard();
     }
 
     function updateStackProgress() {
@@ -2387,7 +2381,7 @@
 
         el.innerHTML = `
           <div class="tile-counter-badge">${stack.items.length}/${stack.totalNeeded}</div>
-         <div class="tile-main-text type-${mainItem.type}">${mainItem.text}</div>
+          <div class="tile-main-text type-${mainItem.type}">${mainItem.text}</div>
           ${chipsHtml}
         `;
 
@@ -2419,7 +2413,7 @@
 
       if (firstStack.wordId === targetStack.wordId) {
         targetStack.items.push(...firstStack.items);
-        boardSlots[firstIdx] = null;
+        boardSlots[firstIdx] = null; // Освобождаем слот (остается пустым до конца волны)
         selectedSlotIdx = null;
 
         const word = allWords.find(w => w.id === targetStack.wordId);
@@ -2438,21 +2432,26 @@
 
           setTimeout(() => {
             boardSlots[targetIdx] = null;
-            fillEmptySlots();
             renderStackBoard();
 
-            const hasAny = boardSlots.some(s => s !== null);
-            if (!hasAny && upcomingPiecesQueue.length === 0) {
-              setTimeout(() => {
-                alert('🎉 Превосходно! Все стопки собраны!');
-                showMap();
-              }, 300);
+            // Проверяем: решились ли ВСЕ 12 карточек в текущей волне?
+            const isWaveCleared = boardSlots.every(s => s === null);
+            if (isWaveCleared) {
+              if (currentWaveIndex + 1 < stackWaves.length) {
+                // Загружаем следующие 12 штук!
+                setTimeout(() => {
+                  loadWave(currentWaveIndex + 1);
+                }, 200);
+              } else {
+                setTimeout(() => {
+                  alert('🎉 Превосходно! Все стопки собраны!');
+                  showMap();
+                }, 300);
+              }
             }
           }, 300);
         } else {
-          fillEmptySlots();
           renderStackBoard();
-
           const targetEl = document.querySelector(`.stack-tile[data-slot="${targetIdx}"]`);
           if (targetEl) targetEl.classList.add('merge-pulse');
         }
@@ -2470,7 +2469,7 @@
       }
     }
 
-// Инициализация
+    // Инициализация игры
     loadState(() => {
       renderMap();
     });
