@@ -759,47 +759,70 @@
       border-radius: 10px;
     }
 
-    /* 1. БОЛЬШИЕ КАНДЗИ И ХИРАГАНА В СТОПКЕ */
-    .tile-main-text.type-kanji,
-    .tile-main-text.type-reading {
-      font-weight: 900;
-      line-height: 1.1;
-      font-size: clamp(1.5rem, 6.2vw, 2.3rem);
-      letter-spacing: -0.5px;
+   /* ==========================================================================
+       СТИЛИ ТЕКСТА КАРТОЧЕК В СТОПКЕ (СТАБИЛЬНЫЕ И КРУПНЫЕ)
+       ========================================================================== */
+    .tile-main-text {
+      font-weight: 850;
+      line-height: 1.15;
+      color: var(--text);
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+      padding: 0 6px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    body.desktop-device .tile-main-text.type-kanji,
+    /* 1. КАНДЗИ (ЕЩЕ КРУПНЕЕ И МОЩНЕЕ) */
+    .tile-main-text.type-kanji {
+      font-size: clamp(2.0rem, 8.5vw, 2.7rem);
+      letter-spacing: -1px;
+    }
+    body.desktop-device .tile-main-text.type-kanji {
+      font-size: 4.6rem;
+      letter-spacing: -2px;
+    }
+
+    /* 2. ХИРАГАНА / КАНА (КРУПНАЯ, ЧЕТКАЯ, РАВНОМЕРНАЯ) */
+    .tile-main-text.type-reading {
+      font-size: clamp(1.6rem, 6.8vw, 2.2rem);
+      letter-spacing: -0.5px;
+    }
     body.desktop-device .tile-main-text.type-reading {
       font-size: 3.8rem;
     }
 
-    /* 2. АККУРАТНЫЙ РУССКИЙ ПЕРЕВОД */
+    /* 3. РУССКИЙ ПЕРЕВОД (СТАБИЛЬНЫЙ СРЕДНИЙ РАЗМЕР) */
     .tile-main-text.type-translation {
+      font-size: clamp(0.92rem, 3.8vw, 1.15rem);
       font-weight: 750;
       line-height: 1.2;
-      font-size: clamp(0.85rem, 3.4vw, 1.1rem);
     }
-
     body.desktop-device .tile-main-text.type-translation {
-      font-size: 1.85rem;
+      font-size: 1.95rem;
     }
 
-    /* 3. УМЕНЬШЕНИЕ ТОЛЬКО ДЛЯ ДЛИННЫХ ФРАЗ */
+    /* 4. УМЕНЬШЕНИЕ ТОЛЬКО ДЛЯ ОЧЕНЬ ДЛИННЫХ ФРАЗ */
     .tile-main-text.size-sm {
-      font-size: clamp(0.78rem, 2.9vw, 0.95rem) !important;
+      font-size: clamp(0.82rem, 3.2vw, 1.0rem) !important;
       line-height: 1.15;
     }
     body.desktop-device .tile-main-text.size-sm {
-      font-size: 1.45rem !important;
+      font-size: 1.55rem !important;
     }
 
     .tile-main-text.size-xs {
-      font-size: clamp(0.68rem, 2.5vw, 0.82rem) !important;
-      line-height: 1.08;
+      font-size: clamp(0.72rem, 2.7vw, 0.88rem) !important;
+      line-height: 1.1;
     }
     body.desktop-device .tile-main-text.size-xs {
-      font-size: 1.15rem !important;
+      font-size: 1.3rem !important;
     }
+
 
     .tile-sub-chips {
       display: flex;
@@ -2509,7 +2532,7 @@
       document.getElementById('stackCounter').innerText = `${stackDoneWords}/${stackTotalWords}`;
     }
 
-    function renderStackBoard() {
+   function renderStackBoard() {
       const grid = document.getElementById('stackGrid');
       grid.innerHTML = '';
 
@@ -2529,17 +2552,18 @@
         const isStack = stack.items.length > 1;
         const mainItem = stack.items[stack.items.length - 1];
 
-        // Авто-подбор размера шрифта в зависимости от длины текста
+        // Мягкий расчет: уменьшаем ТОЛЬКО если реально не влезает
         const textLen = mainItem.text.length;
         let sizeClass = '';
 
         if (mainItem.type === 'translation') {
-          if (textLen > 18) sizeClass = 'size-xs';      // Для самых длинных переводов
-          else if (textLen > 11) sizeClass = 'size-sm'; // Для средних фраз
-        } else {
-          // Для японских слов (кандзи / кана)
-          if (textLen > 7) sizeClass = 'size-xs';
-          else if (textLen > 4) sizeClass = 'size-sm';
+          if (textLen > 24) sizeClass = 'size-xs';      // Только для огромных предложений
+          else if (textLen > 14) sizeClass = 'size-sm'; // Для длинных фраз из 3-4 слов
+        } else if (mainItem.type === 'reading') {
+          if (textLen > 10) sizeClass = 'size-xs';      // Длинные грамматические конструкции
+          else if (textLen > 7) sizeClass = 'size-sm';  // Слова длиннее 7 знаков
+        } else if (mainItem.type === 'kanji') {
+          if (textLen > 6) sizeClass = 'size-sm';
         }
 
         let chipsHtml = '';

@@ -5,8 +5,7 @@ import requests
 
 VOICEVOX_URL = "http://127.0.0.1:50021"
 
-# Голос: 8 = Kasukabe Tsumugi (красивый женский)
-SPEAKER_ID = 51
+SPEAKER_ID = 59
 
 OUTPUT_DIR = "audio"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -861,7 +860,7 @@ def generate_voicevox_audio(word_id, text):
             timeout=10
         )
         query_data = query_res.json()
-        query_data["speedScale"] = 0.95
+        query_data["speedScale"] = 0.85
 
         synth_res = requests.post(
             f"{VOICEVOX_URL}/synthesis",
