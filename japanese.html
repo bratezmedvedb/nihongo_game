@@ -740,7 +740,6 @@
         <span>JLPT</span>
         <span class="badge-n5">N5</span>
       </div>
-      <div class="header-status" id="headerWordCount">Лексика</div>
     </header>
 
     <!-- ЭКРАН 1: КАРТА -->
@@ -1753,36 +1752,84 @@
     const TOTAL_LEVELS = 42;
     let userProgress = {};
 
-    // Сохранение в локальный кэш и в облако аккаунта Telegram
+    // --- ПОСТОЯННОЕ ОБЛАЧНОЕ СОХРАНЕНИЕ В СЕРВЕРА TELEGRAM (НЕ УДАЛЯЕТСЯ ПРИ ОЧИСТКЕ КЭША) ---
+    const TG_KEYS = ['tg_p1', 'tg_p2', 'tg_p3'];
+
+    function packChunk(minId, maxId) {
+      const list = [];
+      for (let id = minId; id <= maxId; id++) {
+        const p = userProgress[id];
+        if (p) {
+          const s = p.stacked ? 1 : 0;
+          const a = p.ankiMastered ? 1 : 0;
+          const r = p.reps || 0;
+          const i = p.interval || 0;
+          if (s || a || r || i) {
+            list.push(`${id}:${r}:${i}:${s}:${a}`);
+          }
+        }
+      }
+      return list.join(';');
+    }
+
+    function unpackChunk(rawStr) {
+      if (!rawStr || typeof rawStr !== 'string') return;
+      const items = rawStr.split(';');
+      items.forEach(item => {
+        if (!item) return;
+        const [id, r, i, s, a] = item.split(':').map(Number);
+        if (id) {
+          if (!userProgress[id]) {
+            userProgress[id] = { reps: 0, interval: 0, easeFactor: 2.5, dueDate: 0, lapses: 0, stacked: false };
+          }
+          userProgress[id].reps = Math.max(userProgress[id].reps || 0, r || 0);
+          userProgress[id].interval = Math.max(userProgress[id].interval || 0, i || 0);
+          if (s === 1) userProgress[id].stacked = true;
+          if (a === 1) userProgress[id].ankiMastered = true;
+        }
+      });
+    }
+
     function saveState() {
-      const s = JSON.stringify(userProgress);
-      localStorage.setItem('japandi_srs_v13', s);
-      
+      // 1. Быстрая копия на устройстве
+      try {
+        localStorage.setItem('japandi_backup_data', JSON.stringify(userProgress));
+      } catch(e) {}
+
+      // 2. Вечное сохранение на серверах Telegram
       if (window.Telegram?.WebApp?.CloudStorage) {
-        try {
-          window.Telegram.WebApp.CloudStorage.setItem('japandi_srs_v13', s, (err) => {
-            if (err) console.error("Ошибка сохранения в CloudStorage:", err);
-          });
-        } catch(e) {}
+        const p1 = packChunk(1, 300);
+        const p2 = packChunk(301, 600);
+        const p3 = packChunk(601, 830);
+
+        if (p1) window.Telegram.WebApp.CloudStorage.setItem('tg_p1', p1);
+        if (p2) window.Telegram.WebApp.CloudStorage.setItem('tg_p2', p2);
+        if (p3) window.Telegram.WebApp.CloudStorage.setItem('tg_p3', p3);
       }
     }
 
-    // Загрузка прогресса с аккаунта Telegram
     function loadState(callback) {
       try {
-        const localData = localStorage.getItem('japandi_srs_v13');
-        if (localData) userProgress = JSON.parse(localData);
-      } catch(e) {}
+        const local = localStorage.getItem('japandi_backup_data');
+        if (local) userProgress = JSON.parse(local);
+      } catch(e) {
+        userProgress = {};
+      }
 
       if (window.Telegram?.WebApp?.CloudStorage) {
-        window.Telegram.WebApp.CloudStorage.getItem('japandi_srs_v13', (err, cloudData) => {
-          if (!err && cloudData) {
+        window.Telegram.WebApp.CloudStorage.getItems(TG_KEYS, (err, res) => {
+          if (!err && res) {
+            if (res.tg_p1) unpackChunk(res.tg_p1);
+            if (res.tg_p2) unpackChunk(res.tg_p2);
+            if (res.tg_p3) unpackChunk(res.tg_p3);
+            
             try {
-              userProgress = JSON.parse(cloudData);
-              localStorage.setItem('japandi_srs_v13', cloudData);
+              localStorage.setItem('japandi_backup_data', JSON.stringify(userProgress));
             } catch(e) {}
           }
+
           if (callback) callback();
+          renderMap();
         });
       } else {
         if (callback) callback();
@@ -1825,7 +1872,7 @@
       }
       return TOTAL_LEVELS;
     }
-   // --- KYOKO ОЗВУЧКА ---
+       // --- KYOKO ОЗВУЧКА ---
     let kyokoVoice = null;
     function getKyokoVoice() {
       if (!('speechSynthesis' in window)) return;
@@ -2007,12 +2054,32 @@
       if (mode === 'anki') startAnki(pool);
       else startStackGame(pool);
     }
-    // --- 2. НАСТОЯЩИЙ АЛГОРИТМ ANKI (С ПОВТОРОМ ДО ПОЛНОГО УСВОЕНИЯ) ---
+    // =========================================================================
+    // --- 2. ОФИЦИАЛЬНЫЙ ДВИЖОК ANKI (V3 / SM-2 + УМНОЕ ПОВТОРЕНИЕ) ---
+    // =========================================================================
+
+    const ANKI_CONFIG = {
+      learningSteps: [1, 10],   // Шаги заучивания: 1м, 10м
+      graduatingInterval: 1,    // Дней после выпуска
+      easyInterval: 4,          // Дней при "Легко"
+      startingEase: 2.50,       // Стартовый фактор легкости (250%)
+      minEase: 1.30,            // Минимальный фактор (130%)
+      easyBonus: 1.30,          // Бонус кнопки "Легко"
+      hardIntervalFactor: 1.20  // Множитель кнопки "Трудно"
+    };
+
+    const CARD_STATE = {
+      NEW: 0,
+      LEARNING: 1,
+      REVIEW: 2,
+      RELEARNING: 3
+    };
+
     let ankiQueue = [];
     let currentAnkiCard = null;
     let ankiMode = 'ja';
-    let ankiTotalWords = 0;
-    let ankiLearnedIds = new Set();
+    let ankiTotalBatchSize = 0;
+    let ankiGraduatedIds = new Set();
 
     function setAnkiMode(m) {
       ankiMode = m;
@@ -2021,45 +2088,68 @@
       if (currentAnkiCard) renderAnkiCard();
     }
 
+    function initCardSRS(wId) {
+      const card = getWordData(wId);
+      if (card.state === undefined) {
+        card.state = card.stacked ? CARD_STATE.REVIEW : CARD_STATE.NEW;
+        card.step = 0;
+        card.easeFactor = card.easeFactor || ANKI_CONFIG.startingEase;
+        card.interval = card.interval || 0;
+        card.reps = card.reps || 0;
+        card.lapses = card.lapses || 0;
+      }
+      return card;
+    }
+
     function startAnki(words) {
-      ankiTotalWords = words.length;
-      ankiLearnedIds.clear();
-      // Перемешиваем карточки на старте
-      ankiQueue = [...words].sort(() => Math.random() - 0.5);
-      
+      ankiGraduatedIds.clear();
+      ankiTotalBatchSize = words.length;
+      const now = Date.now();
+
+      words.forEach(w => {
+        const srs = initCardSRS(w.id);
+        if (srs.state === CARD_STATE.REVIEW && srs.interval >= 1) {
+          ankiGraduatedIds.add(w.id);
+        }
+      });
+
+      if (isReviewMode) {
+        // В режиме "Повтор": Сложные и горящие слова идут ПЕРВЫМИ, легкие — в самом конце
+        ankiQueue = [...words].sort((a, b) => {
+          const srsA = initCardSRS(a.id);
+          const srsB = initCardSRS(b.id);
+
+          const dueA = (srsA.dueDate || 0) <= now ? 1 : 0;
+          const dueB = (srsB.dueDate || 0) <= now ? 1 : 0;
+          if (dueB !== dueA) return dueB - dueA;
+
+          const lapsesA = srsA.lapses || 0;
+          const lapsesB = srsB.lapses || 0;
+          if (lapsesB !== lapsesA) return lapsesB - lapsesA;
+
+          const easeA = srsA.easeFactor || 2.50;
+          const easeB = srsB.easeFactor || 2.50;
+          if (easeA !== easeB) return easeA - easeB;
+
+          return (srsA.interval || 0) - (srsB.interval || 0);
+        });
+      } else {
+        // В обычном уровне карточки перемешиваются
+        ankiQueue = [...words].sort(() => Math.random() - 0.5);
+      }
+
       switchView('viewAnki');
       nextAnkiCard();
     }
 
-    function calculateNextInterval(srs, grade) {
-      let reps = srs.reps || 0;
-      let interval = srs.interval || 0;
-      let ef = srs.easeFactor || 2.5;
-
-      if (grade === 1) {
-        return { reps: 0, interval: 0, ef: Math.max(1.3, ef - 0.2), text: "через 2-3 шт", days: 0 };
-      } else if (grade === 2) {
-        return { reps: reps, interval: Math.max(1, interval), ef: Math.max(1.3, ef - 0.15), text: "в конец", days: 1 };
-      } else if (grade === 3) {
-        let nextInt = reps === 0 ? 1 : (reps === 1 ? 3 : Math.round(interval * ef));
-        return { reps: reps + 1, interval: nextInt, ef: ef, text: `${nextInt} дн`, days: nextInt };
-      } else {
-        let nextInt = reps === 0 ? 3 : (reps === 1 ? 6 : Math.round((interval || 1) * ef * 1.3));
-        return { reps: reps + 1, interval: nextInt, ef: ef + 0.15, text: `${nextInt} дн`, days: nextInt };
-      }
-    }
-
     function nextAnkiCard() {
-      // Если очередь пуста, но какие-то слова не выучены — уровень продолжается
       if (ankiQueue.length === 0) {
-        if (ankiLearnedIds.size >= ankiTotalWords) {
-          saveState();
-          setTimeout(() => {
-            alert('🎉 Великолепно! Все карточки уровня успешно выучены!');
-            showMap();
-          }, 200);
-          return;
-        }
+        saveState();
+        setTimeout(() => {
+          alert('🎉 Сессия Anki успешно завершена!');
+          showMap();
+        }, 200);
+        return;
       }
 
       currentAnkiCard = ankiQueue.shift();
@@ -2068,25 +2158,29 @@
 
     function renderAnkiCard() {
       const w = currentAnkiCard;
-      const srs = getWordData(w.id);
+      const srs = initCardSRS(w.id);
 
       document.getElementById('ankiAnswerBlock').classList.remove('revealed');
       document.getElementById('btnShowAnswer').style.display = 'block';
       document.getElementById('ankiGradeGroup').style.display = 'none';
 
       const badge = document.getElementById('ankiCardBadge');
-      if (ankiLearnedIds.has(w.id)) {
-        badge.innerText = `Повтор`;
-        badge.style.background = 'var(--ink-soft)';
-        badge.style.color = 'var(--ink)';
-      } else if (srs.reps === 0) {
+      if (srs.state === CARD_STATE.NEW) {
         badge.innerText = 'Новое';
         badge.style.background = 'var(--success-bg)';
         badge.style.color = 'var(--success-text)';
-      } else {
-        badge.innerText = `В процессе`;
+      } else if (srs.state === CARD_STATE.LEARNING) {
+        badge.innerText = `Шаг ${srs.step + 1}/${ANKI_CONFIG.learningSteps.length}`;
         badge.style.background = 'var(--star-bg)';
         badge.style.color = 'var(--star-color)';
+      } else if (srs.state === CARD_STATE.RELEARNING) {
+        badge.innerText = 'Повтор';
+        badge.style.background = 'var(--danger-bg)';
+        badge.style.color = 'var(--danger-text)';
+      } else {
+        badge.innerText = `Интервал: ${srs.interval}д`;
+        badge.style.background = 'var(--ink-soft)';
+        badge.style.color = 'var(--ink)';
       }
 
       if (ankiMode === 'ja') {
@@ -2099,21 +2193,10 @@
         document.getElementById('ankiTranslation').innerText = '';
       }
 
-      // Прогресс показывает реально выученные слова из общего пула
-      const learnedCount = ankiLearnedIds.size;
-      const progressPercent = ankiTotalWords > 0 ? (learnedCount / ankiTotalWords) * 100 : 0;
-      document.getElementById('ankiProgress').style.width = `${progressPercent}%`;
-      document.getElementById('ankiCounter').innerText = `${learnedCount}/${ankiTotalWords}`;
-
-      const resAgain = calculateNextInterval(srs, 1);
-      const resHard = calculateNextInterval(srs, 2);
-      const resGood = calculateNextInterval(srs, 3);
-      const resEasy = calculateNextInterval(srs, 4);
-
-      if (document.getElementById('lblTimeAgain')) document.getElementById('lblTimeAgain').innerText = resAgain.text;
-      if (document.getElementById('lblTimeHard')) document.getElementById('lblTimeHard').innerText = resHard.text;
-      if (document.getElementById('lblTimeGood')) document.getElementById('lblTimeGood').innerText = resGood.text;
-      if (document.getElementById('lblTimeEasy')) document.getElementById('lblTimeEasy').innerText = resEasy.text;
+      const graduatedCount = ankiGraduatedIds.size;
+      const pct = ankiTotalBatchSize > 0 ? (graduatedCount / ankiTotalBatchSize) * 100 : 0;
+      document.getElementById('ankiProgress').style.width = `${pct}%`;
+      document.getElementById('ankiCounter').innerText = `${graduatedCount}/${ankiTotalBatchSize}`;
     }
 
     function revealAnkiAnswer() {
@@ -2129,40 +2212,82 @@
 
     function handleAnkiGrade(grade) {
       const w = currentAnkiCard;
-      const srs = getWordData(w.id);
-      const res = calculateNextInterval(srs, grade);
+      const srs = initCardSRS(w.id);
+      const now = Date.now();
 
-      srs.easeFactor = res.ef;
+      srs.reps = (srs.reps || 0) + 1;
 
       if (grade === 1) {
-        // «СНОВА» — сбрасываем прогресс карточки и вставляем через 2-3 шага в колоду
+        // [СНОВА] — Сброс карточки на 1-й шаг заучивания + штраф к легкости
         srs.lapses = (srs.lapses || 0) + 1;
-        srs.reps = 0;
+        srs.easeFactor = Math.max(ANKI_CONFIG.minEase, srs.easeFactor - 0.20);
+        srs.state = CARD_STATE.LEARNING;
+        srs.step = 0;
         srs.interval = 0;
-        srs.ankiMastered = false;
-        ankiLearnedIds.delete(w.id);
+        srs.dueDate = now;
+        ankiGraduatedIds.delete(w.id);
 
-        const insertPos = Math.min(ankiQueue.length, 2 + Math.floor(Math.random() * 2));
-        ankiQueue.splice(insertPos, 0, w);
+        const pos = Math.min(ankiQueue.length, 1 + Math.floor(Math.random() * 2));
+        ankiQueue.splice(pos, 0, w);
 
       } else if (grade === 2) {
-        // «ТРУДНО» — слово не считается выученным, отправляется в конец текущей очереди
-        ankiLearnedIds.delete(w.id);
-        ankiQueue.push(w);
+        // [ТРУДНО] — Штраф к легкости (-0.15), повторить позже в сессии
+        srs.easeFactor = Math.max(ANKI_CONFIG.minEase, srs.easeFactor - 0.15);
 
-      } else {
-        // «ХОРОШО» (3) или «ЛЕГКО» (4) — слово успешно освоено в этой сессии!
-        srs.reps = res.reps;
-        srs.interval = res.interval;
-        srs.dueDate = Date.now() + (res.days * 24 * 60 * 60 * 1000);
+        if (srs.state === CARD_STATE.REVIEW) {
+          srs.interval = Math.max(1, Math.round(srs.interval * ANKI_CONFIG.hardIntervalFactor));
+          srs.dueDate = now + (srs.interval * 86400000);
+          srs.ankiMastered = true;
+          ankiGraduatedIds.add(w.id);
+        } else {
+          const pos = Math.min(ankiQueue.length, 3 + Math.floor(Math.random() * 2));
+          ankiQueue.splice(pos, 0, w);
+        }
+
+      } else if (grade === 3) {
+        // [ХОРОШО]
+        if (srs.state === CARD_STATE.REVIEW) {
+          srs.interval = Math.max(srs.interval + 1, Math.round(srs.interval * srs.easeFactor));
+          srs.dueDate = now + (srs.interval * 86400000);
+          srs.ankiMastered = true;
+          ankiGraduatedIds.add(w.id);
+        } else {
+          const nextStep = (srs.step || 0) + 1;
+          if (nextStep >= ANKI_CONFIG.learningSteps.length) {
+            // Выпуск в память
+            srs.state = CARD_STATE.REVIEW;
+            srs.step = 0;
+            srs.interval = ANKI_CONFIG.graduatingInterval;
+            srs.dueDate = now + (srs.interval * 86400000);
+            srs.ankiMastered = true;
+            ankiGraduatedIds.add(w.id);
+          } else {
+            // Шаг закрепления (спросит еще раз через 5-7 карточек)
+            srs.state = CARD_STATE.LEARNING;
+            srs.step = nextStep;
+            const pos = Math.min(ankiQueue.length, 5 + Math.floor(Math.random() * 2));
+            ankiQueue.splice(pos, 0, w);
+          }
+        }
+
+      } else if (grade === 4) {
+        // [ЛЕГКО] — Мгновенный выпуск карточки
+        srs.easeFactor = srs.easeFactor + 0.15;
+        if (srs.state === CARD_STATE.REVIEW) {
+          srs.interval = Math.max(srs.interval + 2, Math.round(srs.interval * srs.easeFactor * ANKI_CONFIG.easyBonus));
+        } else {
+          srs.interval = ANKI_CONFIG.easyInterval;
+        }
+        srs.state = CARD_STATE.REVIEW;
+        srs.step = 0;
+        srs.dueDate = now + (srs.interval * 86400000);
         srs.ankiMastered = true;
-        ankiLearnedIds.add(w.id);
+        ankiGraduatedIds.add(w.id);
       }
 
       saveState();
       nextAnkiCard();
     }
-
     // --- 3. ИГРА «СТОПКА» ---
     let upcomingPiecesQueue = [];
     let boardSlots = new Array(12).fill(null);
