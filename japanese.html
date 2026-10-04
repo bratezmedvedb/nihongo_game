@@ -107,13 +107,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      /* ИДЕАЛЬНЫЙ ОТСТУП ДЛЯ IPHONE ПОД DYNAMIC ISLAND */
       padding: calc(44px + env(safe-area-inset-top, 0px)) 16px 8px;
       flex-shrink: 0;
       width: 100%;
     }
 
-    /* НА ANDROID ПРИНУДИТЕЛЬНО ОПУСКАЕМ НА 75px НИЖЕ ПЛАШКИ */
     body.is-android .session-header {
       padding: 75px 16px 8px !important;
     }
@@ -196,7 +194,7 @@
     }
 
     /* ==========================================================================
-       ЭКРАН 1: КАРТА (ИСПРАВЛЕНА ПРОКРУТКА + РАЗДЕЛЬНЫЕ ОТСТУПЫ)
+       ЭКРАН 1: КАРТА
        ========================================================================== */
     #viewMap {
       flex: 1 1 auto !important;
@@ -364,7 +362,7 @@
     body.desktop-device .pos-3 { transform: translateX(-180px); }
 
     /* ==========================================================================
-       ЭКРАН 2: ANKI (ЛИЦЕВАЯ СТОРОНА ГИГАНТСКАЯ, ПЕРЕВОД АККУРАТНЫЙ)
+       ЭКРАН 2: ANKI
        ========================================================================== */
     #viewAnki {
       padding: 0 16px calc(16px + env(safe-area-inset-bottom, 0px));
@@ -464,7 +462,6 @@
       border-radius: 14px;
     }
 
-    /* ЛИЦЕВАЯ СТОРОНА КАРТОЧКИ (ВОПРОС) ВСЕГДА КРУПНЫЙ */
     .card-question {
       font-weight: 700;
       color: var(--text);
@@ -479,7 +476,6 @@
       justify-content: center;
     }
 
-    /* ОБОРОТНАЯ СТОРОНА (ОТВЕТ) — АККУРАТНЫЙ И КОМПАКТНЫЙ РАЗМЕР */
     .card-answer-block {
       display: none;
       flex-direction: column;
@@ -634,7 +630,7 @@
     .btn-grade.easy  { background: var(--ink-soft); border-color: #c9c3e6; color: var(--ink); }
 
     /* ==========================================================================
-       ЭКРАН 3: СТОПКА (КАНДЗИ ОГРОМНЫЕ, РУССКИЙ АККУРАТНЫЙ)
+       ЭКРАН 3: СТОПКА
        ========================================================================== */
     #viewStack {
       padding: 0 12px calc(14px + env(safe-area-inset-bottom, 0px));
@@ -769,9 +765,6 @@
       border-radius: 10px;
     }
 
-   /* ==========================================================================
-       СТИЛИ ТЕКСТА КАРТОЧЕК В СТОПКЕ (СТАБИЛЬНЫЕ И КРУПНЫЕ)
-       ========================================================================== */
     .tile-main-text {
       font-weight: 850;
       line-height: 1.15;
@@ -787,7 +780,6 @@
       justify-content: center;
     }
 
-/* ЕЩЕ БОЛЕЕ МОЩНЫЕ И КРУПНЫЕ КАНДЗИ */
     .tile-main-text.type-kanji {
       font-size: clamp(2.4rem, 9.5vw, 3.2rem) !important;
       font-weight: 700;
@@ -798,7 +790,6 @@
       letter-spacing: -2px;
     }
 
-    /* 2. ХИРАГАНА / КАНА (КРУПНАЯ, ЧЕТКАЯ, РАВНОМЕРНАЯ) */
     .tile-main-text.type-reading {
       font-size: clamp(1.6rem, 6.8vw, 2.2rem);
       letter-spacing: -0.5px;
@@ -807,20 +798,16 @@
       font-size: 3.8rem;
     }
 
- /* 2. УВЕЛИЧЕННЫЙ РУССКИЙ ПЕРЕВОД */
     .tile-main-text.type-translation {
       font-weight: 800;
       line-height: 1.18;
-      /* Увеличен размер: минимум 1.15rem, стандарт 4.8vw, максимум 1.45rem */
       font-size: clamp(1.15rem, 4.8vw, 1.45rem);
     }
 
-    /* На ПК делаем его еще крупнее и выразительнее */
     body.desktop-device .tile-main-text.type-translation {
       font-size: 2.35rem;
     }
 
-    /* 4. УМЕНЬШЕНИЕ ТОЛЬКО ДЛЯ ОЧЕНЬ ДЛИННЫХ ФРАЗ */
     .tile-main-text.size-sm {
       font-size: clamp(0.82rem, 3.2vw, 1.0rem) !important;
       line-height: 1.15;
@@ -836,7 +823,6 @@
     body.desktop-device .tile-main-text.size-xs {
       font-size: 1.3rem !important;
     }
-
 
     .tile-sub-chips {
       display: flex;
@@ -1973,7 +1959,7 @@
       { id: 830, level_id: 42, kanji: "意味", reading: "いみ", translation: "смысл / значение", emoji: "💡" }
     ];
 
-   const TOTAL_LEVELS = 42;
+  const TOTAL_LEVELS = 42;
     let userProgress = {};
 
     // --- ОБЛАЧНОЕ СОХРАНЕНИЕ ---
@@ -2030,7 +2016,7 @@
       }
     }
 
-   function loadState(callback) {
+    function loadState(callback) {
       try {
         const local = localStorage.getItem('japandi_backup_data');
         if (local) userProgress = JSON.parse(local);
@@ -2038,11 +2024,9 @@
         userProgress = {};
       }
 
-      // 1. СРАЗУ рисуем экран, чтобы не было белого/пустого экрана
       renderMap();
       if (callback) callback();
 
-      // 2. В фоновом режиме подтягиваем данные из облака Telegram
       if (window.Telegram?.WebApp?.CloudStorage) {
         window.Telegram.WebApp.CloudStorage.getItems(TG_KEYS, (err, res) => {
           if (!err && res) {
@@ -2053,7 +2037,6 @@
             try {
               localStorage.setItem('japandi_backup_data', JSON.stringify(userProgress));
             } catch(e) {}
-            // Обновляем экран, если из облака пришли свежие данные
             renderMap();
           }
         });
@@ -2092,27 +2075,21 @@
       return TOTAL_LEVELS;
     }
 
-   // =========================================================================
-    // --- ПЛЕЕР С МГНОВЕННОЙ ПРЕДЗАГРУЗКОЙ (0ms РЕАКЦИЯ НА КЛИК) ---
+    // =========================================================================
+    // --- ПЛЕЕР С МГНОВЕННОЙ ПРЕДЗАГРУЗКОЙ ---
     // =========================================================================
     const activeAudio = new Audio();
     activeAudio.preload = 'auto';
 
-    // Функция мгновенного воспроизведения
     function speakKyoko(wordId) {
       if (!wordId) return;
-
       try {
         const expectedSrc = `audio/${wordId}.mp3`;
-
-        // Если файл УЖЕ предзагружен в память — просто запускаем с 0 секунды
         if (activeAudio.src.includes(expectedSrc)) {
           activeAudio.currentTime = 0;
           activeAudio.play().catch(() => {});
           return;
         }
-
-        // Если не был предзагружен (например, при клике в стопке) — загружаем и играем
         activeAudio.src = expectedSrc;
         activeAudio.currentTime = 0;
         activeAudio.play().catch(() => {});
@@ -2121,12 +2098,12 @@
       }
     }
 
-    // Предзагрузка аудиофайла в память заранее
     function preloadCurrentAudio(wordId) {
       if (!wordId) return;
       activeAudio.src = `audio/${wordId}.mp3`;
-      activeAudio.load(); // Телефон сразу скачивает файл в оперативку
+      activeAudio.load();
     }
+
     // --- РЕНДЕР КАРТЫ ---
     function renderMap() {
       const tree = document.getElementById('snakeTree');
@@ -2263,7 +2240,7 @@
     }
 
     // =========================================================================
-    // --- 2. ANKI (УВЕЛИЧЕННЫЙ В 3 РАЗА ШРИФТ + АВТО-МАСШТАБ) ---
+    // --- 2. ANKI ---
     // =========================================================================
     const ANKI_CONFIG = {
       learningSteps: [1, 10],
@@ -2306,7 +2283,6 @@
     function startAnki(words) {
       ankiGraduatedIds.clear();
       ankiTotalBatchSize = words.length;
-      const now = Date.now();
 
       words.forEach(w => {
         const srs = initCardSRS(w.id);
@@ -2343,7 +2319,7 @@
       renderAnkiCard();
     }
 
-function renderAnkiCard() {
+    function renderAnkiCard() {
       const w = currentAnkiCard;
       const srs = initCardSRS(w.id);
 
@@ -2351,7 +2327,7 @@ function renderAnkiCard() {
       document.getElementById('btnShowAnswer').style.display = 'block';
       document.getElementById('ankiGradeGroup').style.display = 'none';
 
-  const badge = document.getElementById('ankiCardBadge');
+      const badge = document.getElementById('ankiCardBadge');
       if (srs.state === CARD_STATE.NEW) {
         badge.innerText = 'Новое';
         badge.style.background = 'var(--success-bg)';
@@ -2370,7 +2346,7 @@ function renderAnkiCard() {
         badge.style.color = 'var(--ink)';
       }
 
-  const qEl = document.getElementById('ankiQuestion');
+      const qEl = document.getElementById('ankiQuestion');
       let qText = '';
 
       if (ankiMode === 'ja') {
@@ -2385,8 +2361,6 @@ function renderAnkiCard() {
 
       qEl.innerText = qText;
 
-
- // ДИНАМИЧЕСКИЙ РАСЧЕТ ШРИФТА (В 3 РАЗА БОЛЬШЕ ДЛЯ КОРОТКИХ СЛОВ)
       const len = qText.length;
       if (len <= 2) {
         qEl.style.fontSize = 'clamp(4.8rem, 20vw, 7.5rem)';
@@ -2400,26 +2374,24 @@ function renderAnkiCard() {
         qEl.style.fontSize = 'clamp(1.5rem, 5.5vw, 2.2rem)';
       }
 
-const graduatedCount = ankiGraduatedIds.size;
+      const graduatedCount = ankiGraduatedIds.size;
       const pct = ankiTotalBatchSize > 0 ? (graduatedCount / ankiTotalBatchSize) * 100 : 0;
       document.getElementById('ankiProgress').style.width = `${pct}%`;
       document.getElementById('ankiCounter').innerText = `${graduatedCount}/${ankiTotalBatchSize}`;
 
-   // Тихо кэшируем звук в память (без проигрывания)
       if (currentAnkiCard) {
         preloadCurrentAudio(currentAnkiCard.id);
       }
     }
 
-function revealAnkiAnswer() {
-  document.getElementById('ankiAnswerBlock').classList.add('revealed');
-  document.getElementById('btnShowAnswer').style.display = 'none';
-  document.getElementById('ankiGradeGroup').style.display = 'grid';
-  // Воспроизводим звук только при показе ответа:
-  speakCurrentWord();
-}
+    function revealAnkiAnswer() {
+      document.getElementById('ankiAnswerBlock').classList.add('revealed');
+      document.getElementById('btnShowAnswer').style.display = 'none';
+      document.getElementById('ankiGradeGroup').style.display = 'grid';
+      speakCurrentWord();
+    }
 
-  function speakCurrentWord() {
+    function speakCurrentWord() {
       if (currentAnkiCard) speakKyoko(currentAnkiCard.id);
     }
 
@@ -2492,8 +2464,8 @@ function revealAnkiAnswer() {
       nextAnkiCard();
     }
 
-    /// =========================================================================
-    // --- 3. ИГРА «СТОПКА» (ИСПРАВЛЕНА СБОРКА + КРУПНЫЕ КАНДЗИ) ---
+    // =========================================================================
+    // --- 3. ИГРА «СТОПКА» (С АКТИВНОЙ НЕЗАВЕРШЁННОЙ СТОПКОЙ) ---
     // =========================================================================
     let stackWaves = [];
     let currentWaveIndex = 0;
@@ -2627,21 +2599,21 @@ function revealAnkiAnswer() {
     function onSlotClick(clickedIdx, el) {
       if (!boardSlots[clickedIdx]) return;
 
-      // 1. ПЕРВЫЙ КЛИК (ВЫБОР КАРТОЧКИ) — ВОТ ЭТО БЫЛО ПРОПУЩЕНО!
+      // 1. Первый клик (выбор карточки)
       if (selectedSlotIdx === null) {
         selectedSlotIdx = clickedIdx;
         renderStackBoard();
         return;
       }
 
-      // 2. Клик по той же карточке (снятие выделения)
+      // 2. Клик по уже выбранной карточке/стопке (снятие выделения)
       if (selectedSlotIdx === clickedIdx) {
         selectedSlotIdx = null;
         renderStackBoard();
         return;
       }
 
-      // 3. ВТОРОЙ КЛИК (ПОПЫТКА ОБЪЕДИНЕНИЯ)
+      // 3. Второй клик (попытка объединения)
       const firstIdx = selectedSlotIdx;
       const targetIdx = clickedIdx;
 
@@ -2654,15 +2626,16 @@ function revealAnkiAnswer() {
         return;
       }
 
-      // ПРОВЕРКА НА СОВПАДЕНИЕ
+      // Проверка совпадения
       if (firstStack.wordId === targetStack.wordId) {
         targetStack.items.push(...firstStack.items);
         boardSlots[firstIdx] = null;
-        selectedSlotIdx = null;
 
         if (targetStack.wordId) speakKyoko(targetStack.wordId);
 
+        // Если стопка собрана ПОЛНОСТЬЮ
         if (targetStack.items.length >= targetStack.totalNeeded) {
+          selectedSlotIdx = null;
           const p = getWordData(targetStack.wordId);
           p.stacked = true;
           saveState();
@@ -2692,12 +2665,14 @@ function revealAnkiAnswer() {
             }
           }, 300);
         } else {
+          // Если стопка собрана НЕ ДО КОНЦА (например, 2 из 3) — оставляем ее активной!
+          selectedSlotIdx = targetIdx;
           renderStackBoard();
           const targetEl = document.querySelector(`.stack-tile[data-slot="${targetIdx}"]`);
           if (targetEl) targetEl.classList.add('merge-pulse');
         }
       } else {
-        // Ошибка (карточки не подошли)
+        // Ошибка (карточки не подошли друг к другу)
         const firstEl = document.querySelector(`.stack-tile[data-slot="${firstIdx}"]`);
         const secondEl = el;
 
@@ -2711,7 +2686,7 @@ function revealAnkiAnswer() {
       }
     }
 
-// Инициализация игры
+    // Инициализация
     loadState();
     renderMap();
   </script>
