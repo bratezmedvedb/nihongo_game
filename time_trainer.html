@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Японское время и даты</title>
+  
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root {
+      --bg-page: #f4f1ea;
+      --card-bg: #ffffff;
+      --text-main: #2c2c2a;
+      --text-sub: #6b6a63;
+      --border: #d3d1c7;
+      --border-light: #e5e2d8;
+      --accent: #d97757;
+      --accent-hover: #c46445;
+      --accent-soft: #fdf0eb;
+      --accent-border: #f5c4b3;
+      --highlight: #e0533c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: calc(20px + env(safe-area-inset-top, 0px)) 14px calc(40px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Навигация / Верх */
+    .top-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .back-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s;
+    }
+    .back-btn:active {
+      background: #e5e2d8;
+    }
+    .badge {
+      display: inline-block;
+      background: #e5e2d8;
+      color: var(--text-sub);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    /* Вкладки переключения режимов */
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      background: #e8e4d9;
+      padding: 4px;
+      border-radius: 14px;
+      gap: 4px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 9px 4px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-sub);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .tab-btn.active {
+      background: #ffffff;
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    /* Основная карточка */
+    .main-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      min-height: 440px;
+      justify-content: space-between;
+    }
+
+    .mode-content {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .mode-content.active {
+      display: flex;
+    }
+
+    /* =========================================================
+       1. СТИЛИ ДЛЯ ИДЕАЛЬНЫХ ЧАСОВ
+    ========================================================= */
+    .clock-wrapper {
+      width: 210px;
+      height: 210px;
+      position: relative;
+      background: #ffffff;
+      border: 7px solid #2c2c2a;
+      border-radius: 50%;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      margin: 4px 0;
+    }
+
+    /* Засечки циферблата */
+    .clock-tick {
+      position: absolute;
+      width: 2px;
+      height: 6px;
+      background: #c2bfb5;
+      top: 4px;
+      left: 50%;
+      margin-left: -1px;
+      transform-origin: 50% 98px;
+    }
+    .clock-tick.major {
+      width: 3px;
+      height: 9px;
+      background: #8e8c84;
+      margin-left: -1.5px;
+    }
+
+    /* Цифры на циферблате */
+    .clock-number {
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      text-align: center;
+      line-height: 24px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #52504a;
+      left: 50%;
+      top: 50%;
+      margin-left: -12px;
+      margin-top: -12px;
+      user-select: none;
+    }
+
+    /* Стрелки */
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: 50% 100%;
+      border-radius: 8px;
+      transition: transform 0.25s cubic-bezier(0.4, 2, 0.5, 1);
+    }
+    .hand.hour {
+      width: 6px;
+      height: 52px;
+      background: #2c2c2a;
+      margin-left: -3px;
+      z-index: 5;
+    }
+    .hand.minute {
+      width: 4px;
+      height: 74px;
+      background: var(--accent);
+      margin-left: -2px;
+      z-index: 6;
+    }
+    .clock-center {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      background: var(--accent);
+      border: 2.5px solid #ffffff;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    /* =========================================================
+       2. СТИЛИ ДЛЯ КАЛЕНДАРЯ (С ПН по ВС)
+    ========================================================= */
+    .calendar-card {
+      width: 100%;
+      max-width: 320px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .calendar-header {
+      background: var(--accent);
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 15.5px;
+      letter-spacing: 0.5px;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      padding: 10px;
+      gap: 4px;
+      text-align: center;
+    }
+    .cal-weekday {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--text-sub);
+      padding-bottom: 5px;
+    }
+    /* Суббота (6 колонка) и Воскресенье (7 колонка) */
+    .cal-weekday:nth-child(6) { color: #2e7bb6; } /* 土 - суббота */
+    .cal-weekday:nth-child(7) { color: #d9534f; } /* 日 - воскресенье */
+
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12.5px;
+      font-weight: 600;
+      border-radius: 8px;
+      color: #444;
+    }
+    .cal-day.empty { visibility: hidden; }
+    .cal-day.selected {
+      background: var(--highlight);
+      color: #fff !important;
+      font-weight: 700;
+      transform: scale(1.1);
+      box-shadow: 0 2px 6px rgba(224, 83, 60, 0.4);
+      animation: calPulse 1.4s infinite;
+    }
+    @keyframes calPulse {
+      0%, 100% { transform: scale(1.08); }
+      50% { transform: scale(1.16); }
+    }
+
+    /* =========================================================
+       3. СТИЛИ ДЛЯ ПЕРИОДОВ ВРЕМЕНИ
+    ========================================================= */
+    .relative-card {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .prompt-box {
+      background: var(--accent-soft);
+      border: 1px dashed var(--accent-border);
+      padding: 14px 20px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent-hover);
+      text-align: center;
+      width: 100%;
+    }
+    .matrix-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      max-height: 180px;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .matrix-tag {
+      background: #f4f1ea;
+      border: 1px solid var(--border-light);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      color: var(--text-sub);
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .matrix-tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Область вывода ответа (БЕЗ РОМАДЗИ) */
+    .answer-box {
+      width: 100%;
+      min-height: 84px;
+      background: #faf8f5;
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 4px;
+    }
+    .answer-kanji {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .answer-kana {
+      font-size: 15px;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .answer-placeholder {
+      font-size: 13.5px;
+      color: #9c9a91;
+      font-style: italic;
+    }
+
+    /* Панель кнопок управления */
+    .controls {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+    .btn-dice {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      font-size: 20px;
+      width: 52px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+      transition: transform 0.15s, background 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-dice:active {
+      transform: scale(0.92) rotate(15deg);
+      background: #ece8de;
+    }
+    .btn-action {
+      flex: 1;
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      font-size: 14.5px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 3px 8px rgba(217, 119, 87, 0.25);
+      transition: background 0.15s, transform 0.15s;
+    }
+    .btn-action:hover {
+      background: var(--accent-hover);
+    }
+    .btn-action:active {
+      transform: scale(0.98);
+    }
+    .btn-sound {
+      background: var(--accent-soft);
+      border: 1px solid var(--accent-border);
+      color: var(--accent);
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    .btn-sound:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Верхняя панель -->
+  <div class="top-nav">
+    <a href="index.html" class="back-btn">← Меню</a>
+    <div class="badge">時間・日付・曜日</div>
+  </div>
+
+  <!-- Переключатель режимов -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchMode('clock')">🕒 Часы</button>
+    <button class="tab-btn" onclick="switchMode('calendar')">📅 Календарь</button>
+    <button class="tab-btn" onclick="switchMode('relative')">⏳ Периоды</button>
+  </div>
+
+  <!-- Карточка тренажера -->
+  <div class="main-card">
+
+    <!-- 1. Режим ЧАСЫ -->
+    <div class="mode-content active" id="mode-clock">
+      <div class="clock-wrapper" id="clock">
+        <!-- Засечки и цифры генерируются скриптом для идеальной симметрии -->
+        <div class="hand hour" id="hourHand"></div>
+        <div class="hand minute" id="minuteHand"></div>
+        <div class="clock-center"></div>
+      </div>
+    </div>
+
+    <!-- 2. Режим КАЛЕНДАРЬ -->
+    <div class="mode-content" id="mode-calendar">
+      <div class="calendar-card">
+        <div class="calendar-header" id="calMonthTitle">1月 (Январь)</div>
+        <div class="calendar-grid" id="calGrid">
+          <!-- Дни недели с ПН по ВС -->
+          <div class="cal-weekday">月</div>
+          <div class="cal-weekday">火</div>
+          <div class="cal-weekday">水</div>
+          <div class="cal-weekday">木</div>
+          <div class="cal-weekday">金</div>
+          <div class="cal-weekday">土</div>
+          <div class="cal-weekday">日</div>
+          <!-- Числа заполняются через JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Режим ПЕРИОДЫ -->
+    <div class="mode-content" id="mode-relative">
+      <div class="relative-card">
+        <div class="prompt-box" id="relativePrompt">Каждое утро</div>
+        <div class="matrix-preview" id="relativeMatrixList">
+          <!-- Быстрые теги -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Область ответа (БЕЗ РОМАДЗИ) -->
+    <div class="answer-box" id="answerBox">
+      <div class="answer-placeholder">Подумайте и нажмите «Проверить» 💭</div>
+    </div>
+
+    <!-- Панель кнопок -->
+    <div class="controls">
+      <button class="btn-dice" onclick="nextQuestion()" title="Случайный вопрос">🎲</button>
+      <button class="btn-action" id="actionBtn" onclick="toggleAnswer()">Проверить ответ</button>
+      <button class="btn-sound" id="soundBtn" onclick="repeatAudio()" title="Повторить озвучку">🔊</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  if (window.Telegram && window.Telegram.WebApp) {
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+  }
+
+  /* -------------------------------------------------------------
+     ГОЛОСОВАЯ ОЗВУЧКА KYOKO
+  ------------------------------------------------------------- */
+  let kyokoVoice = null;
+
+  function initKyokoVoice() {
+    if (!('speechSynthesis' in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    kyokoVoice = voices.find(v => v.name.includes('Kyoko')) ||
+                 voices.find(v => v.name.includes('Otoya')) ||
+                 voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP') ||
+                 null;
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = initKyokoVoice;
+    initKyokoVoice();
+  }
+
+  function speakJa(text) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ja-JP';
+    u.rate = 0.88;
+    if (kyokoVoice) u.voice = kyokoVoice;
+    window.speechSynthesis.speak(u);
+  }
+
+  /* -------------------------------------------------------------
+     ДАННЫЕ
+  ------------------------------------------------------------- */
+  let currentMode = 'clock';
+  let isAnswerShown = false;
+  let currentJapaneseAudio = '';
+
+  // 1. ЧАСЫ (с японскими исключениями)
+  const HOURS_JA = [
+    { kanji: '12時', kana: 'じゅうにじ' },
+    { kanji: '1時', kana: 'いちじ' },
+    { kanji: '2時', kana: 'にじ' },
+    { kanji: '3時', kana: 'さんじ' },
+    { kanji: '4時', kana: 'よじ' },      // Исключение
+    { kanji: '5時', kana: 'ごじ' },
+    { kanji: '6時', kana: 'ろくじ' },
+    { kanji: '7時', kana: 'しちじ' },    // Исключение
+    { kanji: '8時', kana: 'はちじ' },
+    { kanji: '9時', kana: 'くじ' },      // Исключение
+    { kanji: '10時', kana: 'じゅうじ' },
+    { kanji: '11時', kana: 'じゅういちじ' }
+  ];
+
+  const MINUTES_JA = {
+    0:  { kanji: '', kana: '' },
+    5:  { kanji: '5分', kana: 'ごふん' },
+    10: { kanji: '10分', kana: 'じゅっぷん' },
+    15: { kanji: '15分', kana: 'じゅうごふん' },
+    20: { kanji: '20分', kana: 'にじゅっぷん' },
+    25: { kanji: '25分', kana: 'にじゅうごふん' },
+    30: { kanji: '半 (30分)', kana: 'はん (さんじゅっぷん)' },
+    35: { kanji: '35分', kana: 'さんじゅうごふん' },
+    40: { kanji: '40分', kana: 'よんじゅっぷん' },
+    45: { kanji: '45分', kana: 'よんじゅうごふん' },
+    50: { kanji: '50分', kana: 'ごじゅっぷん' },
+    55: { kanji: '55分', kana: 'ごじゅうごふん' }
+  };
+
+  let curHour = 3;
+  let curMinute = 0;
+
+  // 2. КАЛЕНДАРЬ
+  const MONTHS = [
+    { n: 1, ru: 'Январь', ja: '1月', kana: 'いちがつ' },
+    { n: 2, ru: 'Февраль', ja: '2月', kana: 'にがつ' },
+    { n: 3, ru: 'Март', ja: '3月', kana: 'さんがつ' },
+    { n: 4, ru: 'Апрель', ja: '4月', kana: 'しがつ' },       // Исключение
+    { n: 5, ru: 'Май', ja: '5月', kana: 'ごがつ' },
+    { n: 6, ru: 'Июнь', ja: '6月', kana: 'ろくがつ' },
+    { n: 7, ru: 'Июль', ja: '7月', kana: 'しちがつ' },       // Исключение
+    { n: 8, ru: 'Август', ja: '8月', kana: 'はちがつ' },
+    { n: 9, ru: 'Сентябрь', ja: '9月', kana: 'くがつ' },      // Исключение
+    { n: 10, ru: 'Октябрь', ja: '10月', kana: 'じゅうがつ' },
+    { n: 11, ru: 'Ноябрь', ja: '11月', kana: 'じゅういちがつ' },
+    { n: 12, ru: 'Декабрь', ja: '12月', kana: 'じゅうにがつ' }
+  ];
+
+  const DAYS_JA = {
+    1: { ja: '1日', kana: 'ついたち' },
+    2: { ja: '2日', kana: 'ふつか' },
+    3: { ja: '3日', kana: 'みっか' },
+    4: { ja: '4日', kana: 'よっか' },
+    5: { ja: '5日', kana: 'いつか' },
+    6: { ja: '6日', kana: 'むいか' },
+    7: { ja: '7日', kana: 'なのか' },
+    8: { ja: '8日', kana: 'ようか' },
+    9: { ja: '9日', kana: 'ここのか' },
+    10: { ja: '10日', kana: 'とおか' },
+    11: { ja: '11日', kana: 'じゅういちにち' },
+    12: { ja: '12日', kana: 'じゅうににち' },
+    13: { ja: '13日', kana: 'じゅうさんにち' },
+    14: { ja: '14日', kana: 'じゅうよっか' },   // Исключение
+    15: { ja: '15日', kana: 'じゅうごにち' },
+    16: { ja: '16日', kana: 'じゅうろくにち' },
+    17: { ja: '17日', kana: 'じゅうしちにち' },
+    18: { ja: '18日', kana: 'じゅうはちにち' },
+    19: { ja: '19日', kana: 'じゅうくにち' },
+    20: { ja: '20日', kana: 'はつか' },         // Исключение
+    21: { ja: '21日', kana: 'にじゅういちにち' },
+    22: { ja: '22日', kana: 'にじゅうににち' },
+    23: { ja: '23日', kana: 'にじゅうさんにち' },
+    24: { ja: '24日', kana: 'にじゅうよっか' },   // Исключение
+    25: { ja: '25日', kana: 'にじゅうごにち' },
+    26: { ja: '26日', kana: 'にじゅうろくにち' },
+    27: { ja: '27日', kana: 'にじゅうしちにち' },
+    28: { ja: '28日', kana: 'にじゅうはちにち' },
+    29: { ja: '29日', kana: 'にじゅうくにち' },
+    30: { ja: '30日', kana: 'さんじゅうにち' },
+    31: { ja: '31日', kana: 'さんじゅういちにち' }
+  };
+
+  // Порядок дней: Пн, Вт, Ср, Чт, Пт, Сб, Вс
+  const WEEKDAYS = [
+    { ru: 'Понедельник', ja: '月曜日', kana: 'げつようび' },
+    { ru: 'Вторник', ja: '火曜日', kana: 'かようび' },
+    { ru: 'Среда', ja: '水曜日', kana: 'すいようび' },
+    { ru: 'Четверг', ja: '木曜日', kana: 'もくようび' },
+    { ru: 'Пятница', ja: '金曜日', kana: 'きんようび' },
+    { ru: 'Суббота', ja: '土曜日', kana: 'どようび' },
+    { ru: 'Воскресенье', ja: '日曜日', kana: 'にちようび' }
+  ];
+
+  let curCalMonth = 1;
+  let curCalDay = 1;
+  let curCalWeekday = 0; // Индекс в массиве WEEKDAYS (0 = Понедельник)
+
+  // 3. ОТНОСИТЕЛЬНЫЕ ПЕРИОДЫ
+  const RELATIVE_WORDS = [
+    { ru: "Сегодня", ja: "今日", kana: "きょう" },
+    { ru: "Вчера", ja: "昨日", kana: "きのう" },
+    { ru: "Завтра", ja: "明日", kana: "あした" },
+    { ru: "Позавчера", ja: "一昨日", kana: "おととい" },
+    { ru: "Послезавтра", ja: "明後日", kana: "あさって" },
+    { ru: "Каждый день", ja: "毎日", kana: "まいにち" },
+
+    { ru: "Эта неделя", ja: "今週", kana: "こんしゅう" },
+    { ru: "Прошлая неделя", ja: "先週", kana: "せんしゅう" },
+    { ru: "Следующая неделя", ja: "来週", kana: "らいしゅう" },
+    { ru: "Каждую неделю", ja: "毎週", kana: "まいしゅう" },
+
+    { ru: "Этот месяц", ja: "今月", kana: "こんげつ" },
+    { ru: "Прошлый месяц", ja: "先月", kana: "せんげつ" },
+    { ru: "Следующий месяц", ja: "来月", kana: "らいげつ" },
+    { ru: "Каждый месяц", ja: "毎月", kana: "まいつき / まいげつ" },
+
+    { ru: "Этот год", ja: "今年", kana: "ことし" },
+    { ru: "Прошлый год", ja: "去年", kana: "きょねん" },
+    { ru: "Следующий год", ja: "来年", kana: "らいねん" },
+    { ru: "Каждый год", ja: "毎年", kana: "まいとし / まいねん" },
+
+    { ru: "Сегодня утром (это утро)", ja: "今朝", kana: "けさ" },
+    { ru: "Вчера утром", ja: "昨日の朝", kana: "きのうのあさ" },
+    { ru: "Каждое утро", ja: "毎朝", kana: "まいあさ" },
+    { ru: "Сегодня вечером", ja: "今晩 / 今夜", kana: "こんばん / こんや" },
+    { ru: "Вчера вечером", ja: "昨日の晩", kana: "きのうのばん" },
+    { ru: "Каждый вечер", ja: "毎晩", kana: "まいばん" }
+  ];
+
+  let curRelativeIdx = 0;
+
+  /* -------------------------------------------------------------
+     ИНИЦИАЛИЗАЦИЯ ЧАСОВ И МАТРИЦЫ
+  ------------------------------------------------------------- */
+  function initClockDial() {
+    const clock = document.getElementById('clock');
+
+    // Создаем 60 засечек (минуты и часы)
+    for (let i = 0; i < 60; i++) {
+      if (i % 5 === 0) {
+        const tick = document.createElement('div');
+        tick.className = 'clock-tick major';
+        tick.style.transform = `rotate(${i * 6}deg)`;
+        clock.appendChild(tick);
+      }
+    }
+
+    // Идеальная расстановка цифр 1..12
+    const radius = 72; // расстояние цифры от центра
+    for (let i = 1; i <= 12; i++) {
+      const angle = (i * 30) * (Math.PI / 180);
+      const x = radius * Math.sin(angle);
+      const y = -radius * Math.cos(angle);
+
+      const numEl = document.createElement('div');
+      numEl.className = 'clock-number';
+      numEl.textContent = i;
+      numEl.style.transform = `translate(${x}px, ${y}px)`;
+      clock.appendChild(numEl);
+    }
+  }
+
+  function initRelativeMatrix() {
+    const container = document.getElementById('relativeMatrixList');
+    container.innerHTML = '';
+    RELATIVE_WORDS.forEach((item, idx) => {
+      const tag = document.createElement('div');
+      tag.className = 'matrix-tag';
+      tag.textContent = item.ru;
+      tag.onclick = () => {
+        curRelativeIdx = idx;
+        renderRelative();
+        showAnswer();
+      };
+      container.appendChild(tag);
+    });
+  }
+
+  /* -------------------------------------------------------------
+     ГЕНЕРАТОРЫ И ОТРИСОВКА
+  ------------------------------------------------------------- */
+
+  // 1. Часы
+  function renderClock() {
+    const hourHand = document.getElementById('hourHand');
+    const minHand = document.getElementById('minuteHand');
+
+    const minDeg = curMinute * 6;
+    const hourDeg = (curHour % 12) * 30 + (curMinute * 0.5);
+
+    hourHand.style.transform = `rotate(${hourDeg}deg)`;
+    minHand.style.transform = `rotate(${minDeg}deg)`;
+  }
+
+  function randomClock() {
+    curHour = Math.floor(Math.random() * 12) + 1;
+    curMinute = Math.floor(Math.random() * 12) * 5;
+    renderClock();
+  }
+
+  // 2. Календарь (С ПН по ВС)
+  function renderCalendar() {
+    const monthObj = MONTHS[curCalMonth - 1];
+    document.getElementById('calMonthTitle').textContent = `${monthObj.ja} (${monthObj.ru})`;
+
+    const grid = document.getElementById('calGrid');
+    while (grid.children.length > 7) {
+      grid.removeChild(grid.lastChild);
+    }
+
+    const firstDayOffset = Math.floor(Math.random() * 7); // Смещение 1-го числа (0 = Пн, 6 = Вс)
+    const daysInMonth = (curCalMonth === 2) ? 28 : ([4,6,9,11].includes(curCalMonth) ? 30 : 31);
+    
+    if (curCalDay > daysInMonth) curCalDay = daysInMonth;
+
+    // Пустые ячейки смещения
+    for (let i = 0; i < firstDayOffset; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'cal-day empty';
+      grid.appendChild(empty);
+    }
+
+    // Дни месяца
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayEl = document.createElement('div');
+      dayEl.className = 'cal-day';
+      dayEl.textContent = d;
+
+      // Выделяем выходные цветом
+      const dayOfWeekIdx = (firstDayOffset + d - 1) % 7;
+      if (dayOfWeekIdx === 5) dayEl.style.color = '#2e7bb6'; // Суббота
+      if (dayOfWeekIdx === 6) dayEl.style.color = '#d9534f'; // Воскресенье
+
+      if (d === curCalDay) {
+        dayEl.classList.add('selected');
+        curCalWeekday = dayOfWeekIdx;
+      }
+      grid.appendChild(dayEl);
+    }
+  }
+
+  function randomCalendar() {
+    curCalMonth = Math.floor(Math.random() * 12) + 1;
+    const maxDays = (curCalMonth === 2) ? 28 : ([4,6,9,11].includes(curCalMonth) ? 30 : 31);
+    curCalDay = Math.floor(Math.random() * maxDays) + 1;
+    renderCalendar();
+  }
+
+  // 3. Периоды
+  function renderRelative() {
+    const item = RELATIVE_WORDS[curRelativeIdx];
+    document.getElementById('relativePrompt').textContent = item.ru;
+  }
+
+  function randomRelative() {
+    curRelativeIdx = Math.floor(Math.random() * RELATIVE_WORDS.length);
+    renderRelative();
+  }
+
+  /* -------------------------------------------------------------
+     ОТВЕТ И ОЗВУЧКА
+  ------------------------------------------------------------- */
+  function clearAnswer() {
+    isAnswerShown = false;
+    document.getElementById('actionBtn').textContent = 'Проверить ответ';
+    document.getElementById('answerBox').innerHTML = '<div class="answer-placeholder">Подумайте и нажмите «Проверить» 💭</div>';
+  }
+
+  function showAnswer() {
+    isAnswerShown = true;
+    document.getElementById('actionBtn').textContent = 'Следующий 🎲';
+
+    let kanji = '', kana = '', speakText = '';
+
+    if (currentMode === 'clock') {
+      const hObj = HOURS_JA[curHour % 12];
+      const mObj = MINUTES_JA[curMinute];
+      
+      if (curMinute === 0) {
+        kanji = hObj.kanji;
+        kana = hObj.kana;
+        speakText = hObj.kana;
+      } else if (curMinute === 30) {
+        kanji = `${hObj.kanji} 半`;
+        kana = `${hObj.kana} はん`;
+        speakText = `${hObj.kana} はん`;
+      } else {
+        kanji = `${hObj.kanji} ${mObj.kanji}`;
+        kana = `${hObj.kana} ${mObj.kana}`;
+        speakText = `${hObj.kana} ${mObj.kana}`;
+      }
+    } 
+    else if (currentMode === 'calendar') {
+      const mObj = MONTHS[curCalMonth - 1];
+      const dObj = DAYS_JA[curCalDay];
+      const wObj = WEEKDAYS[curCalWeekday];
+
+      kanji = `${mObj.ja} ${dObj.ja} (${wObj.ja})`;
+      kana = `${mObj.kana} ${dObj.kana} (${wObj.kana})`;
+      speakText = `${mObj.kana}、${dObj.kana}、${wObj.kana}`;
+    } 
+    else if (currentMode === 'relative') {
+      const item = RELATIVE_WORDS[curRelativeIdx];
+      kanji = item.ja;
+      kana = item.kana;
+      speakText = item.kana.split('/')[0].trim();
+    }
+
+    currentJapaneseAudio = speakText;
+
+    document.getElementById('answerBox').innerHTML = `
+      <div class="answer-kanji">${kanji}</div>
+      <div class="answer-kana">${kana}</div>
+    `;
+
+    speakJa(speakText);
+  }
+
+  function toggleAnswer() {
+    if (!isAnswerShown) {
+      showAnswer();
+    } else {
+      nextQuestion();
+    }
+  }
+
+  function nextQuestion() {
+    clearAnswer();
+    if (currentMode === 'clock') randomClock();
+    else if (currentMode === 'calendar') randomCalendar();
+    else if (currentMode === 'relative') randomRelative();
+  }
+
+  function repeatAudio() {
+    if (!currentJapaneseAudio) {
+      showAnswer();
+    } else {
+      speakJa(currentJapaneseAudio);
+    }
+  }
+
+  function switchMode(mode) {
+    currentMode = mode;
+    
+    document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', 
+        (mode === 'clock' && i === 0) || 
+        (mode === 'calendar' && i === 1) || 
+        (mode === 'relative' && i === 2)
+      );
+    });
+
+    document.querySelectorAll('.mode-content').forEach(el => el.classList.remove('active'));
+    document.getElementById(`mode-${mode}`).classList.add('active');
+
+    nextQuestion();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    initClockDial();
+    initRelativeMatrix();
+    nextQuestion();
+  });
+</script>
+
+</body>
+</html>

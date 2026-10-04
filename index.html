@@ -483,7 +483,19 @@
       <div class="play-btn">Смотреть →</div>
     </div>
 
-    <!-- 2. Антонимы -->
+    <!-- 2. Время и даты (НОВАЯ ИГРА) -->
+    <div class="game-card" onclick="goTo('time_trainer.html')">
+      <div class="game-left">
+        <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('time')" title="Пояснение к игре">i</button>
+        <div class="game-icon">⏰</div>
+        <div class="game-text">
+          <h2>Время и даты</h2>
+        </div>
+      </div>
+      <div class="play-btn">Играть →</div>
+    </div>
+
+    <!-- 3. Антонимы -->
     <div class="game-card" onclick="goTo('antonyms.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('antonyms')" title="Пояснение к игре">i</button>
@@ -495,7 +507,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 3. Антонимы ひらがな -->
+    <!-- 4. Антонимы ひらがな -->
     <div class="game-card" onclick="goTo('antonyms_hiragana.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('antonyms_hiragana')" title="Пояснение к игре">i</button>
@@ -507,7 +519,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 4. Квиз 1 -->
+    <!-- 5. Квиз 1 -->
     <div class="game-card" onclick="goTo('quiz1.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('quiz1')" title="Пояснение к игре">i</button>
@@ -519,7 +531,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 5. Квиз 2 -->
+    <!-- 6. Квиз 2 -->
     <div class="game-card" onclick="goTo('quiz2.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('quiz2')" title="Пояснение к игре">i</button>
@@ -531,7 +543,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 6. Квиз 3 -->
+    <!-- 7. Квиз 3 -->
     <div class="game-card" onclick="goTo('quiz3.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('quiz3')" title="Пояснение к игре">i</button>
@@ -543,7 +555,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 7. Блоки -->
+    <!-- 8. Блоки -->
     <div class="game-card" onclick="goTo('blocks.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('blocks')" title="Пояснение к игре">i</button>
@@ -555,7 +567,7 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 8. て-форма -->
+    <!-- 9. て-форма -->
     <div class="game-card" onclick="goTo('te_form.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('te_form')" title="Пояснение к игре">i</button>
@@ -567,13 +579,25 @@
       <div class="play-btn">Играть →</div>
     </div>
 
-    <!-- 9. Мастер глаголов  -->
+    <!-- 10. Мастер глаголов -->
     <div class="game-card" onclick="goTo('1ур.html')">
       <div class="game-left">
         <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('verbs')" title="Пояснение к игре">i</button>
         <div class="game-icon">🥋</div>
         <div class="game-text">
           <h2>Мастер глаголов</h2>
+        </div>
+      </div>
+      <div class="play-btn">Играть →</div>
+    </div>
+
+    <!-- 11. Прилагательные -->
+    <div class="game-card" onclick="goTo('adj_trainer.html')">
+      <div class="game-left">
+        <button type="button" class="info-btn" onclick="event.stopPropagation(); openModal('adjectives')" title="Пояснение к игре">i</button>
+        <div class="game-icon">🎨</div>
+        <div class="game-text">
+          <h2>Прилагательные</h2>
         </div>
       </div>
       <div class="play-btn">Играть →</div>
@@ -693,6 +717,11 @@
       title: "Слайд-шоу N5",
       desc: "Фоновое изучение JLPT N5.\nВключите режим автопоказа на компьютере или ТВ: карточки переключаются сами и озвучиваются диктором, позволяя запоминать лексику пассивно, пока вы занимаетесь своими делами."
     },
+    time: {
+      icon: "⏰",
+      title: "Время и даты",
+      desc: "Комплексный тренажёр чисел и времени в японском языке:\n1. Интерактивные аналоговые часы (часы, минуты, особые чтения 4, 7, 9 часов, половинки 'хан').\n2. Календарь с днями недели и особыми чтениями чисел (цуитати, фуцука, хацука и др.).\n3. Временная матрица периодов (сегодня, вчера, на этой неделе, каждое утро)."
+    },
     antonyms: {
       icon: "⚖️",
       title: "Антонимы",
@@ -732,6 +761,11 @@
       icon: "🥋",
       title: "Мастер глаголов",
       desc: "Тренажёр спряжений: 124 глагола и все конструкции JLPT N5.\nПошаговое интерактивное обучение грамматике: от базового вежливого стиля до сложных связок. Вводите ответы на японском, тренируйте правильные формы, слушайте произношение и отрабатывайте ошибки."
+    },
+    adjectives: {
+      icon: "🎨",
+      title: "Прилагательные",
+      desc: "Тренажёр японских прилагательных: い и な формы.\nОтрабатывайте времена, отрицания, прошедшие формы и соединительные конструкции, тренируйте правильные окончания и закрепляйте их употребление в живой речи."
     }
   };
 
