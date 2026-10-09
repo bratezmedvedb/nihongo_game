@@ -937,12 +937,44 @@
       font-size: 1.15rem;
       border-radius: 18px;
     }
+    /* Кнопка звука в главном меню */
+    .map-sound-btn {
+      position: fixed;
+      top: calc(14px + env(safe-area-inset-top, 0px));
+      right: 16px;
+      z-index: 50;
+      background: var(--card-bg);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 7px 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      color: var(--sub-text);
+      box-shadow: var(--shadow-sm);
+      transition: all 0.15s ease;
+    }
+    .map-sound-btn:active {
+      transform: scale(0.93);
+      background: var(--border-light);
+    }
+    body.is-android .map-sound-btn {
+      top: 45px !important;
+    }
   </style>
 </head>
 <body>
 
     <!-- ЭКРАН 1: КАРТА -->
     <div id="viewMap" class="view active">
+      <!-- Кнопка выключения звука -->
+      <button class="map-sound-btn" id="btnSoundToggle" onclick="toggleGameSound()">
+        <span id="soundIcon">🔊</span>
+      </button>
+
       <div class="snake-container" id="snakeTree">
         <svg id="snakeSvg"></svg>
       </div>
@@ -2075,14 +2107,30 @@
       return TOTAL_LEVELS;
     }
 
+// =========================================================================
+    // --- ПЛЕЕР И ПЕРЕКЛЮЧАТЕЛЬ ЗВУКА ---
     // =========================================================================
-    // --- ПЛЕЕР С МГНОВЕННОЙ ПРЕДЗАГРУЗКОЙ ---
-    // =========================================================================
+    let isSoundMuted = localStorage.getItem('japandi_sound_muted') === 'true';
+
+    function updateSoundBtnUI() {
+      const icon = document.getElementById('soundIcon');
+      if (icon) icon.innerText = isSoundMuted ? '🔇' : '🔊';
+    }
+
+    function toggleGameSound() {
+      isSoundMuted = !isSoundMuted;
+      localStorage.setItem('japandi_sound_muted', isSoundMuted ? 'true' : 'false');
+      if (isSoundMuted) {
+        activeAudio.pause();
+      }
+      updateSoundBtnUI();
+    }
+
     const activeAudio = new Audio();
     activeAudio.preload = 'auto';
 
     function speakKyoko(wordId) {
-      if (!wordId) return;
+      if (isSoundMuted || !wordId) return; // При выключенном звуке даже не трогаем плеер — музыка не остановится!
       try {
         const expectedSrc = `audio/${wordId}.mp3`;
         if (activeAudio.src.includes(expectedSrc)) {
@@ -2099,7 +2147,7 @@
     }
 
     function preloadCurrentAudio(wordId) {
-      if (!wordId) return;
+      if (isSoundMuted || !wordId) return; // Не предзагружаем при выключенном звуке, чтобы iOS не перебивал аудиосессию
       activeAudio.src = `audio/${wordId}.mp3`;
       activeAudio.load();
     }
@@ -2689,6 +2737,7 @@
     // Инициализация
     loadState();
     renderMap();
+    updateSoundBtnUI();
   </script>
 </body>
 </html>
