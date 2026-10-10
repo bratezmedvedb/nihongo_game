@@ -162,6 +162,7 @@
 
     /* Игровая карточка */
     .card {
+      position: relative;
       background: var(--card-bg);
       border: 1px solid var(--border-light);
       border-radius: 14px;
@@ -173,12 +174,19 @@
       gap: 8px;
     }
 
+    /* Кнопка озвучки, зафиксированная в правом верхнем углу карточки */
+    .btn-sound-corner {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+    }
+
     .target-header {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
       width: 100%;
+      padding: 0 36px; /* Защита от наложения длинного текста на кнопку */
     }
 
     .target-phrase {
@@ -240,8 +248,8 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 13px 4px;
-      font-size: 17px;
+      padding: 12px 2px;
+      font-size: clamp(13px, 4vw, 16px);
       font-weight: 700;
       color: var(--text-main);
       cursor: pointer;
@@ -249,6 +257,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
+      word-break: keep-all;
     }
     .choice-btn:active {
       transform: scale(0.97);
@@ -399,9 +409,11 @@
   <!-- 4. Игровая панель -->
   <div id="gamePanel" style="display: flex; flex-direction: column; gap: 8px;">
     <div class="card">
+      <!-- Зафиксированная кнопка озвучки -->
+      <button type="button" class="btn-sound btn-sound-corner" onclick="replayQuestionAudio()" title="Послушать задание">🔊</button>
+      
       <div class="target-header">
         <div class="target-phrase" id="qPhrase">大きい</div>
-        <button type="button" class="btn-sound" onclick="replayQuestionAudio()" title="Послушать задание">🔊</button>
       </div>
       <div class="target-reading" id="qReading">おおきい</div>
       <div class="target-ru" id="qRu">Большой</div>
@@ -848,6 +860,34 @@ function shuffleArray(arr) {
 }
 
 /* ==========================================================================
+   УРОВЕНЬ 4: вторая часть предложения (готовая, не тренируется)
+   id: [id второго прилагательного, русский перевод; "~" = место для НЕ]
+   ========================================================================== */
+var LVL4_PAIRS = {
+  1:[36,"просторный"],2:[34,"лёгкая"],3:[25,"быстрая"],4:[15,"интересная"],5:[29,"тёплая"],
+  6:[33,"тяжёлое"],7:[39,"длинное"],8:[39,"длинная"],9:[16,"вкусная"],10:[15,"интересные"],
+  11:[40,"короткий"],12:[50,"красивая"],13:[34,"лёгкая"],14:[4,"старый"],15:[39,"длинный"],
+  16:[13,"дешёвая"],17:[54,"добрый"],18:[39,"длинное"],19:[9,"холодный"],20:[33,"тяжёлая"],
+  21:[50,"красивый"],22:[41,"светлое"],23:[57,"удобная"],24:[1,"большая"],25:[57,"удобный"],
+  26:[4,"старый"],27:[52,"оживлённо"],28:[34,"они ~лёгкие"],29:[40,"короткая"],30:[50,"красивая"],
+  31:[13,"дешёвые"],32:[16,"вкусный"],33:[1,"большая"],34:[2,"маленький"],35:[12,"дорогие"],
+  36:[41,"светлая"],37:[42,"тёмная"],38:[55,"бодрый"],39:[18,"весёлый"],40:[13,"дешёвый"],
+  41:[1,"большое"],42:[8,"холодная"],43:[25,"быстрая"],44:[2,"маленький"],45:[9,"холодный"],
+  46:[66,"это ~тяжело"],47:[54,"добрый"],48:[50,"красивая"],49:[12,"высокий"],50:[1,"большое"],
+  51:[36,"просторная"],52:[1,"большой"],53:[4,"старый"],54:[15,"интересный"],55:[2,"маленький"],
+  56:[18,"весёлое"],57:[25,"быстрое"],58:[24,"далёкое"],59:[12,"дорогая"],60:[18,"весёлая"],
+  61:[12,"дорогие"],62:[10,"трудный"],63:[1,"большой"],64:[15,"интересные"],65:[40,"короткий"],
+  66:[39,"длинная"],67:[1,"большая"],68:[65,"простая"],69:[10,"трудное"],70:[66,"это ~тяжело"]
+};
+var LVL4_RU_HEAD = { 68:["Проблема в порядке","Проблема НЕ в порядке"] };
+
+function secForm(a, neg) {
+  if (a.type === 'ii') return neg ? ["よくないです","よくないです"] : ["いいです","いいです"];
+  if (a.type === 'i')  return neg ? [a.stem+"くないです", a.stem_r+"くないです"] : [a.k+"です", a.r+"です"];
+  return neg ? [a.k+"じゃないです", a.r+"じゃないです"] : [a.k+"です", a.r+"です"];
+}
+
+/* ==========================================================================
    ГЕНЕРАТОР КОЛОДЫ
    ========================================================================== */
 function generateLevelDeck(level) {
@@ -890,18 +930,19 @@ function generateLevelDeck(level) {
         : ["いです", "です", "くないです", "じゃないです", "かったです", "でした", "くなかったです", "じゃなかったです"];
 
       // Форма 0: Наст (+)
+      var ans2_0 = isIi ? "いいです" : (isI ? "いです" : "です");
       deck.push({
         rawId: item.id,
         rawKana: item.r,
-        phrase: item.nk + "は " + item.stem + "＿＿",
-        reading: item.nr + "は " + stemKana + "＿＿",
+        phrase: item.nk + "は " + (isIi ? "" : item.stem) + "＿＿",
+        reading: item.nr + "は " + (isIi ? "" : stemKana) + "＿＿",
         ru: item.ru_pred[0],
-        correct: isI ? "いです" : "です",
+        correct: ans2_0,
         choices: choices1,
-        full: item.nk + "は" + item.k + "です",
-        kana: item.nr + "は" + item.r + "です",
-        rule: isI ? "い-прил.: 〜いです" : "な-прил.: 〜です (без буквы な)",
-        typeTag: isI ? "い-прилагательное" : "な-прилагательное"
+        full: item.nk + "は" + (isIi ? "いいです" : (isI ? item.k + "です" : item.stem + "です")),
+        kana: item.nr + "は" + (isIi ? "いいです" : (isI ? item.r + "です" : stemKana + "です")),
+        rule: isIi ? "Исключение 良い: в наст. вр. утверждении форма いいです" : (isI ? "い-прил.: 〜いです" : "на-прил.: 〜です (без буквы な)"),
+        typeTag: isI ? "い-прилагательное" : "на-прилагательное"
       });
 
       // Форма 1: Наст (-)
@@ -916,7 +957,7 @@ function generateLevelDeck(level) {
         full: item.nk + "は" + (isIi ? "よくないです" : (isI ? item.stem + "くないです" : item.stem + "じゃないです")),
         kana: item.nr + "は" + (isIi ? "よくないです" : (isI ? stemKana + "くないです" : stemKana + "じゃないです")),
         rule: isI ? "い-прил. отрицание: 〜くないです (いい → よくないです)" : "на-прил. отрицание: 〜じゃないです",
-        typeTag: isI ? "い-прилагательное" : "な-прилагательное"
+        typeTag: isI ? "い-прилагательное" : "на-прилагательное"
       });
 
       // Форма 2: Прош (+)
@@ -931,7 +972,7 @@ function generateLevelDeck(level) {
         full: item.nk + "は" + (isIi ? "よかったです" : (isI ? item.stem + "かったです" : item.stem + "でした")),
         kana: item.nr + "は" + (isIi ? "よかったです" : (isI ? stemKana + "かったです" : stemKana + "でした")),
         rule: isI ? "い-прил. прошлое: 〜かったです (いい → よかったです)" : "на-прил. прошлое: 〜でした",
-        typeTag: isI ? "い-прилагательное" : "な-прилагательное"
+        typeTag: isI ? "い-прилагательное" : "на-прилагательное"
       });
 
       // Форма 3: Прош (-)
@@ -958,18 +999,23 @@ function generateLevelDeck(level) {
         ? ["いい", "な", "よくない", "じゃない", "よかった", "だった", "よくなかった", "じゃなかった"]
         : ["い", "な", "くない", "じゃない", "かった", "だった", "くなかった", "じゃなかった"];
 
+      var specialNote = (item.k === "多い" || item.k === "少ない") 
+        ? " (⚠️ Внимание: в живой речи перед сущ. чаще говорят 多くの / 少しの)" 
+        : "";
+
       // Форма 0: Наст (+)
+      var ans3_0 = isIi ? "いい" : (isI ? "い" : "な");
       deck.push({
         rawId: item.id,
         rawKana: item.r,
-        phrase: item.stem + "＿＿ " + item.nk,
-        reading: stemKana + "＿＿ " + item.nr,
+        phrase: (isIi ? "" : item.stem) + "＿＿ " + item.nk,
+        reading: (isIi ? "" : stemKana) + "＿＿ " + item.nr,
         ru: item.ru_attr[0],
-        correct: isI ? "い" : "な",
+        correct: ans3_0,
         choices: choices2,
-        full: item.k + item.nk,
-        kana: item.r + item.nr,
-        rule: isI ? "い-прил. перед сущ.: 〜い + N" : "на-прил. перед сущ.: 〜な + N",
+        full: (isIi ? "いい" : (isI ? item.k : item.stem + "な")) + item.nk,
+        kana: (isIi ? "いい" : (isI ? item.r : stemKana + "な")) + item.nr,
+        rule: (isIi ? "Исключение 良い перед сущ.: いい + N" : (isI ? "い-прил. перед сущ.: 〜い + N" : "на-прил. перед сущ.: 〜な + N")) + specialNote,
         typeTag: isI ? "い-прилагательное" : "на-прилагательное"
       });
 
@@ -1020,47 +1066,37 @@ function generateLevelDeck(level) {
     }
 
     // -------------------------------------------------------------
-    // УРОВЕНЬ 4: Соединение
+    // УРОВЕНЬ 4: Соединение двух прилагательных (て-форма)
     // -------------------------------------------------------------
     if (level === 4) {
-      var choices3 = isIi 
-        ? ["よくて", "で", "よくなくて", "じゃなくて"] 
+      var pr = LVL4_PAIRS[item.id];
+      var sec = ADJECTIVES_DB.filter(function(a) { return a.id === pr[0]; })[0];
+      var choices3 = isIi
+        ? ["よくて", "で", "よくなくて", "じゃなくて"]
         : ["くて", "で", "くなくて", "じゃなくて"];
+      var tail = pr[1].indexOf("~") === -1 ? "~" + pr[1] : pr[1];
+      var head = LVL4_RU_HEAD[item.id] || [item.ru_pred[0].replace(/\.$/, ""), item.ru_pred[1].replace(/\.$/, "")];
 
-      // Соединение (+)
-      var ans3 = isI ? (isIi ? "よくて" : "くて") : "で";
-      var full3 = (isIi ? "よくて" : (isI ? item.stem + "くて" : item.stem + "で")) + "、いいです";
-      var full3Kana = (isIi ? "よくて" : (isI ? stemKana + "くて" : stemKana + "で")) + "、いいです";
-      deck.push({
-        rawId: item.id,
-        rawKana: item.r,
-        phrase: (isIi ? "" : item.stem) + "＿＿ ...",
-        reading: (isIi ? "" : stemKana) + "＿＿ ...",
-        ru: item.ru_te[0],
-        correct: ans3,
-        choices: choices3,
-        full: full3,
-        kana: full3Kana,
-        rule: isI ? "い-прил. соединение: 〜くて (いい → よくて)" : "на-прил. соединение: 〜で",
-        typeTag: isI ? "い-прилагательное" : "на-прилагательное"
-      });
-
-      // Соединение (-)
-      var ans3n = isI ? (isIi ? "よくなくて" : "くなくて") : "じゃなくて";
-      var full3n = (isIi ? "よくなくて" : (isI ? item.stem + "くなくて" : item.stem + "じゃなくて")) + "、ダメです";
-      var full3nKana = (isIi ? "よくなくて" : (isI ? stemKana + "くなくて" : stemKana + "じゃなくて")) + "、だめです";
-      deck.push({
-        rawId: item.id,
-        rawKana: item.r,
-        phrase: (isIi ? "" : item.stem) + "＿＿ ...",
-        reading: (isIi ? "" : stemKana) + "＿＿ ...",
-        ru: item.ru_te[1],
-        correct: ans3n,
-        choices: choices3,
-        full: full3n,
-        kana: full3nKana,
-        rule: isI ? "い-прил. отриц. соединение: 〜くなくて" : "на-прил. отриц. соединение: 〜じゃなくて",
-        typeTag: isI ? "い-прилагательное" : "на-прилагательное"
+      [false, true].forEach(function(neg) {
+        var ans = neg ? (isI ? (isIi ? "よくなくて" : "くなくて") : "じゃなくて")
+                      : (isI ? (isIi ? "よくて" : "くて") : "で");
+        var pre = isIi ? "" : item.stem, preR = isIi ? "" : stemKana;
+        var s2 = secForm(sec, neg);
+        deck.push({
+          rawId: item.id,
+          rawKana: item.r,
+          phrase: item.nk + "は " + pre + "＿＿、" + s2[0] + "。",
+          reading: item.nr + "は " + preR + "＿＿、" + s2[1] + "。",
+          ru: head[neg ? 1 : 0] + " и " + tail.replace("~", neg ? "НЕ " : "") + ".",
+          correct: ans,
+          choices: choices3,
+          full: item.nk + "は " + pre + ans + "、" + s2[0] + "。",
+          kana: item.nr + "は " + preR + ans + "、" + s2[1] + "。",
+          rule: neg
+            ? (isI ? "い-прил. отриц. соединение: 〜くなくて (いい → よくなくて)" : "на-прил. отриц. соединение: 〜じゃなくて")
+            : (isI ? "い-прил. соединение: 〜くて (いい → よくて)" : "на-прил. соединение: 〜で"),
+          typeTag: isI ? "い-прилагательное" : "на-прилагательное"
+        });
       });
     }
 
@@ -1307,12 +1343,15 @@ function openTheory() {
   } else if (currentLevel === 4) {
     mTitle.textContent = "Правила: Соединение";
     mBody.innerHTML = `
+      <p>«И» между двумя прилагательными: заполняете только первое, второе уже дано в конце предложения.</p>
+      <p><em>Пример: 家は 大き＿＿、広いです → 大きくて</em></p>
+      <br>
       <p><strong>い-прилагательные:</strong></p>
       <p>• Утвердительное: <code>〜くて</code></p>
       <p>• Отрицательное: <code>〜くなくて</code></p>
       <p><em>*Исключение 良い (いい): よくて, よくなくて</em></p>
       <br>
-      <p><strong>на-прилагательные:</strong></p>
+      <p><strong>な-прилагательные:</strong></p>
       <p>• Утвердительное: <code>〜で</code></p>
       <p>• Отрицательное: <code>〜じゃなくて</code></p>
     `;
